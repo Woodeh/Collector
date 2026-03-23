@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { db, storage, auth } from '../firebase/config';
-import { collection, addDoc, doc, getDoc, updateDoc } from 'firebase/firestore';
+import { collection, addDoc, doc, getDoc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import {
   PlusCircle,
@@ -17,13 +17,14 @@ import {
   Tag,
   Edit3,
 } from 'lucide-react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom'; // Добавили useLocation
 import CustomSelect from '../components/Select';
 import AnimeSearch from '../components/AnimeSearch';
 
 const FigureForm = ({ mode = 'add' }) => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation(); // Слушаем переданные данные
   const isEdit = mode === 'edit';
 
   const [files, setFiles] = useState([]);
@@ -46,6 +47,16 @@ const FigureForm = ({ mode = 'add' }) => {
     hasBox: 'Yes',
     purchasePlace: '',
   });
+
+  // Логика подхвата данных из Wishlist
+  useEffect(() => {
+    if (!isEdit && location.state?.initialData) {
+      setFormData((prev) => ({
+        ...prev,
+        ...location.state.initialData,
+      }));
+    }
+  }, [location.state, isEdit]);
 
   useEffect(() => {
     if (isEdit && id) {
@@ -121,12 +132,18 @@ const FigureForm = ({ mode = 'add' }) => {
       if (isEdit) {
         await updateDoc(doc(db, 'figures', id), finalData);
       } else {
+        // Создаем запись в коллекции
         await addDoc(collection(db, 'figures'), {
           ...finalData,
           createdAt: new Date(),
           authorName: cleanName,
           authorId: currentUser?.uid || 'unknown',
         });
+
+        // Если пришли из Wishlist — удаляем оттуда "хотелку"
+        if (location.state?.fromWishlistId) {
+          await deleteDoc(doc(db, 'wishlist', location.state.fromWishlistId));
+        }
       }
 
       setSuccess(true);
@@ -153,11 +170,15 @@ const FigureForm = ({ mode = 'add' }) => {
       {success && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm transition-all duration-300">
           <div className="bg-[#1a1a1a] border border-green-500/50 p-10 rounded-[3rem] shadow-2xl flex flex-col items-center gap-6 animate-in zoom-in duration-300">
-            <div className="bg-green-500 p-4 rounded-full">
+            <div className="bg-green-500 p-4 rounded-full shadow-[0_0_30px_rgba(34,197,94,0.4)]">
               <Check size={40} className="text-[#121212] stroke-[4px]" />
             </div>
-            <h3 className="text-3xl font-black text-white uppercase italic tracking-tighter">
-              {isEdit ? 'Updated!' : 'Saved!'}
+            <h3 className="text-3xl font-black text-white uppercase italic tracking-tighter text-center">
+              {isEdit
+                ? 'Updated!'
+                : location.state?.fromWishlistId
+                ? 'Moved to Collection!'
+                : 'Saved!'}
             </h3>
           </div>
         </div>
@@ -180,7 +201,7 @@ const FigureForm = ({ mode = 'add' }) => {
             <input
               name="name"
               placeholder="Name *"
-              className="w-full bg-[#121212] border border-[#333] p-4 rounded-xl outline-none focus:border-blue-500 text-white"
+              className="w-full bg-[#121212] border border-[#333] p-4 rounded-xl outline-none focus:border-blue-500 text-white font-bold"
               onChange={handleChange}
               value={formData.name}
               required
@@ -196,7 +217,7 @@ const FigureForm = ({ mode = 'add' }) => {
               <input
                 name="brand"
                 placeholder="Manufacturer / Brand"
-                className="w-full bg-[#121212] border border-[#333] p-4 pl-12 rounded-xl outline-none focus:border-blue-500 text-white"
+                className="w-full bg-[#121212] border border-[#333] p-4 pl-12 rounded-xl outline-none focus:border-blue-500 text-white font-bold"
                 onChange={handleChange}
                 value={formData.brand}
               />
@@ -206,7 +227,7 @@ const FigureForm = ({ mode = 'add' }) => {
                 name="price"
                 type="number"
                 placeholder="Price ($) *"
-                className="bg-[#121212] border border-[#333] p-4 rounded-xl outline-none focus:border-blue-500 text-white"
+                className="bg-[#121212] border border-[#333] p-4 rounded-xl outline-none focus:border-blue-500 text-white font-bold"
                 onChange={handleChange}
                 value={formData.price}
                 required
@@ -259,7 +280,7 @@ const FigureForm = ({ mode = 'add' }) => {
               <input
                 name="purchasePlace"
                 placeholder="Shop Name"
-                className="w-full bg-[#121212] border border-[#333] p-4 pl-12 rounded-xl outline-none focus:border-blue-500 text-white"
+                className="w-full bg-[#121212] border border-[#333] p-4 pl-12 rounded-xl outline-none focus:border-blue-500 text-white font-bold"
                 onChange={handleChange}
                 value={formData.purchasePlace}
               />
@@ -273,7 +294,7 @@ const FigureForm = ({ mode = 'add' }) => {
             <input
               name="auctionUrl"
               placeholder="Listing / Store URL"
-              className="w-full bg-[#121212] border border-[#333] p-4 pl-12 rounded-xl outline-none focus:border-blue-500 text-white"
+              className="w-full bg-[#121212] border border-[#333] p-4 pl-12 rounded-xl outline-none focus:border-blue-500 text-white font-bold"
               onChange={handleChange}
               value={formData.auctionUrl}
             />
@@ -281,7 +302,7 @@ const FigureForm = ({ mode = 'add' }) => {
           <textarea
             name="conditionNotes"
             placeholder="Notes..."
-            className="w-full bg-[#121212] border border-[#333] p-4 rounded-xl outline-none focus:border-blue-500 h-20 resize-none"
+            className="w-full bg-[#121212] border border-[#333] p-4 rounded-xl outline-none focus:border-blue-500 h-20 resize-none font-bold text-white"
             onChange={handleChange}
             value={formData.conditionNotes}
           ></textarea>
@@ -308,7 +329,9 @@ const FigureForm = ({ mode = 'add' }) => {
               <div
                 key={`old-${idx}`}
                 className={`relative aspect-[3/4] rounded-2xl overflow-hidden border-2 ${
-                  previewIdx === idx ? 'border-blue-500' : 'border-[#333]'
+                  previewIdx === idx
+                    ? 'border-blue-500 shadow-lg shadow-blue-500/20'
+                    : 'border-[#333]'
                 }`}
               >
                 <img src={url} className="w-full h-full object-cover" alt="figure" />
@@ -357,7 +380,7 @@ const FigureForm = ({ mode = 'add' }) => {
 
         <button
           disabled={loading}
-          className="w-full py-5 rounded-[1.5rem] bg-blue-600 hover:bg-blue-500 text-white font-black text-xl tracking-widest transition-all shadow-xl flex items-center justify-center gap-3 uppercase"
+          className="w-full py-5 rounded-[1.5rem] bg-blue-600 hover:bg-blue-500 text-white font-black text-xl tracking-widest transition-all shadow-xl flex items-center justify-center gap-3 uppercase active:scale-95"
         >
           {loading ? (
             <Loader2 className="animate-spin" size={24} />
