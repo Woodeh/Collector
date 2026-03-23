@@ -1,0 +1,24 @@
+@import "tailwindcss";
+
+/* Основные стили страницы */
+body {
+  @apply bg-[#121212] text-[#e4e4e4] antialiased;
+}
+
+/* Стилизация скроллбара (для Chrome, Edge, Safari) */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-[#1a1a1a];
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-[#333333] rounded-full;
+}
+
+/* Опционально: эффект при наведении на скроллбар */
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-[#444444];
+}
