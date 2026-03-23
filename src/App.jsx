@@ -6,6 +6,7 @@ import Collection from './pages/Collection';
 import Login from './pages/Login.jsx';
 import FigureDetails from './pages/FigureDetails';
 import PreOrders from './pages/PreOrders';
+import Wishlist from './pages/Wishlist';
 
 const HomePage = () => (
   <div className="p-12 text-center max-w-2xl mx-auto">
@@ -46,6 +47,7 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/figure/:id" element={<FigureDetails />} />
             <Route path="/preorders" element={<PreOrders />} />
+            <Route path="/wishlist" element={<Wishlist />} />
           </Routes>
         </main>
       </div>

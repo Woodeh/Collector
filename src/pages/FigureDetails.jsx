@@ -8,12 +8,12 @@ import {
   ArrowLeft,
   Tag,
   Loader2,
-  Calendar,
   Box,
   ShoppingCart,
   ExternalLink,
   ShieldCheck,
   User,
+  Info,
 } from 'lucide-react';
 
 const FigureDetails = () => {
@@ -46,7 +46,6 @@ const FigureDetails = () => {
     if (figure && !isPaused) {
       const images =
         figure.images?.length > 0 ? figure.images : [figure.previewImage || figure.image];
-
       if (images.length > 1) {
         timerRef.current = setInterval(() => {
           setActiveImg((prev) => (prev + 1) % images.length);
@@ -83,7 +82,6 @@ const FigureDetails = () => {
     setIsPaused(true);
     setActiveImg((prev) => (prev + 1) % images.length);
   };
-
   const prevSlide = () => {
     setIsPaused(true);
     setActiveImg((prev) => (prev - 1 + images.length) % images.length);
@@ -97,11 +95,11 @@ const FigureDetails = () => {
           className="flex items-center gap-2 text-gray-500 hover:text-white mb-8 transition-all group"
         >
           <ArrowLeft size={20} className="group-hover:-translate-x-1 transition-transform" />
-          <span className="font-medium">Назад к коллекции</span>
+          <span className="font-bold uppercase text-xs tracking-widest">Назад к коллекции</span>
         </button>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-          {/* ОБНОВЛЕННЫЙ СЛАЙДЕР */}
+          {/* СЛАЙДЕР */}
           <div className="space-y-6">
             <div
               className="relative aspect-[3/4] rounded-[2.5rem] overflow-hidden bg-[#0a0a0a] border border-[#333] shadow-[0_20px_50px_rgba(0,0,0,0.5)] group"
@@ -115,7 +113,7 @@ const FigureDetails = () => {
                   className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ease-in-out ${
                     idx === activeImg ? 'opacity-100 z-10' : 'opacity-0 z-0'
                   }`}
-                  alt={`${figure.name} - ${idx + 1}`}
+                  alt={figure.name}
                 />
               ))}
 
@@ -124,34 +122,24 @@ const FigureDetails = () => {
                   <div className="absolute inset-0 flex items-center justify-between px-6 z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                     <button
                       onClick={prevSlide}
-                      className="bg-black/40 backdrop-blur-xl p-4 rounded-full hover:bg-blue-600 text-white shadow-2xl transition-all active:scale-90"
+                      className="bg-black/40 backdrop-blur-xl p-4 rounded-full hover:bg-blue-600 text-white transition-all active:scale-90"
                     >
                       <ChevronLeft size={28} />
                     </button>
                     <button
                       onClick={nextSlide}
-                      className="bg-black/40 backdrop-blur-xl p-4 rounded-full hover:bg-blue-600 text-white shadow-2xl transition-all active:scale-90"
+                      className="bg-black/40 backdrop-blur-xl p-4 rounded-full hover:bg-blue-600 text-white transition-all active:scale-90"
                     >
                       <ChevronRight size={28} />
                     </button>
-                  </div>
-
-                  <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 flex gap-2">
-                    {images.map((_, idx) => (
-                      <div
-                        key={idx}
-                        className={`h-1.5 transition-all duration-500 rounded-full ${
-                          idx === activeImg ? 'w-8 bg-blue-500' : 'w-2 bg-white/30'
-                        }`}
-                      />
-                    ))}
                   </div>
                 </>
               )}
             </div>
 
+            {/* ТАМБНЕЙЛЫ */}
             {images.length > 1 && (
-              <div className="flex gap-4 overflow-x-auto py-2 no-scrollbar justify-center">
+              <div className="flex gap-3 overflow-x-auto py-2 no-scrollbar justify-center">
                 {images.map((img, idx) => (
                   <button
                     key={idx}
@@ -159,10 +147,10 @@ const FigureDetails = () => {
                       setActiveImg(idx);
                       setIsPaused(true);
                     }}
-                    className={`h-20 w-16 flex-shrink-0 rounded-2xl overflow-hidden border-2 transition-all duration-500 ${
+                    className={`h-20 w-16 flex-shrink-0 rounded-2xl overflow-hidden border-2 transition-all duration-300 ${
                       activeImg === idx
-                        ? 'border-blue-500 scale-110 shadow-lg shadow-blue-500/20'
-                        : 'border-transparent opacity-30 hover:opacity-100'
+                        ? 'border-blue-500 scale-105 shadow-lg shadow-blue-500/20'
+                        : 'border-transparent opacity-40 hover:opacity-100'
                     }`}
                   >
                     <img src={img} className="w-full h-full object-cover" alt="thumb" />
@@ -172,67 +160,85 @@ const FigureDetails = () => {
             )}
           </div>
 
+          {/* ИНФО-БЛОК */}
           <div className="flex flex-col gap-8">
-            <div>
-              <div className="flex items-center gap-2 text-blue-500 font-bold uppercase tracking-[0.2em] text-[10px] mb-3">
-                <Tag size={14} /> {figure.anime}
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 text-blue-500 font-black uppercase tracking-[0.3em] text-[10px] italic">
+                <Tag size={12} /> {figure.anime}
               </div>
-              <h1 className="text-5xl md:text-7xl font-black text-white leading-tight tracking-tighter italic uppercase">
+              <h1 className="text-5xl md:text-7xl font-black text-white leading-[0.9] tracking-tighter italic uppercase">
                 {figure.name}
               </h1>
             </div>
 
+            {/* ХАРАКТЕРИСТИКИ (3 КОЛОНКИ) */}
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               <div className="bg-[#1a1a1a] p-6 rounded-[2rem] border border-[#333]">
-                <p className="text-gray-500 text-[10px] uppercase mb-1 font-bold tracking-widest leading-none">
+                <p className="text-gray-500 text-[9px] uppercase mb-2 font-black tracking-widest leading-none">
                   Price
                 </p>
-                <p className="text-4xl font-black text-white">
+                <p className="text-4xl font-black text-white leading-none">
                   {figure.price}
                   <span className="text-blue-500 ml-1">$</span>
                 </p>
               </div>
+
               <div className="bg-[#1a1a1a] p-6 rounded-[2rem] border border-[#333]">
-                <p className="text-gray-500 text-[10px] uppercase mb-1 font-bold tracking-widest leading-none">
+                <p className="text-gray-500 text-[9px] uppercase mb-2 font-black tracking-widest leading-none">
                   Gender
                 </p>
-                <p className="text-2xl font-black text-white">
-                  {figure.gender === 'Male' ? 'MALE' : 'FEMALE'}
+                <p className="text-xl font-black text-white uppercase">{figure.gender}</p>
+              </div>
+
+              {/* НОВОЕ ПОЛЕ: BRAND */}
+              <div className="bg-[#1a1a1a] p-6 rounded-[2rem] border border-[#333]">
+                <p className="text-gray-500 text-[9px] uppercase mb-2 font-black tracking-widest leading-none">
+                  Brand
+                </p>
+                <p
+                  className="text-xl font-black text-white uppercase truncate"
+                  title={figure.brand}
+                >
+                  {figure.brand || 'Original'}
                 </p>
               </div>
-              <div className="bg-[#1a1a1a] p-6 rounded-[2rem] border border-[#333] col-span-2 md:col-span-1 flex flex-col justify-center">
-                <p className="text-gray-500 text-[10px] uppercase mb-2 font-bold tracking-widest leading-none">
-                  Box
+
+              <div className="bg-[#1a1a1a] p-6 rounded-[2rem] border border-[#333] col-span-2 md:col-span-3">
+                <p className="text-gray-500 text-[9px] uppercase mb-2 font-black tracking-widest leading-none">
+                  Box Integrity
                 </p>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-3">
                   <div
-                    className={`w-2 h-2 rounded-full ${
-                      figure.hasBox === 'Yes' ? 'bg-green-500' : 'bg-red-500'
+                    className={`w-2.5 h-2.5 rounded-full ${
+                      figure.hasBox === 'Yes'
+                        ? 'bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.4)]'
+                        : 'bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.4)]'
                     }`}
                   />
-                  <p className="text-xl font-bold uppercase">
-                    {figure.hasBox === 'Yes' ? 'Original' : 'No Box'}
+                  <p className="text-lg font-black uppercase tracking-tight">
+                    {figure.hasBox === 'Yes' ? 'Original Box Included' : 'No Box / Loose'}
                   </p>
                 </div>
               </div>
             </div>
 
+            {/* ДОПОЛНИТЕЛЬНО */}
             <div className="space-y-4">
               {figure.conditionGrade && (
-                <div className="bg-[#1a1a1a] p-6 rounded-[2rem] border border-[#333] flex gap-5">
-                  <div className="bg-blue-500/10 p-4 rounded-3xl h-fit text-blue-500 flex-shrink-0">
+                <div className="bg-[#1a1a1a] p-6 rounded-[2.5rem] border border-[#333] flex gap-5 items-start">
+                  <div className="bg-blue-500/10 p-4 rounded-3xl text-blue-500">
                     <ShieldCheck size={28} />
                   </div>
-                  <div className="min-w-0">
-                    <p className="text-gray-500 text-[10px] uppercase font-bold mb-1 tracking-widest">
+                  <div>
+                    <p className="text-gray-500 text-[9px] uppercase font-black mb-1 tracking-widest">
                       Condition Grade
                     </p>
-                    <p className="text-white text-xl font-bold uppercase tracking-tight truncate">
+                    <p className="text-white text-xl font-black uppercase tracking-tight">
                       {figure.conditionGrade}
                     </p>
                     {figure.conditionNotes && (
-                      <p className="text-gray-400 text-sm mt-2 italic leading-relaxed">
-                        "{figure.conditionNotes}"
+                      <p className="text-gray-400 text-sm mt-2 leading-relaxed border-l-2 border-[#333] pl-4">
+                        {figure.conditionNotes}
                       </p>
                     )}
                   </div>
@@ -240,34 +246,29 @@ const FigureDetails = () => {
               )}
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {figure.purchasePlace && (
-                  <div className="bg-[#1a1a1a] p-6 rounded-[2rem] border border-[#333] flex items-center gap-4 min-w-0 shadow-inner">
-                    <div className="bg-purple-500/10 p-3 rounded-2xl text-purple-500 flex-shrink-0">
-                      <ShoppingCart size={20} />
-                    </div>
-                    <div className="min-w-0">
-                      <p className="text-gray-500 text-[10px] uppercase font-bold tracking-widest">
-                        Source
-                      </p>
-                      <p className="text-white font-bold truncate uppercase">
-                        {figure.purchasePlace}
-                      </p>
-                    </div>
+                <div className="bg-[#1a1a1a] p-6 rounded-[2rem] border border-[#333] flex items-center gap-4">
+                  <div className="bg-purple-500/10 p-3 rounded-2xl text-purple-500">
+                    <ShoppingCart size={20} />
                   </div>
-                )}
+                  <div className="min-w-0">
+                    <p className="text-gray-500 text-[9px] uppercase font-black tracking-widest mb-0.5">
+                      Source
+                    </p>
+                    <p className="text-white font-black uppercase text-sm truncate">
+                      {figure.purchasePlace || 'Unknown'}
+                    </p>
+                  </div>
+                </div>
 
-                <div className="bg-[#1a1a1a] p-6 rounded-[2rem] border border-[#333] flex items-center gap-4 min-w-0 shadow-inner">
-                  <div className="bg-green-500/10 p-3 rounded-2xl text-green-500 flex-shrink-0">
+                <div className="bg-[#1a1a1a] p-6 rounded-[2rem] border border-[#333] flex items-center gap-4">
+                  <div className="bg-green-500/10 p-3 rounded-2xl text-green-500">
                     <User size={20} />
                   </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-gray-500 text-[10px] uppercase font-bold tracking-widest leading-none mb-1">
-                      Added by
+                  <div className="min-w-0">
+                    <p className="text-gray-500 text-[9px] uppercase font-black tracking-widest mb-0.5">
+                      Collector
                     </p>
-                    <p
-                      className="text-white font-bold truncate text-lg uppercase tracking-tight"
-                      title={displayAuthor}
-                    >
+                    <p className="text-white font-black uppercase text-sm truncate">
                       {displayAuthor}
                     </p>
                   </div>
@@ -279,12 +280,12 @@ const FigureDetails = () => {
                   href={figure.auctionUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="group w-full flex items-center justify-between bg-white text-black p-6 rounded-[2rem] transition-all hover:bg-blue-600 hover:text-white"
+                  className="group w-full flex items-center justify-between bg-white text-black p-6 rounded-[2.5rem] transition-all hover:bg-blue-600 hover:text-white"
                 >
                   <div className="flex items-center gap-3">
                     <ExternalLink size={20} />
                     <span className="font-black uppercase tracking-widest text-sm">
-                      View Listing
+                      Product Reference
                     </span>
                   </div>
                   <ChevronRight
