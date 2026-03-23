@@ -11,7 +11,6 @@ import {
   LayoutDashboard,
   ChevronUp,
   ChevronDown,
-  RefreshCw,
 } from 'lucide-react';
 import { db } from '../firebase/config';
 import { collection, onSnapshot } from 'firebase/firestore';
@@ -20,17 +19,48 @@ import faceLogo from '../assets/face.png';
 const Header = () => {
   const [stats, setStats] = useState({ totalValue: 0, pending: 0, count: 0 });
   const [isDashOpen, setIsDashOpen] = useState(false);
-  const [currency, setCurrency] = useState('USD'); // 'USD' или 'KZT'
-  const [rate, setRate] = useState(450); // Дефолтный курс
+  const [currency, setCurrency] = useState('USD');
+  const [rate, setRate] = useState(450);
 
-  // Загрузка курса при монтировании
+  // --- ЛОГИКА КЕШИРОВАНИЯ КУРСА ---
   useEffect(() => {
-    fetch('https://api.frankfurter.app/latest?from=USD&to=KZT')
-      .then((res) => res.json())
-      .then((data) => setRate(data.rates.KZT))
-      .catch(() => console.log('Используем дефолтный курс'));
+    const fetchRate = async () => {
+      const cachedData = localStorage.getItem('kzt_rate_data');
+      const now = new Date().getTime();
+      const dayInMs = 24 * 60 * 60 * 1000; // 24 часа
+
+      if (cachedData) {
+        const { rate: savedRate, timestamp } = JSON.parse(cachedData);
+        // Если курсу меньше суток — используем его
+        if (now - timestamp < dayInMs) {
+          setRate(savedRate);
+          return;
+        }
+      }
+
+      // Если кеша нет или он старый — делаем запрос
+      try {
+        const res = await fetch('https://api.frankfurter.app/latest?from=USD&to=KZT');
+        const data = await res.json();
+        const newRate = data.rates.KZT;
+
+        setRate(newRate);
+        localStorage.setItem(
+          'kzt_rate_data',
+          JSON.stringify({
+            rate: newRate,
+            timestamp: now,
+          }),
+        );
+      } catch {
+        console.warn('Не удалось обновить курс, используем старый или дефолт');
+      }
+    };
+
+    fetchRate();
   }, []);
 
+  // Подписка на Firebase (остается без изменений)
   useEffect(() => {
     const unsubCol = onSnapshot(collection(db, 'figures'), (snap) => {
       const colValue = snap.docs.reduce((sum, doc) => sum + (Number(doc.data().price) || 0), 0);
@@ -58,7 +88,6 @@ const Header = () => {
     return () => unsubCol();
   }, []);
 
-  // Функция для красивого вывода валюты
   const formatValue = (val) => {
     const finalVal = currency === 'KZT' ? val * rate : val;
     return new Intl.NumberFormat('ru-RU', {
@@ -70,8 +99,12 @@ const Header = () => {
 
   return (
     <header className="sticky top-0 z-50">
+      {/* Навигация */}
       <nav className="bg-[#1a1a1a] border-b border-[#333] p-4 px-8 flex justify-between items-center shadow-xl relative z-20">
-        <Link to="/" className="flex items-center gap-3 font-bold text-xl tracking-tighter group">
+        <Link
+          to="/"
+          className="flex items-center gap-3 font-bold text-xl tracking-tighter group select-none"
+        >
           <div className="w-10 h-10 flex items-center justify-center bg-[#121212] rounded-full border border-[#333] group-hover:border-blue-500/30 group-hover:rotate-12 transition-all duration-300 overflow-hidden">
             <img src={faceLogo} alt="Logo" className="w-full h-full object-cover" />
           </div>
@@ -134,7 +167,7 @@ const Header = () => {
       >
         <div className="flex justify-between items-center max-w-5xl mx-auto">
           <div className="flex gap-12">
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 cursor-default">
               <div className="p-1.5 bg-blue-500/10 rounded-lg text-blue-500">
                 <Wallet size={14} />
               </div>
@@ -148,7 +181,7 @@ const Header = () => {
               </div>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 cursor-default">
               <div className="p-1.5 bg-orange-500/10 rounded-lg text-orange-500">
                 <ShoppingBag size={14} />
               </div>
@@ -162,7 +195,7 @@ const Header = () => {
               </div>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 cursor-default">
               <div className="p-1.5 bg-purple-500/10 rounded-lg text-purple-500">
                 <Package size={14} />
               </div>
@@ -181,7 +214,7 @@ const Header = () => {
               onClick={() => setCurrency('USD')}
               className={`px-3 py-1 rounded-lg text-[10px] font-black transition-all ${
                 currency === 'USD'
-                  ? 'bg-blue-600 text-white shadow-lg'
+                  ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/40'
                   : 'text-gray-500 hover:text-gray-300'
               }`}
             >
@@ -191,7 +224,7 @@ const Header = () => {
               onClick={() => setCurrency('KZT')}
               className={`px-3 py-1 rounded-lg text-[10px] font-black transition-all ${
                 currency === 'KZT'
-                  ? 'bg-blue-600 text-white shadow-lg'
+                  ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/40'
                   : 'text-gray-500 hover:text-gray-300'
               }`}
             >

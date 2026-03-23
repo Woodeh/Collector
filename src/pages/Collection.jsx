@@ -76,7 +76,8 @@ const Collection = () => {
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-10 border-b border-[#333] pb-8 gap-6">
           <div className="flex items-center gap-4">
             <LayoutGrid className="text-blue-500" size={30} />
-            <h2 className="text-3xl font-black uppercase tracking-tighter text-white">
+            {/* Тот самый красивый наклонный шрифт тут */}
+            <h2 className="text-3xl font-black uppercase italic tracking-tighter text-white">
               Collection
             </h2>
             <span className="bg-[#1a1a1a] px-3 py-1 rounded-full text-blue-500 text-sm font-mono border border-[#333] font-bold">
@@ -110,7 +111,6 @@ const Collection = () => {
               )}
             </div>
 
-            {/* Исправленная кнопка Add New — без лишнего курсива и веса */}
             <Link
               to="/add"
               className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2.5 rounded-2xl font-bold uppercase tracking-tight flex items-center justify-center gap-2 transition-all active:scale-95 shadow-lg shadow-blue-900/20 text-[13px]"
