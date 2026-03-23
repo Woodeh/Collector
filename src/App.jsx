@@ -10,7 +10,7 @@ import PreOrders from './pages/PreOrders';
 const HomePage = () => (
   <div className="p-12 text-center max-w-2xl mx-auto">
     <h2 className="text-4xl font-black mb-6 italic uppercase tracking-tighter">
-      Welcome to your <span className="text-blue-500">Vault</span>
+      Welcome to your <span className="text-blue-500">COLLECTION</span>
     </h2>
     <p className="text-gray-400 text-lg mb-10 leading-relaxed">
       Manage your figure collection, track pre-orders, and keep your inventory up to date.
