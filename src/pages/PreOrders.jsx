@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { db, auth, storage } from '../firebase/config';
 import { collection, addDoc, query, orderBy, onSnapshot, doc, deleteDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { Plus, Loader2, X, Clock, Camera } from 'lucide-react';
+import { Plus, Loader2, X, Clock, Camera, Calendar } from 'lucide-react';
 import AnimeSearch from '../components/AnimeSearch';
 import PreOrderCard from '../components/PreOrderCard';
 
@@ -23,6 +23,8 @@ const PreOrders = () => {
     totalPrice: '',
     deposit: '',
     releaseDate: '',
+    // По умолчанию ставим сегодняшнюю дату
+    paymentDate: new Date().toISOString().split('T')[0],
   });
 
   useEffect(() => {
@@ -44,7 +46,15 @@ const PreOrders = () => {
   };
 
   const resetForm = () => {
-    setFormData({ name: '', anime: '', brand: '', totalPrice: '', deposit: '', releaseDate: '' });
+    setFormData({
+      name: '',
+      anime: '',
+      brand: '',
+      totalPrice: '',
+      deposit: '',
+      releaseDate: '',
+      paymentDate: new Date().toISOString().split('T')[0],
+    });
     setScreenshotFile(null);
     setScreenshotPreview(null);
   };
@@ -61,6 +71,7 @@ const PreOrders = () => {
       }
       const currentUser = auth.currentUser;
       const cleanName = currentUser?.email?.split('@')[0] || 'Anonymous';
+
       await addDoc(collection(db, 'preorders'), {
         ...formData,
         totalPrice: Number(formData.totalPrice),
@@ -69,6 +80,7 @@ const PreOrders = () => {
         createdAt: new Date(),
         authorName: cleanName,
       });
+
       setShowForm(false);
       resetForm();
     } catch (error) {
@@ -146,16 +158,39 @@ const PreOrders = () => {
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   required
                 />
+
                 <AnimeSearch
                   value={formData.anime}
                   onChange={(val) => setFormData({ ...formData, anime: val })}
                 />
+
                 <input
                   placeholder="Brand / Manufacturer"
                   className="w-full bg-[#121212] border border-[#333] p-4 rounded-xl outline-none focus:border-orange-500 transition-colors text-white"
                   value={formData.brand}
                   onChange={(e) => setFormData({ ...formData, brand: e.target.value })}
                 />
+
+                {/* Поле даты оплаты */}
+                <div className="space-y-2 text-left">
+                  <label className="text-gray-500 font-bold text-[10px] uppercase tracking-[0.2em] px-1">
+                    Payment / Last Contact Date *
+                  </label>
+                  <div className="relative group">
+                    <Calendar
+                      className="absolute left-4 top-4 text-gray-600 group-focus-within:text-orange-500 transition-colors"
+                      size={18}
+                    />
+                    <input
+                      type="date"
+                      className="w-full bg-[#121212] border border-[#333] p-4 pl-12 rounded-xl outline-none focus:border-orange-500 transition-colors text-white font-mono"
+                      value={formData.paymentDate}
+                      onChange={(e) => setFormData({ ...formData, paymentDate: e.target.value })}
+                      required
+                    />
+                  </div>
+                </div>
+
                 <div className="grid grid-cols-2 gap-4">
                   <input
                     type="number"
@@ -174,6 +209,7 @@ const PreOrders = () => {
                     required
                   />
                 </div>
+
                 <input
                   placeholder="Est. Release (e.g. Q4 2026)"
                   className="w-full bg-[#121212] border border-[#333] p-4 rounded-xl outline-none focus:border-orange-500 transition-colors text-white"

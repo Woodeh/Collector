@@ -16,7 +16,7 @@ const Header = () => {
       <Link to="/" className="flex items-center gap-2 font-bold text-xl tracking-tighter group">
         <Database className="text-blue-500 group-hover:rotate-12 transition-transform" />
         <span className="uppercase tracking-tighter">
-          Figure <span className="text-blue-500">Vault</span>
+          Figure <span className="text-blue-500">COLLECTOR</span>
         </span>
       </Link>
 

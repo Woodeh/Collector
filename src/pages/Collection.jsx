@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { db, storage } from '../firebase/config';
 import { collection, query, orderBy, onSnapshot, doc, deleteDoc } from 'firebase/firestore';
 import { ref, deleteObject } from 'firebase/storage';
-import { LayoutGrid, Loader2, Tag, Trash2, User } from 'lucide-react';
+import { LayoutGrid, Loader2, Tag, Trash2, User, Plus } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import Modal from '../components/Modal';
 
@@ -44,7 +44,7 @@ const Collection = () => {
             const imageRef = ref(storage, imgUrl);
             await deleteObject(imageRef);
           } catch {
-            console.warn('Файл не найден');
+            console.warn('File not found in storage');
           }
         }
       } else if (figureToDelete.image) {
@@ -52,11 +52,11 @@ const Collection = () => {
           const imageRef = ref(storage, figureToDelete.image);
           await deleteObject(imageRef);
         } catch {
-          console.warn('Файл не найден');
+          console.warn('File not found in storage');
         }
       }
     } catch (error) {
-      console.error('Ошибка при удалении:', error);
+      console.error('Delete error:', error);
     } finally {
       setIsModalOpen(false);
       setFigureToDelete(null);
@@ -76,33 +76,46 @@ const Collection = () => {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onConfirm={handleConfirmDelete}
-        title="Удаление фигурки"
-        message={`Вы действительно хотите удалить "${figureToDelete?.name}" и все его фотографии?`}
+        title="Delete Figure"
+        message={`Are you sure you want to delete "${figureToDelete?.name}" and all associated photos?`}
       />
 
       <div className="max-w-7xl mx-auto">
-        <div className="flex items-center gap-3 mb-10 border-b border-[#333] pb-6">
-          <LayoutGrid className="text-blue-500" size={30} />
-          <h2 className="text-3xl font-black uppercase tracking-tight">Коллекция</h2>
-          <span className="bg-[#1a1a1a] px-3 py-1 rounded-full text-blue-500 text-sm font-mono border border-[#333]">
-            {figures.length}
-          </span>
+        {/* Header Section */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-10 border-b border-[#333] pb-6 gap-4">
+          <div className="flex items-center gap-3">
+            <LayoutGrid className="text-blue-500" size={30} />
+            <h2 className="text-3xl font-black uppercase italic tracking-tighter">Collection</h2>
+            <span className="bg-[#1a1a1a] px-3 py-1 rounded-full text-blue-500 text-sm font-mono border border-[#333]">
+              {figures.length}
+            </span>
+          </div>
+
+          <Link
+            to="/add"
+            className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 rounded-2xl font-bold flex items-center gap-2 transition-all active:scale-95 shadow-lg shadow-blue-900/20"
+          >
+            <Plus size={20} /> Add New
+          </Link>
         </div>
 
+        {/* Figures Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
           {figures.map((figure) => (
             <Link
               to={`/figure/${figure.id}`}
               key={figure.id}
-              className="group bg-[#1a1a1a] rounded-2xl border border-[#333] overflow-hidden hover:border-blue-500/30 transition-all duration-500 relative flex flex-col shadow-xl"
+              className="group bg-[#1a1a1a] rounded-[2rem] border border-[#333] overflow-hidden hover:border-blue-500/30 transition-all duration-500 relative flex flex-col shadow-xl"
             >
+              {/* Delete Button */}
               <button
                 onClick={(e) => openModal(e, figure)}
                 className="absolute top-4 right-4 z-30 bg-red-600/10 hover:bg-red-600 text-red-500 hover:text-white p-2 rounded-xl opacity-0 group-hover:opacity-100 transition-all duration-300 backdrop-blur-md border border-red-500/20"
               >
-                <Trash2 size={20} />
+                <Trash2 size={18} />
               </button>
 
+              {/* Image Preview */}
               <div className="aspect-[3/4] overflow-hidden bg-[#121212] relative">
                 <img
                   src={figure.previewImage || figure.image}
@@ -111,23 +124,24 @@ const Collection = () => {
                 />
 
                 {figure.authorName && (
-                  <div className="absolute bottom-2 right-2 bg-black/60 backdrop-blur-md px-2 py-1 rounded-lg flex items-center gap-1.5 border border-white/5">
+                  <div className="absolute bottom-3 right-3 bg-black/60 backdrop-blur-md px-2 py-1 rounded-lg flex items-center gap-1.5 border border-white/5">
                     <User size={10} className="text-blue-400" />
-                    <span className="text-[10px] text-gray-300 font-semibold truncate max-w-[80px]">
+                    <span className="text-[10px] text-gray-300 font-bold uppercase tracking-wider truncate max-w-[80px]">
                       {figure.authorName.split(' ')[0]}
                     </span>
                   </div>
                 )}
               </div>
 
-              <div className="p-5 flex-grow flex flex-col justify-between relative z-10 bg-[#1a1a1a]">
+              {/* Info Block */}
+              <div className="p-6 flex-grow flex flex-col justify-between bg-[#1a1a1a]">
                 <div>
                   <div className="flex justify-between items-start mb-3">
-                    <h3 className="text-xl font-bold text-white truncate pr-2 group-hover:text-blue-400 transition-colors">
+                    <h3 className="text-xl font-black text-white truncate pr-2 group-hover:text-blue-500 transition-colors uppercase tracking-tight">
                       {figure.name}
                     </h3>
                     <span
-                      className={`text-[10px] font-bold px-2 py-0.5 rounded border ${
+                      className={`text-[10px] font-black px-2 py-0.5 rounded border ${
                         figure.gender === 'Female'
                           ? 'border-pink-500/30 text-pink-400'
                           : 'border-blue-500/30 text-blue-400'
@@ -136,15 +150,16 @@ const Collection = () => {
                       {figure.gender === 'Female' ? 'F' : 'M'}
                     </span>
                   </div>
-                  <div className="flex items-center gap-2 text-gray-500 text-sm font-medium">
+                  <div className="flex items-center gap-2 text-gray-500 text-xs font-bold uppercase tracking-wide">
                     <Tag size={14} className="text-blue-500" />
                     <span className="truncate italic">{figure.anime}</span>
                   </div>
                 </div>
+
                 <div className="mt-6 pt-4 border-t border-white/5 flex justify-between items-end">
-                  <span className="text-2xl font-black text-white">
+                  <span className="text-2xl font-black text-white italic">
                     {Number(figure.price).toLocaleString()}{' '}
-                    <span className="text-sm font-normal text-blue-500">$</span>
+                    <span className="text-sm font-normal text-blue-500 not-italic">$</span>
                   </span>
                 </div>
               </div>
