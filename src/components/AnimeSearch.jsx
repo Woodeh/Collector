@@ -1,0 +1,120 @@
+import React, { useState, useEffect, useRef } from 'react';
+import { Search, Loader2, X } from 'lucide-react';
+
+const AnimeSearch = ({ value, onChange }) => {
+  const [query, setQuery] = useState(value || '');
+  const [results, setResults] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+  const wrapperRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (wrapperRef.current && !wrapperRef.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  useEffect(() => {
+    const searchAnime = async () => {
+      if (query.length < 3) {
+        setResults([]);
+        return;
+      }
+
+      setLoading(true);
+      try {
+        // Добавляем обработку ошибок и таймаут
+        const response = await fetch(
+          `https://api.jikan.moe/v4/anime?q=${encodeURIComponent(query)}&limit=6`,
+        );
+        const data = await response.json();
+        if (data.data) {
+          setResults(data.data);
+        }
+      } catch (error) {
+        console.error('Jikan API Error:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    const timeoutId = setTimeout(searchAnime, 600);
+    return () => clearTimeout(timeoutId);
+  }, [query]);
+
+  const handleSelect = (anime) => {
+    setQuery(anime.title);
+    onChange(anime.title);
+    setIsOpen(false);
+  };
+
+  return (
+    <div className="relative w-full" ref={wrapperRef} style={{ zIndex: isOpen ? 100 : 10 }}>
+      <div className="relative">
+        <input
+          type="text"
+          placeholder="Начните вводить название аниме..."
+          className="w-full bg-[#121212] border border-[#333] p-4 rounded-xl outline-none focus:border-blue-500 transition-all text-white"
+          value={query}
+          onChange={(e) => {
+            setQuery(e.target.value);
+            onChange(e.target.value);
+            setIsOpen(true);
+          }}
+          onFocus={() => setIsOpen(true)}
+        />
+        <div className="absolute right-4 top-4 flex items-center gap-2">
+          {loading ? (
+            <Loader2 className="animate-spin text-blue-500" size={20} />
+          ) : query.length > 0 ? (
+            <X
+              className="text-gray-500 cursor-pointer hover:text-white"
+              size={18}
+              onClick={() => {
+                setQuery('');
+                onChange('');
+                setResults([]);
+              }}
+            />
+          ) : (
+            <Search className="text-gray-500" size={20} />
+          )}
+        </div>
+      </div>
+
+      {isOpen && results.length > 0 && (
+        <div className="absolute left-0 right-0 mt-2 bg-[#1a1a1a] border border-[#333] rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.7)] overflow-hidden z-[999] animate-in fade-in slide-in-from-top-2 duration-200">
+          <div className="max-h-[300px] overflow-y-auto no-scrollbar">
+            {results.map((anime) => (
+              <div
+                key={anime.mal_id}
+                onClick={() => handleSelect(anime)}
+                className="w-full flex items-center gap-4 p-3 hover:bg-blue-600/10 cursor-pointer transition-colors border-b border-white/5 last:border-0 group"
+              >
+                <img
+                  src={anime.images?.jpg?.small_image_url}
+                  className="w-12 h-16 object-cover rounded-lg shadow-md flex-shrink-0"
+                  alt=""
+                />
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-bold text-white truncate group-hover:text-blue-400 transition-colors">
+                    {anime.title}
+                  </p>
+                  <p className="text-[11px] text-gray-500 mt-1 uppercase tracking-wider">
+                    {anime.type} • {anime.status}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default AnimeSearch;

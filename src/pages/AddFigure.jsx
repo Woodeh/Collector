@@ -15,11 +15,15 @@ import {
   ShoppingCart,
   Info,
   ShieldCheck,
+  Tag,
+  Camera, // Icon for screenshot
 } from 'lucide-react';
 import CustomSelect from '../components/Select';
+import AnimeSearch from '../components/AnimeSearch';
 
 const AddFigure = () => {
   const [files, setFiles] = useState([]);
+  const [screenshot, setScreenshot] = useState(null); // New state for one screenshot
   const [previewIdx, setPreviewIdx] = useState(0);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -27,6 +31,7 @@ const AddFigure = () => {
   const [formData, setFormData] = useState({
     name: '',
     anime: '',
+    brand: '',
     price: '',
     gender: 'Male',
     auctionUrl: '',
@@ -38,21 +43,21 @@ const AddFigure = () => {
   });
 
   const genderOptions = [
-    { value: 'Male', label: 'Мужской ♂' },
-    { value: 'Female', label: 'Женский ♀' },
+    { value: 'Male', label: 'Male ♂' },
+    { value: 'Female', label: 'Female ♀' },
   ];
 
   const boxOptions = [
-    { value: 'Yes', label: 'Коробка: Есть' },
-    { value: 'No', label: 'Коробка: Нет' },
+    { value: 'Yes', label: 'Box: Original' },
+    { value: 'No', label: 'Box: Loose / No Box' },
   ];
 
   const conditionOptions = [
-    { value: 'New', label: 'Новая (Sealed)' },
-    { value: 'Like New', label: 'Как новая' },
-    { value: 'Good', label: 'Хорошее (Б/У)' },
-    { value: 'Minor Damage', label: 'Мелкие дефекты' },
-    { value: 'Damaged', label: 'Повреждена' },
+    { value: 'New', label: 'New (Sealed)' },
+    { value: 'Like New', label: 'Like New' },
+    { value: 'Good', label: 'Good (Pre-owned)' },
+    { value: 'Minor Damage', label: 'Minor Damage' },
+    { value: 'Damaged', label: 'Damaged' },
   ];
 
   const handleChange = (e) => {
@@ -60,13 +65,19 @@ const AddFigure = () => {
   };
 
   const handleCustomChange = (name, value) => {
-    setFormData({ ...formData, [name]: value });
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleFileChange = (e) => {
     const selectedFiles = Array.from(e.target.files);
-    if (files.length + selectedFiles.length > 5) return alert('Максимум 5 фото');
+    if (files.length + selectedFiles.length > 5) return alert('Maximum 5 photos allowed');
     setFiles([...files, ...selectedFiles]);
+  };
+
+  const handleScreenshotChange = (e) => {
+    if (e.target.files[0]) {
+      setScreenshot(e.target.files[0]);
+    }
   };
 
   const removeFile = (index) => {
@@ -78,7 +89,7 @@ const AddFigure = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (files.length === 0) return alert('Загрузите хотя бы одно фото');
+    if (files.length === 0) return alert('Please upload at least one photo');
 
     setLoading(true);
     try {
@@ -90,14 +101,22 @@ const AddFigure = () => {
         imageUrls.push(url);
       }
 
+      let screenshotUrl = '';
+      if (screenshot) {
+        const screenshotRef = ref(storage, `screenshots/${Date.now()}_${screenshot.name}`);
+        await uploadBytes(screenshotRef, screenshot);
+        screenshotUrl = await getDownloadURL(screenshotRef);
+      }
+
       const currentUser = auth.currentUser;
-      const rawName = currentUser?.displayName || currentUser?.email || 'Аноним';
+      const rawName = currentUser?.displayName || currentUser?.email || 'Anonymous';
       const cleanName = rawName.includes('@') ? rawName.split('@')[0] : rawName;
 
       await addDoc(collection(db, 'figures'), {
         ...formData,
         images: imageUrls,
         previewImage: imageUrls[previewIdx],
+        screenshot: screenshotUrl, // Save screenshot URL
         price: Number(formData.price) || 0,
         createdAt: new Date(),
         authorName: cleanName,
@@ -106,9 +125,11 @@ const AddFigure = () => {
 
       setSuccess(true);
       setFiles([]);
+      setScreenshot(null);
       setFormData({
         name: '',
         anime: '',
+        brand: '',
         price: '',
         gender: 'Male',
         auctionUrl: '',
@@ -122,7 +143,7 @@ const AddFigure = () => {
       setTimeout(() => setSuccess(false), 3000);
     } catch (error) {
       console.error(error);
-      alert('Ошибка при сохранении: ' + error.message);
+      alert('Error saving figure: ' + error.message);
     } finally {
       setLoading(false);
     }
@@ -131,25 +152,25 @@ const AddFigure = () => {
   return (
     <div className="max-w-4xl mx-auto p-6 text-[#e4e4e4] relative">
       {success && (
-        <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm transition-all duration-300">
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm transition-all duration-300">
           <div className="bg-[#1a1a1a] border border-green-500/50 p-10 rounded-[3rem] shadow-[0_0_50px_rgba(0,0,0,0.8)] flex flex-col items-center gap-6 animate-in zoom-in duration-300">
             <div className="bg-green-500 p-4 rounded-full shadow-[0_0_30px_rgba(34,197,94,0.4)]">
               <Check size={40} className="text-[#121212] stroke-[4px]" />
             </div>
             <div className="text-center">
               <h3 className="text-3xl font-black text-white uppercase tracking-tighter italic">
-                Готово!
+                Success!
               </h3>
               <p className="text-green-400 font-bold text-sm uppercase tracking-[0.2em] mt-2">
-                Фигурка добавлена!
+                Figure added to collection
               </p>
             </div>
           </div>
         </div>
       )}
 
-      <h2 className="text-3xl font-black mb-8 flex items-center gap-3">
-        <PlusCircle className="text-blue-500" /> Добавить в коллекцию
+      <h2 className="text-3xl font-black mb-8 flex items-center gap-3 uppercase tracking-tight">
+        <PlusCircle className="text-blue-500" /> Add to Collection
       </h2>
 
       <form
@@ -158,30 +179,38 @@ const AddFigure = () => {
       >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <div className="space-y-5">
-            <h3 className="text-blue-500 font-bold text-[10px] uppercase tracking-[0.2em] flex items-center gap-2 mb-2">
-              <Info size={14} /> Основная информация
+            <h3 className="text-blue-500 font-bold text-[10px] uppercase tracking-[0.2em] flex items-center gap-2 mb-2 italic">
+              <Info size={14} /> Basic Information
             </h3>
             <input
               name="name"
-              placeholder="Название фигурки *"
+              placeholder="Figure Name *"
               className="w-full bg-[#121212] border border-[#333] p-4 rounded-xl outline-none focus:border-blue-500 transition-colors"
               onChange={handleChange}
               value={formData.name}
               required
             />
-            <input
-              name="anime"
-              placeholder="Аниме / Источник *"
-              className="w-full bg-[#121212] border border-[#333] p-4 rounded-xl outline-none focus:border-blue-500 transition-colors"
-              onChange={handleChange}
-              value={formData.anime}
-              required
-            />
+            <div className="relative z-[60]">
+              <AnimeSearch
+                value={formData.anime}
+                onChange={(val) => handleCustomChange('anime', val)}
+              />
+            </div>
+            <div className="relative">
+              <Tag className="absolute left-4 top-4 text-gray-600" size={18} />
+              <input
+                name="brand"
+                placeholder="Manufacturer / Brand (e.g. Max Factory)"
+                className="w-full bg-[#121212] border border-[#333] p-4 pl-12 rounded-xl outline-none focus:border-blue-500 transition-colors"
+                onChange={handleChange}
+                value={formData.brand}
+              />
+            </div>
             <div className="grid grid-cols-2 gap-4">
               <input
                 name="price"
                 type="number"
-                placeholder="Цена ($) *"
+                placeholder="Price ($) *"
                 className="bg-[#121212] border border-[#333] p-4 rounded-xl outline-none focus:border-blue-500 transition-colors"
                 onChange={handleChange}
                 value={formData.price}
@@ -191,13 +220,13 @@ const AddFigure = () => {
                 options={genderOptions}
                 value={formData.gender}
                 onChange={(val) => handleCustomChange('gender', val)}
+                placeholder="Select Gender"
               />
             </div>
           </div>
-
           <div className="space-y-5">
-            <h3 className="text-gray-500 font-bold text-[10px] uppercase tracking-[0.2em] flex items-center gap-2 mb-2">
-              <PlusCircle size={14} /> Детали приобретения
+            <h3 className="text-gray-500 font-bold text-[10px] uppercase tracking-[0.2em] flex items-center gap-2 mb-2 italic">
+              <PlusCircle size={14} /> Acquisition Details
             </h3>
             <div className="grid grid-cols-2 gap-4">
               <div className="relative group">
@@ -219,21 +248,26 @@ const AddFigure = () => {
                 onChange={(val) => handleCustomChange('hasBox', val)}
               />
             </div>
-
             <CustomSelect
               icon={ShieldCheck}
               options={conditionOptions}
               value={formData.conditionGrade}
               onChange={(val) => handleCustomChange('conditionGrade', val)}
+              placeholder="Condition Grade"
             />
-
-            <input
-              name="purchasePlace"
-              placeholder="Место приобретения"
-              className="w-full bg-[#121212] border border-[#333] p-4 rounded-2xl outline-none focus:border-blue-500 transition-colors"
-              onChange={handleChange}
-              value={formData.purchasePlace}
-            />
+            <div className="relative group">
+              <ShoppingCart
+                className="absolute left-4 top-4 text-gray-600 group-focus-within:text-blue-500 transition-colors"
+                size={18}
+              />
+              <input
+                name="purchasePlace"
+                placeholder="Purchase Place (e.g. AmiAmi)"
+                className="w-full bg-[#121212] border border-[#333] p-4 pl-12 rounded-xl outline-none focus:border-blue-500 transition-colors"
+                onChange={handleChange}
+                value={formData.purchasePlace}
+              />
+            </div>
           </div>
         </div>
 
@@ -245,28 +279,31 @@ const AddFigure = () => {
             />
             <input
               name="auctionUrl"
-              placeholder="Ссылка на аукцион"
-              className="w-full bg-[#121212] border border-[#333] p-4 pl-12 rounded-2xl outline-none focus:border-blue-500 transition-colors"
+              placeholder="Auction / Listing URL"
+              className="w-full bg-[#121212] border border-[#333] p-4 pl-12 rounded-xl outline-none focus:border-blue-500 transition-colors"
               onChange={handleChange}
               value={formData.auctionUrl}
             />
           </div>
           <textarea
             name="conditionNotes"
-            placeholder="Дополнительные заметки о состоянии..."
-            className="w-full bg-[#121212] border border-[#333] p-4 rounded-2xl outline-none focus:border-blue-500 h-24 resize-none transition-colors"
+            placeholder="Additional condition notes or details..."
+            className="w-full bg-[#121212] border border-[#333] p-4 rounded-xl outline-none focus:border-blue-500 h-24 resize-none transition-colors"
             onChange={handleChange}
             value={formData.conditionNotes}
           ></textarea>
         </div>
 
+        {/* PHOTOS UPLOAD SECTION */}
         <div className="space-y-5">
           <label className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-[#333] rounded-[2rem] cursor-pointer hover:bg-[#1f1f1f] hover:border-blue-500/50 transition-all group">
             <Upload
               className="text-gray-600 mb-3 group-hover:text-blue-500 group-hover:-translate-y-1 transition-all"
               size={32}
             />
-            <span className="text-gray-500 font-medium">Загрузите фото (макс. 5) *</span>
+            <span className="text-gray-500 font-medium tracking-wide">
+              Upload Photos (max. 5) *
+            </span>
             <input
               type="file"
               className="hidden"
@@ -275,7 +312,6 @@ const AddFigure = () => {
               accept="image/*"
             />
           </label>
-
           {files.length > 0 && (
             <div className="grid grid-cols-5 gap-4">
               {files.map((file, idx) => (
@@ -317,6 +353,41 @@ const AddFigure = () => {
           )}
         </div>
 
+        {/* SCREENSHOT UPLOAD SECTION */}
+        <div className="space-y-5 border-t border-[#333] pt-8">
+          <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-[#333] rounded-[2rem] cursor-pointer hover:bg-[#1f1f1f] hover:border-orange-500/50 transition-all group">
+            <Camera
+              className="text-gray-600 mb-3 group-hover:text-orange-400 group-hover:-translate-y-1 transition-all"
+              size={28}
+            />
+            <span className="text-gray-500 font-medium tracking-wide">
+              Upload ONE Screenshot (e.g. Order Confirmation)
+            </span>
+            <input
+              type="file"
+              className="hidden"
+              onChange={handleScreenshotChange}
+              accept="image/*"
+            />
+          </label>
+          {screenshot && (
+            <div className="relative aspect-[16/9] w-full max-w-sm mx-auto rounded-2xl overflow-hidden border-2 border-orange-500 shadow-lg shadow-orange-500/20 scale-105">
+              <img
+                src={URL.createObjectURL(screenshot)}
+                className="w-full h-full object-cover"
+                alt="screenshot preview"
+              />
+              <button
+                type="button"
+                onClick={() => setScreenshot(null)}
+                className="absolute top-2 right-2 bg-red-600/80 p-1.5 rounded-lg text-white hover:bg-red-600 transition-colors shadow-lg"
+              >
+                <X size={14} />
+              </button>
+            </div>
+          )}
+        </div>
+
         <button
           disabled={loading}
           className={`w-full py-5 rounded-[1.5rem] font-black text-xl tracking-widest transition-all flex items-center justify-center gap-3 shadow-xl ${
@@ -328,10 +399,10 @@ const AddFigure = () => {
           {loading ? (
             <>
               <Loader2 className="animate-spin" size={24} />
-              <span>СОХРАНЕНИЕ...</span>
+              <span>SAVING...</span>
             </>
           ) : (
-            'СОХРАНИТЬ ФИГУРКУ'
+            'SAVE FIGURE'
           )}
         </button>
       </form>

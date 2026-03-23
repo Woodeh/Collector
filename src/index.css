@@ -22,3 +22,7 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   @apply bg-[#444444];
 }
+
+.tilt-card {
+  transform-style: preserve-3d;
+}
