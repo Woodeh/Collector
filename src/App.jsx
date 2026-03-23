@@ -1,12 +1,13 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
-import Header from './components/Header'; // Импортируем новый Header
-import AddFigure from './pages/AddFigure';
+import Header from './components/Header';
 import Collection from './pages/Collection';
 import Login from './pages/Login.jsx';
 import FigureDetails from './pages/FigureDetails';
 import PreOrders from './pages/PreOrders';
 import Wishlist from './pages/Wishlist';
+// Импортируем нашу универсальную форму
+import FigureForm from './components/FigureForm';
 
 const HomePage = () => (
   <div className="p-12 text-center max-w-2xl mx-auto">
@@ -19,7 +20,7 @@ const HomePage = () => (
     <div className="flex justify-center gap-6">
       <Link
         to="/add"
-        className="bg-blue-600 px-8 py-3 rounded-2xl font-black hover:bg-blue-500 transition-all shadow-lg shadow-blue-900/20 active:scale-95"
+        className="bg-blue-600 px-8 py-3 rounded-2xl font-black hover:bg-blue-500 transition-all shadow-lg shadow-blue-900/20 active:scale-95 text-white"
       >
         ADD NEW FIGURE
       </Link>
@@ -39,11 +40,15 @@ function App() {
       <div className="min-h-screen flex flex-col bg-[#121212] text-[#e4e4e4]">
         <Header />
 
-        <main className="max-w-7xl mx-auto w-full p-6">
+        <main className="max-w-7xl mx-auto w-full p-6 text-left">
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/collection" element={<Collection />} />
-            <Route path="/add" element={<AddFigure />} />
+
+            {/* Используем FigureForm для обоих случаев */}
+            <Route path="/add" element={<FigureForm mode="add" />} />
+            <Route path="/edit/:id" element={<FigureForm mode="edit" />} />
+
             <Route path="/login" element={<Login />} />
             <Route path="/figure/:id" element={<FigureDetails />} />
             <Route path="/preorders" element={<PreOrders />} />

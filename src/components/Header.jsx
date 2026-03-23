@@ -11,6 +11,7 @@ import {
   LayoutDashboard,
   ChevronUp,
   ChevronDown,
+  Heart,
 } from 'lucide-react';
 import { db } from '../firebase/config';
 import { collection, onSnapshot } from 'firebase/firestore';
@@ -27,18 +28,16 @@ const Header = () => {
     const fetchRate = async () => {
       const cachedData = localStorage.getItem('kzt_rate_data');
       const now = new Date().getTime();
-      const dayInMs = 24 * 60 * 60 * 1000; // 24 часа
+      const dayInMs = 24 * 60 * 60 * 1000;
 
       if (cachedData) {
         const { rate: savedRate, timestamp } = JSON.parse(cachedData);
-        // Если курсу меньше суток — используем его
         if (now - timestamp < dayInMs) {
           setRate(savedRate);
           return;
         }
       }
 
-      // Если кеша нет или он старый — делаем запрос
       try {
         const res = await fetch('https://api.frankfurter.app/latest?from=USD&to=KZT');
         const data = await res.json();
@@ -53,14 +52,14 @@ const Header = () => {
           }),
         );
       } catch {
-        console.warn('Не удалось обновить курс, используем старый или дефолт');
+        console.warn('Не удалось обновить курс, используем дефолт');
       }
     };
 
     fetchRate();
   }, []);
 
-  // Подписка на Firebase (остается без изменений)
+  // Подписка на Firebase
   useEffect(() => {
     const unsubCol = onSnapshot(collection(db, 'figures'), (snap) => {
       const colValue = snap.docs.reduce((sum, doc) => sum + (Number(doc.data().price) || 0), 0);
@@ -117,23 +116,42 @@ const Header = () => {
           <NavLink
             to="/"
             className={({ isActive }) =>
-              `flex items-center gap-1.5 ${isActive ? 'text-blue-500' : 'text-gray-400'}`
+              `flex items-center gap-1.5 transition-colors ${
+                isActive ? 'text-blue-500' : 'text-gray-400'
+              }`
             }
           >
             <Home size={16} /> Home
           </NavLink>
+
           <NavLink
             to="/collection"
             className={({ isActive }) =>
-              `flex items-center gap-1.5 ${isActive ? 'text-blue-500' : 'text-gray-400'}`
+              `flex items-center gap-1.5 transition-colors ${
+                isActive ? 'text-blue-500' : 'text-gray-400'
+              }`
             }
           >
             <LayoutGrid size={16} /> Collection
           </NavLink>
+
+          <NavLink
+            to="/wishlist"
+            className={({ isActive }) =>
+              `flex items-center gap-1.5 transition-colors ${
+                isActive ? 'text-pink-500' : 'text-gray-400 hover:text-pink-400'
+              }`
+            }
+          >
+            <Heart size={16} /> Wishlist
+          </NavLink>
+
           <NavLink
             to="/preorders"
             className={({ isActive }) =>
-              `flex items-center gap-1.5 ${isActive ? 'text-orange-500' : 'text-gray-400'}`
+              `flex items-center gap-1.5 transition-colors ${
+                isActive ? 'text-orange-500' : 'text-gray-400'
+              }`
             }
           >
             <Clock size={16} /> Pre-Orders
@@ -208,7 +226,7 @@ const Header = () => {
             </div>
           </div>
 
-          {/* CURRENCY TOGGLE */}
+          {/* Кнопки валют */}
           <div className="flex items-center gap-2 border border-[#333] p-1 rounded-xl bg-[#1a1a1a]">
             <button
               onClick={() => setCurrency('USD')}
