@@ -21,6 +21,7 @@ import {
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import CustomSelect from '../components/Select';
 import AnimeSearch from '../components/AnimeSearch';
+import CharacterSearch from '../components/CharacterSearch';
 
 // Календарь
 import DatePicker from 'react-datepicker';
@@ -34,12 +35,12 @@ const FigureForm = ({ mode = 'add' }) => {
 
   const [files, setFiles] = useState([]);
   const [existingImages, setExistingImages] = useState([]);
-  const [previewIdx, setPreviewIdx] = useState(0);
+  const [previewIdx, setPreviewIdx] = useState(0); // Индекс главного фото
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(isEdit);
   const [epicSuccess, setEpicSuccess] = useState(null);
 
-  // Валюта (по умолчанию USD)
+  const [isDragging, setIsDragging] = useState(false);
   const [currency, setCurrency] = useState('USD');
 
   const [formData, setFormData] = useState({
@@ -56,11 +57,10 @@ const FigureForm = ({ mode = 'add' }) => {
     purchasePlace: 'Jalan Jalan Japan',
   });
 
-  // Курсы валют (примерные, можно обновлять)
   const EXCHANGE_RATES = {
     USD: 1,
-    KZT: 0.0022, // 1 KZT ≈ 0.0022 USD
-    CNY: 0.14, // 1 CNY ≈ 0.14 USD
+    KZT: 0.0022,
+    CNY: 0.14,
   };
 
   const brandOptions = [
@@ -110,7 +110,9 @@ const FigureForm = ({ mode = 'add' }) => {
             const data = docSnap.data();
             setFormData(data);
             setExistingImages(data.images || []);
-            setPreviewIdx(data.images?.indexOf(data.previewImage) || 0);
+            // Находим индекс текущего превью среди всех картинок
+            const currentIdx = data.images?.indexOf(data.previewImage);
+            setPreviewIdx(currentIdx !== -1 ? currentIdx : 0);
           }
         } catch (error) {
           console.error(error);
@@ -125,11 +127,27 @@ const FigureForm = ({ mode = 'add' }) => {
   const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
   const handleCustomChange = (name, value) => setFormData((prev) => ({ ...prev, [name]: value }));
 
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+  const handleDragLeave = () => {
+    setIsDragging(false);
+  };
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const droppedFiles = Array.from(e.dataTransfer.files);
+    const imageFiles = droppedFiles.filter((file) => file.type.startsWith('image/'));
+    if (imageFiles.length > 0) {
+      setFiles((prev) => [...prev, ...imageFiles].slice(0, 5));
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (files.length === 0 && existingImages.length === 0) return alert('Please upload photo');
 
-    // ПРОВЕРКА АВТОРИЗАЦИИ
     const currentUser = auth.currentUser;
     if (!currentUser) return alert('You must be logged in to save figures');
 
@@ -144,18 +162,17 @@ const FigureForm = ({ mode = 'add' }) => {
       }
 
       const allImages = [...existingImages, ...newUrls];
+      // Важно: берем картинку по выбранному индексу превью
       const previewImg = allImages[previewIdx] || allImages[0];
 
-      // КОНВЕРТАЦИЯ ЦЕНЫ В USD
       const priceInCurrency = Number(formData.price) || 0;
       const priceInUSD = parseFloat((priceInCurrency * EXCHANGE_RATES[currency]).toFixed(2));
 
-      // ФОРМИРУЕМ ДАННЫЕ С ПРИВЯЗКОЙ К USER ID
       const finalData = {
         ...formData,
-        userId: currentUser.uid, // Привязываем к ID аккаунта
+        userId: currentUser.uid,
         images: allImages,
-        previewImage: previewImg,
+        previewImage: previewImg, // Сохраняем выбранное главное фото
         price: priceInUSD,
         updatedAt: new Date(),
       };
@@ -167,7 +184,7 @@ const FigureForm = ({ mode = 'add' }) => {
           ...finalData,
           createdAt: new Date(),
           authorName: (currentUser?.displayName || currentUser?.email || 'Anon').split('@')[0],
-          authorId: currentUser.uid, // Дополнительно сохраняем для истории
+          authorId: currentUser.uid,
         });
       }
 
@@ -268,20 +285,19 @@ const FigureForm = ({ mode = 'add' }) => {
             <h3 className="text-blue-500 font-black text-[11px] uppercase tracking-[0.25em] flex items-center gap-2 italic">
               <Info size={14} /> Basic Information
             </h3>
-            <input
-              name="name"
-              placeholder="Name *"
-              className="w-full bg-[#121212] border border-[#333] p-4.5 rounded-2xl outline-none focus:border-blue-500 font-bold text-white placeholder:text-gray-700"
-              onChange={handleChange}
+
+            <CharacterSearch
               value={formData.name}
-              required
+              onChange={(val) => handleCustomChange('name', val)}
             />
+
             <div className="relative z-[60]">
               <AnimeSearch
                 value={formData.anime}
                 onChange={(val) => handleCustomChange('anime', val)}
               />
             </div>
+
             <CustomSelect
               icon={Tag}
               options={brandOptions}
@@ -369,54 +385,45 @@ const FigureForm = ({ mode = 'add' }) => {
           </div>
         </div>
 
-        {/* ... Остальная часть формы (URL, Notes, Photos, Button) без изменений ... */}
-        <div className="space-y-4 pt-4 border-t border-[#333]/50">
-          <div className="relative">
-            <LinkIcon
-              className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600"
-              size={18}
-            />
-            <input
-              name="auctionUrl"
-              placeholder="Listing / Store URL"
-              className="w-full bg-[#121212] border border-[#333] p-4.5 pl-12 rounded-2xl outline-none font-bold text-white placeholder:text-gray-700 focus:border-blue-500 transition-colors"
-              onChange={handleChange}
-              value={formData.auctionUrl}
-            />
-          </div>
-          <textarea
-            name="conditionNotes"
-            placeholder="Notes..."
-            className="w-full bg-[#121212] border border-[#333] p-5 rounded-2xl outline-none h-24 resize-none font-bold text-white placeholder:text-gray-700 focus:border-blue-500 transition-colors"
-            onChange={handleChange}
-            value={formData.conditionNotes}
-          ></textarea>
-        </div>
-
-        <div className="space-y-6">
-          <label className="flex flex-col items-center justify-center w-full h-36 border-2 border-dashed border-[#333] rounded-[2.5rem] cursor-pointer hover:bg-[#1f1f1f] hover:border-blue-500/50 transition-all group">
+        {/* DRAG & DROP AREA */}
+        <div className="space-y-6 pt-4 border-t border-[#333]/50">
+          <label
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+            className={`flex flex-col items-center justify-center w-full h-36 border-2 border-dashed rounded-[2.5rem] cursor-pointer transition-all group relative overflow-hidden ${
+              isDragging
+                ? 'border-blue-500 bg-blue-500/10'
+                : 'border-[#333] hover:bg-[#1f1f1f] hover:border-blue-500/50'
+            }`}
+          >
             <Upload
-              className="text-gray-600 mb-2 group-hover:text-blue-500 transition-transform group-hover:-translate-y-1"
+              className={`mb-2 transition-all ${
+                isDragging ? 'text-blue-500 scale-110' : 'text-gray-600'
+              }`}
               size={32}
             />
             <span className="text-gray-500 font-black text-[10px] uppercase tracking-[0.3em]">
-              Photos (Max 5)
+              Photos (Max 5) / Drag & Drop
             </span>
             <input
               type="file"
               className="hidden"
               multiple
-              onChange={(e) => setFiles([...files, ...Array.from(e.target.files)])}
+              onChange={(e) => setFiles([...files, ...Array.from(e.target.files)].slice(0, 5))}
               accept="image/*"
             />
           </label>
+
+          {/* GALLERY WITH PREVIEW SELECTION */}
           <div className="grid grid-cols-5 gap-4">
+            {/* Рендерим уже существующие картинки (при редактировании) */}
             {existingImages.map((url, idx) => (
               <div
                 key={`old-${idx}`}
                 className={`relative aspect-[3/4] rounded-2xl overflow-hidden border-2 transition-all ${
                   previewIdx === idx
-                    ? 'border-blue-500 shadow-[0_0_20px_rgba(59,130,246,0.2)]'
+                    ? 'border-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.3)]'
                     : 'border-[#333]'
                 }`}
               >
@@ -436,32 +443,79 @@ const FigureForm = ({ mode = 'add' }) => {
                 <button
                   type="button"
                   onClick={() => setExistingImages(existingImages.filter((_, i) => i !== idx))}
-                  className="absolute top-2 right-2 bg-red-600/80 p-1.5 rounded-lg hover:bg-red-600 transition-colors text-white"
-                >
-                  <X size={14} />
-                </button>
-              </div>
-            ))}
-            {files.map((file, idx) => (
-              <div
-                key={`new-${idx}`}
-                className="relative aspect-[3/4] rounded-2xl overflow-hidden border-2 border-blue-500/30"
-              >
-                <img
-                  src={URL.createObjectURL(file)}
-                  className="w-full h-full object-cover"
-                  alt="n"
-                />
-                <button
-                  type="button"
-                  onClick={() => setFiles(files.filter((_, i) => i !== idx))}
                   className="absolute top-2 right-2 bg-red-600/80 p-1.5 rounded-lg text-white"
                 >
                   <X size={14} />
                 </button>
               </div>
             ))}
+
+            {/* Рендерим новые выбранные файлы */}
+            {files.map((file, idx) => {
+              const currentFileIdx = existingImages.length + idx;
+              return (
+                <div
+                  key={`new-${idx}`}
+                  className={`relative aspect-[3/4] rounded-2xl overflow-hidden border-2 transition-all ${
+                    previewIdx === currentFileIdx
+                      ? 'border-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.3)]'
+                      : 'border-[#333]/30'
+                  }`}
+                >
+                  <img
+                    src={URL.createObjectURL(file)}
+                    className="w-full h-full object-cover"
+                    alt="n"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setPreviewIdx(currentFileIdx)}
+                    className="absolute top-2 left-2 bg-black/70 p-1.5 rounded-lg hover:bg-blue-600 transition-colors"
+                  >
+                    <Star
+                      size={14}
+                      className={
+                        previewIdx === currentFileIdx
+                          ? 'text-yellow-400 fill-yellow-400'
+                          : 'text-white'
+                      }
+                    />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setFiles(files.filter((_, i) => i !== idx))}
+                    className="absolute top-2 right-2 bg-red-600/80 p-1.5 rounded-lg text-white"
+                  >
+                    <X size={14} />
+                  </button>
+                </div>
+              );
+            })}
           </div>
+        </div>
+
+        {/* ... Остальная часть формы (URL, Notes, Button) ... */}
+        <div className="space-y-4 pt-4 border-t border-[#333]/50">
+          <div className="relative">
+            <LinkIcon
+              className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600"
+              size={18}
+            />
+            <input
+              name="auctionUrl"
+              placeholder="Listing / Store URL"
+              className="w-full bg-[#121212] border border-[#333] p-4.5 pl-12 rounded-2xl outline-none font-bold text-white focus:border-blue-500 transition-colors"
+              onChange={handleChange}
+              value={formData.auctionUrl}
+            />
+          </div>
+          <textarea
+            name="conditionNotes"
+            placeholder="Notes..."
+            className="w-full bg-[#121212] border border-[#333] p-5 rounded-2xl outline-none h-24 resize-none font-bold text-white focus:border-blue-500 transition-colors"
+            onChange={handleChange}
+            value={formData.conditionNotes}
+          ></textarea>
         </div>
 
         <button
