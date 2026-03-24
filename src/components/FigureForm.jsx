@@ -129,6 +129,10 @@ const FigureForm = ({ mode = 'add' }) => {
     e.preventDefault();
     if (files.length === 0 && existingImages.length === 0) return alert('Please upload photo');
 
+    // ПРОВЕРКА АВТОРИЗАЦИИ
+    const currentUser = auth.currentUser;
+    if (!currentUser) return alert('You must be logged in to save figures');
+
     setLoading(true);
     try {
       const newUrls = [];
@@ -141,17 +145,18 @@ const FigureForm = ({ mode = 'add' }) => {
 
       const allImages = [...existingImages, ...newUrls];
       const previewImg = allImages[previewIdx] || allImages[0];
-      const currentUser = auth.currentUser;
 
       // КОНВЕРТАЦИЯ ЦЕНЫ В USD
       const priceInCurrency = Number(formData.price) || 0;
       const priceInUSD = parseFloat((priceInCurrency * EXCHANGE_RATES[currency]).toFixed(2));
 
+      // ФОРМИРУЕМ ДАННЫЕ С ПРИВЯЗКОЙ К USER ID
       const finalData = {
         ...formData,
+        userId: currentUser.uid, // Привязываем к ID аккаунта
         images: allImages,
         previewImage: previewImg,
-        price: priceInUSD, // Сохраняем всегда в USD
+        price: priceInUSD,
         updatedAt: new Date(),
       };
 
@@ -162,7 +167,7 @@ const FigureForm = ({ mode = 'add' }) => {
           ...finalData,
           createdAt: new Date(),
           authorName: (currentUser?.displayName || currentUser?.email || 'Anon').split('@')[0],
-          authorId: currentUser?.uid || 'unknown',
+          authorId: currentUser.uid, // Дополнительно сохраняем для истории
         });
       }
 

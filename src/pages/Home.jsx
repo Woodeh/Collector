@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { db } from '../firebase/config';
-import { collection, query, orderBy, limit, getDocs } from 'firebase/firestore';
+import { db, auth } from '../firebase/config'; // Добавил auth
+import { collection, query, orderBy, limit, getDocs, where } from 'firebase/firestore'; // Добавил where
+import { onAuthStateChanged } from 'firebase/auth'; // Добавил слушатель юзера
 import { Link } from 'react-router-dom';
 import {
   LayoutGrid,
@@ -21,61 +22,98 @@ const Home = () => {
   const [nextPreorder, setNextPreorder] = useState(null);
   const [stats, setStats] = useState({ totalValue: 0, count: 0, topBrand: 'None', rank: 'Novice' });
   const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const allFiguresSnap = await getDocs(collection(db, 'figures'));
-        const allDocs = allFiguresSnap.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
-
-        if (allDocs.length > 0) {
-          setSpotlight(allDocs[Math.floor(Math.random() * allDocs.length)]);
-        }
-
-        const recentQ = query(collection(db, 'figures'), orderBy('createdAt', 'desc'), limit(10));
-        const recentSnap = await getDocs(recentQ);
-        setRecentFigures(recentSnap.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
-
-        let val = 0;
-        const brands = {};
-        allDocs.forEach((d) => {
-          val += Number(d.price) || 0;
-          if (d.brand) brands[d.brand] = (brands[d.brand] || 0) + 1;
-        });
-        const topBrand = Object.entries(brands).sort((a, b) => b[1] - a[1])[0]?.[0] || 'Unknown';
-
-        const getRank = (count) => {
-          if (count > 100) return 'Legendary Curator';
-          if (count > 50) return 'Master Collector';
-          if (count > 20) return 'Enthusiast';
-          return 'Novice Collector';
-        };
-
-        setStats({
-          totalValue: val,
-          count: allDocs.length,
-          topBrand,
-          rank: getRank(allDocs.length),
-        });
-
-        const preorderSnap = await getDocs(collection(db, 'preorders'));
-        if (!preorderSnap.empty) {
-          const preorders = preorderSnap.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
-          setNextPreorder(preorders[0]);
-        }
-      } catch (e) {
-        console.error(e);
-      } finally {
+    // 1. Сначала проверяем, кто залогинен
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+      if (currentUser) {
+        fetchData(currentUser.uid);
+      } else {
         setLoading(false);
       }
-    };
-    fetchData();
+    });
+
+    return () => unsubscribe();
   }, []);
+
+  const fetchData = async (uid) => {
+    try {
+      // 2. Тянем ЛИЧНУЮ статистику
+      const qAll = query(collection(db, 'figures'), where('userId', '==', uid));
+      const allFiguresSnap = await getDocs(qAll);
+      const allDocs = allFiguresSnap.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
+
+      if (allDocs.length > 0) {
+        // Spotlight только из своих
+        setSpotlight(allDocs[Math.floor(Math.random() * allDocs.length)]);
+      }
+
+      // 3. Последние добавления (ТОЛЬКО СВОИ)
+      const recentQ = query(
+        collection(db, 'figures'),
+        where('userId', '==', uid), // Фильтр юзера
+        orderBy('createdAt', 'desc'),
+        limit(10),
+      );
+      const recentSnap = await getDocs(recentQ);
+      setRecentFigures(recentSnap.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
+
+      let val = 0;
+      const brands = {};
+      allDocs.forEach((d) => {
+        val += Number(d.price) || 0;
+        if (d.brand) brands[d.brand] = (brands[d.brand] || 0) + 1;
+      });
+      const topBrand = Object.entries(brands).sort((a, b) => b[1] - a[1])[0]?.[0] || 'Unknown';
+
+      const getRank = (count) => {
+        if (count > 100) return 'Legendary Curator';
+        if (count > 50) return 'Master Collector';
+        if (count > 20) return 'Enthusiast';
+        return 'Novice Collector';
+      };
+
+      setStats({
+        totalValue: val,
+        count: allDocs.length,
+        topBrand,
+        rank: getRank(allDocs.length),
+      });
+
+      // 4. Предзаказы (ТОЛЬКО СВОИ)
+      const qPre = query(collection(db, 'preorders'), where('userId', '==', uid));
+      const preorderSnap = await getDocs(qPre);
+      if (!preorderSnap.empty) {
+        const preorders = preorderSnap.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
+        setNextPreorder(preorders[0]);
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   if (loading)
     return (
       <div className="h-screen flex items-center justify-center bg-[#121212]">
         <Loader2 className="animate-spin text-blue-500" size={40} />
+      </div>
+    );
+
+  // Если не залогинен — просим войти
+  if (!user)
+    return (
+      <div className="h-screen flex flex-col items-center justify-center bg-[#121212] space-y-6">
+        <h1 className="text-2xl font-black uppercase italic text-white">Access Denied</h1>
+        <Link
+          to="/login"
+          className="bg-blue-600 px-8 py-3 rounded-2xl font-black uppercase tracking-widest text-white shadow-lg shadow-blue-600/20 active:scale-95 transition-all"
+        >
+          Login to System
+        </Link>
       </div>
     );
 
@@ -87,7 +125,7 @@ const Home = () => {
         @media (hover: hover) { .animate-marquee:hover { animation-play-state: paused; } }
       `}</style>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 md:py-12 space-y-16 md:space-y-24">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 md:py-12 space-y-16 md:space-y-24 text-left">
         {/* HERO SECTION */}
         <div className="flex flex-col lg:flex-row justify-between items-center lg:items-start gap-10 md:gap-16">
           <div className="flex-1 text-center lg:text-left space-y-6 md:space-y-8 lg:pt-8">
@@ -96,7 +134,11 @@ const Home = () => {
               <br className="hidden sm:block" /> In One Place
             </h1>
             <p className="text-gray-500 text-xs md:text-sm font-bold uppercase tracking-[0.2em] md:tracking-[0.4em] max-w-xl mx-auto lg:mx-0">
-              Track grails, manage pre-orders, and control collection value in real-time.
+              Welcome back,{' '}
+              <span className="text-white italic">
+                {user.displayName || user.email.split('@')[0]}
+              </span>
+              . Database is live.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start pt-4">
               <Link

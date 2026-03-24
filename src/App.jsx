@@ -8,6 +8,8 @@ import PreOrders from './pages/PreOrders';
 import Wishlist from './pages/Wishlist';
 import Home from './pages/Home';
 import FigureForm from './components/FigureForm';
+import Profile from './pages/Profile.jsx';
+import Community from './pages/Community';
 
 function App() {
   return (
@@ -18,19 +20,15 @@ function App() {
         <main className="w-full">
           <Routes>
             <Route path="/" element={<Home />} />
-
             <Route path="/collection" element={<Collection />} />
             <Route path="/login" element={<Login />} />
-
-            {/* Формы добавления и редактирования */}
             <Route path="/add" element={<FigureForm mode="add" />} />
             <Route path="/edit/:id" element={<FigureForm mode="edit" />} />
-
-            {/* Детали и другие страницы */}
             <Route path="/figure/:id" element={<FigureDetails />} />
             <Route path="/preorders" element={<PreOrders />} />
             <Route path="/wishlist" element={<Wishlist />} />
-            {/* Проверь путь /favorites или /wishlist — в хедере мы писали /favorites */}
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/community" element={<Community />} />
           </Routes>
         </main>
       </div>

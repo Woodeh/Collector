@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { db, storage } from '../firebase/config';
-import { collection, query, orderBy, onSnapshot, doc, deleteDoc } from 'firebase/firestore';
+import { db, storage, auth } from '../firebase/config'; // Добавлен auth
+import { collection, query, orderBy, onSnapshot, doc, deleteDoc, where } from 'firebase/firestore'; // Добавлен where
 import { ref, deleteObject } from 'firebase/storage';
 import { LayoutGrid, Loader2, Tag, Trash2, User, Plus, Search, X, Pencil } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
@@ -15,17 +15,36 @@ const Collection = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const q = query(collection(db, 'figures'), orderBy('createdAt', 'desc'));
-    const unsubscribe = onSnapshot(q, (querySnapshot) => {
-      const figuresArray = [];
-      querySnapshot.forEach((doc) => {
-        figuresArray.push({ ...doc.data(), id: doc.id });
-      });
-      setFigures(figuresArray);
-      setLoading(false);
+    // Ждем, пока Firebase проверит состояние авторизации
+    const unsubscribeAuth = auth.onAuthStateChanged((user) => {
+      if (user) {
+        // Создаем запрос с фильтром по userId текущего пользователя
+        const q = query(
+          collection(db, 'figures'),
+          where('userId', '==', user.uid), // Показываем только МОИ фигурки
+          orderBy('createdAt', 'desc'),
+        );
+
+        const unsubscribeSnap = onSnapshot(q, (querySnapshot) => {
+          const figuresArray = [];
+          querySnapshot.forEach((doc) => {
+            figuresArray.push({ ...doc.data(), id: doc.id });
+          });
+          setFigures(figuresArray);
+          setLoading(false);
+        });
+
+        return () => unsubscribeSnap();
+      } else {
+        // Если пользователь не залогинен, перенаправляем на логин или очищаем список
+        setFigures([]);
+        setLoading(false);
+        navigate('/login');
+      }
     });
-    return () => unsubscribe();
-  }, []);
+
+    return () => unsubscribeAuth();
+  }, [navigate]);
 
   const handleConfirmDelete = async () => {
     if (!figureToDelete) return;
@@ -120,101 +139,100 @@ const Collection = () => {
           </div>
         </div>
 
-        {/* Figures Grid - Адаптивная сетка */}
+        {/* Figures Grid */}
         <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-8">
-          {filteredFigures.map((figure) => (
-            <div key={figure.id} className="relative group h-full">
-              {/* Кнопки управления ( Edit и Delete) - Всегда видны на тач-устройствах */}
-              <div className="absolute top-3 right-3 z-40 flex gap-2 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all duration-300">
-                <button
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    navigate(`/edit/${figure.id}`);
-                  }}
-                  className="bg-[#121212]/90 hover:bg-blue-600 text-white p-2 rounded-xl backdrop-blur-md border border-white/10 transition-all shadow-xl"
+          {filteredFigures.length > 0 ? (
+            filteredFigures.map((figure) => (
+              <div key={figure.id} className="relative group h-full">
+                <div className="absolute top-3 right-3 z-40 flex gap-2 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all duration-300">
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      navigate(`/edit/${figure.id}`);
+                    }}
+                    className="bg-[#121212]/90 hover:bg-blue-600 text-white p-2 rounded-xl backdrop-blur-md border border-white/10 transition-all shadow-xl"
+                  >
+                    <Pencil size={16} md:size={18} />
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setFigureToDelete(figure);
+                      setIsModalOpen(true);
+                    }}
+                    className="bg-[#121212]/90 hover:bg-red-600 text-white p-2 rounded-xl backdrop-blur-md border border-white/10 transition-all shadow-xl"
+                  >
+                    <Trash2 size={16} md:size={18} />
+                  </button>
+                </div>
+
+                <Link
+                  to={`/figure/${figure.id}`}
+                  className="bg-[#1a1a1a] rounded-[1.5rem] md:rounded-[2.5rem] border border-[#333] overflow-hidden hover:border-blue-500/30 transition-all duration-500 flex flex-col shadow-xl h-full"
                 >
-                  <Pencil size={16} md:size={18} />
-                </button>
-                <button
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    setFigureToDelete(figure);
-                    setIsModalOpen(true);
-                  }}
-                  className="bg-[#121212]/90 hover:bg-red-600 text-white p-2 rounded-xl backdrop-blur-md border border-white/10 transition-all shadow-xl"
-                >
-                  <Trash2 size={16} md:size={18} />
-                </button>
+                  <div className="aspect-[10/12] overflow-hidden bg-[#121212] relative border-b border-[#333]">
+                    <img
+                      src={figure.previewImage || figure.image}
+                      alt={figure.name}
+                      loading="lazy"
+                      className="w-full h-full object-cover transition-transform duration-700 sm:group-hover:scale-105 brightness-[0.95] sm:group-hover:brightness-100"
+                    />
+                  </div>
+
+                  <div className="p-4 md:p-7 flex-grow flex flex-col justify-between">
+                    <div className="text-left space-y-3 md:space-y-4">
+                      <div className="flex justify-between items-center gap-2">
+                        <p className="text-[8px] md:text-[9px] text-blue-500 font-black uppercase tracking-[0.2em] md:tracking-[0.3em] opacity-80 leading-none truncate max-w-[70%] italic">
+                          {figure.anime}
+                        </p>
+                        <span
+                          className={`shrink-0 text-[8px] md:text-[9px] font-black px-1.5 py-0.5 rounded border ${
+                            figure.gender === 'Female'
+                              ? 'border-pink-500/30 text-pink-400'
+                              : 'border-blue-500/30 text-blue-400'
+                          }`}
+                        >
+                          {figure.gender === 'Female' ? 'F' : 'M'}
+                        </span>
+                      </div>
+
+                      <div className="border-l-2 border-blue-500/40 pl-3 md:pl-4 py-0.5">
+                        <h3 className="text-base md:text-xl font-black text-white leading-tight mb-1 truncate sm:group-hover:text-blue-500 transition-colors uppercase italic tracking-tighter">
+                          {figure.name}
+                        </h3>
+                        <p className="text-gray-500 text-[8px] md:text-[10px] font-bold uppercase tracking-[0.1em] md:tracking-[0.2em] italic truncate">
+                          {figure.brand || 'Original Character'}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="mt-4 md:mt-8 pt-3 md:pt-4 border-t border-white/5 flex justify-between items-end gap-2">
+                      <div className="flex items-center gap-1.5">
+                        <Tag size={12} md:size={14} className="text-blue-500" />
+                        <span className="text-gray-500 text-[8px] md:text-[9px] uppercase font-bold tracking-widest leading-none">
+                          Price
+                        </span>
+                      </div>
+                      <span className="text-lg md:text-2xl font-black text-white italic leading-none">
+                        {Number(figure.price).toLocaleString()}{' '}
+                        <span className="text-xs md:text-sm font-normal text-blue-500 not-italic">
+                          $
+                        </span>
+                      </span>
+                    </div>
+                  </div>
+                </Link>
               </div>
-
-              <Link
-                to={`/figure/${figure.id}`}
-                className="bg-[#1a1a1a] rounded-[1.5rem] md:rounded-[2.5rem] border border-[#333] overflow-hidden hover:border-blue-500/30 transition-all duration-500 flex flex-col shadow-xl h-full"
-              >
-                <div className="aspect-[10/12] overflow-hidden bg-[#121212] relative border-b border-[#333]">
-                  <img
-                    src={figure.previewImage || figure.image}
-                    alt={figure.name}
-                    loading="lazy"
-                    className="w-full h-full object-cover transition-transform duration-700 sm:group-hover:scale-105 brightness-[0.95] sm:group-hover:brightness-100"
-                  />
-                  {figure.authorName && (
-                    <div className="absolute bottom-3 right-3 bg-black/60 backdrop-blur-md px-2 py-1 rounded-lg flex items-center gap-1.5 border border-white/5">
-                      <User size={10} className="text-blue-400" />
-                      <span className="text-[9px] md:text-[10px] text-gray-300 font-bold uppercase tracking-wider">
-                        {figure.authorName.split(' ')[0]}
-                      </span>
-                    </div>
-                  )}
-                </div>
-
-                <div className="p-4 md:p-7 flex-grow flex flex-col justify-between">
-                  <div className="text-left space-y-3 md:space-y-4">
-                    <div className="flex justify-between items-center gap-2">
-                      <p className="text-[8px] md:text-[9px] text-blue-500 font-black uppercase tracking-[0.2em] md:tracking-[0.3em] opacity-80 leading-none truncate max-w-[70%] italic">
-                        {figure.anime}
-                      </p>
-                      <span
-                        className={`shrink-0 text-[8px] md:text-[9px] font-black px-1.5 py-0.5 rounded border ${
-                          figure.gender === 'Female'
-                            ? 'border-pink-500/30 text-pink-400'
-                            : 'border-blue-500/30 text-blue-400'
-                        }`}
-                      >
-                        {figure.gender === 'Female' ? 'F' : 'M'}
-                      </span>
-                    </div>
-
-                    <div className="border-l-2 border-blue-500/40 pl-3 md:pl-4 py-0.5">
-                      <h3 className="text-base md:text-xl font-black text-white leading-tight mb-1 truncate sm:group-hover:text-blue-500 transition-colors uppercase italic tracking-tighter">
-                        {figure.name}
-                      </h3>
-                      <p className="text-gray-500 text-[8px] md:text-[10px] font-bold uppercase tracking-[0.1em] md:tracking-[0.2em] italic truncate">
-                        {figure.brand || 'Original Character'}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="mt-4 md:mt-8 pt-3 md:pt-4 border-t border-white/5 flex justify-between items-end gap-2">
-                    <div className="flex items-center gap-1.5">
-                      <Tag size={12} md:size={14} className="text-blue-500" />
-                      <span className="text-gray-500 text-[8px] md:text-[9px] uppercase font-bold tracking-widest leading-none">
-                        Price
-                      </span>
-                    </div>
-                    <span className="text-lg md:text-2xl font-black text-white italic leading-none">
-                      {Number(figure.price).toLocaleString()}{' '}
-                      <span className="text-xs md:text-sm font-normal text-blue-500 not-italic">
-                        $
-                      </span>
-                    </span>
-                  </div>
-                </div>
-              </Link>
+            ))
+          ) : (
+            <div className="col-span-full py-20 text-center opacity-40">
+              <p className="text-xl font-black uppercase italic italic tracking-widest">
+                No figures found in your shelf
+              </p>
             </div>
-          ))}
+          )}
         </div>
       </div>
     </div>
