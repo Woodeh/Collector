@@ -10,42 +10,59 @@ import {
   DollarSign,
   Heart,
   ChevronRight,
+  Zap,
+  Target,
+  Box,
 } from 'lucide-react';
 
 const Home = () => {
-  const [backgroundImages, setBackgroundImages] = useState([]);
   const [recentFigures, setRecentFigures] = useState([]);
+  const [spotlight, setSpotlight] = useState(null);
   const [nextPreorder, setNextPreorder] = useState(null);
-  const [stats, setStats] = useState({ totalValue: 0, count: 0 });
+  const [stats, setStats] = useState({ totalValue: 0, count: 0, topBrand: 'None', rank: 'Novice' });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // 1. ЗАГРУЖАЕМ ФОТО ДЛЯ ФОНА
         const allFiguresSnap = await getDocs(collection(db, 'figures'));
-        const allImages = allFiguresSnap.docs
-          .map((doc) => doc.data().previewImage || doc.data().image)
-          .filter(Boolean);
-        setBackgroundImages(allImages.sort(() => 0.5 - Math.random()).slice(0, 15));
+        const allDocs = allFiguresSnap.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
 
-        // 2. ПОСЛЕДНИЕ 5 ФИГУРОК
-        const recentQ = query(collection(db, 'figures'), orderBy('createdAt', 'desc'), limit(5));
+        if (allDocs.length > 0) {
+          setSpotlight(allDocs[Math.floor(Math.random() * allDocs.length)]);
+        }
+
+        const recentQ = query(collection(db, 'figures'), orderBy('createdAt', 'desc'), limit(10));
         const recentSnap = await getDocs(recentQ);
         setRecentFigures(recentSnap.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
 
-        // 3. БЛИЖАЙШИЙ ПРЕДЗАКАЗ (Берем из коллекции preorders)
+        let val = 0;
+        const brands = {};
+        allDocs.forEach((d) => {
+          val += Number(d.price) || 0;
+          if (d.brand) brands[d.brand] = (brands[d.brand] || 0) + 1;
+        });
+        const topBrand = Object.entries(brands).sort((a, b) => b[1] - a[1])[0]?.[0] || 'Unknown';
+
+        const getRank = (count) => {
+          if (count > 100) return 'Legendary Curator';
+          if (count > 50) return 'Master Collector';
+          if (count > 20) return 'Enthusiast';
+          return 'Novice Collector';
+        };
+
+        setStats({
+          totalValue: val,
+          count: allDocs.length,
+          topBrand,
+          rank: getRank(allDocs.length),
+        });
+
         const preorderSnap = await getDocs(collection(db, 'preorders'));
         if (!preorderSnap.empty) {
           const preorders = preorderSnap.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
-          // Сортируем по дате релиза (упрощенно)
           setNextPreorder(preorders[0]);
         }
-
-        // 4. СТАТИСТИКА
-        let val = 0;
-        allFiguresSnap.docs.forEach((doc) => (val += Number(doc.data().price) || 0));
-        setStats({ totalValue: val, count: allFiguresSnap.size });
       } catch (e) {
         console.error(e);
       } finally {
@@ -63,165 +80,242 @@ const Home = () => {
     );
 
   return (
-    <div className="relative min-h-screen bg-[#121212] text-[#e4e4e4] overflow-hidden font-sans">
-      {/* ДИНАМИЧЕСКИЙ ФОН ИЗ ТВОИХ ФОТО */}
-      <div className="absolute inset-0 z-0 grid grid-cols-3 md:grid-cols-5 lg:grid-cols-8 opacity-[0.05] blur-[80px] scale-110 pointer-events-none">
-        {backgroundImages.map((img, i) => (
-          <img
-            key={i}
-            src={img}
-            alt=""
-            className="w-full h-full object-cover animate-pulse"
-            style={{ animationDelay: `${i * 0.5}s` }}
-          />
-        ))}
-      </div>
-      <div className="absolute inset-0 z-1 bg-gradient-to-b from-[#121212] via-transparent to-[#121212]" />
+    <div className="min-h-screen bg-[#121212] text-[#e4e4e4] overflow-hidden font-sans pb-10">
+      <style>{`
+        @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+        .animate-marquee { display: flex; width: max-content; animation: marquee 40s linear infinite; }
+        @media (hover: hover) { .animate-marquee:hover { animation-play-state: paused; } }
+      `}</style>
 
-      <div className="relative z-10 max-w-7xl mx-auto px-6 py-12 space-y-24">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 md:py-12 space-y-16 md:space-y-24">
         {/* HERO SECTION */}
-        <div className="flex flex-col lg:flex-row justify-between items-center gap-16">
-          <div className="flex-1 text-center lg:text-left space-y-8">
-            <h1 className="text-6xl md:text-8xl font-black uppercase italic tracking-tighter leading-[0.85] text-white">
-              Your <span className="text-blue-500">Universe</span> <br /> In One Place
+        <div className="flex flex-col lg:flex-row justify-between items-center lg:items-start gap-10 md:gap-16">
+          <div className="flex-1 text-center lg:text-left space-y-6 md:space-y-8 lg:pt-8">
+            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-8xl font-black uppercase italic tracking-tighter leading-[0.9] text-white">
+              Your <span className="text-blue-500">Universe</span>{' '}
+              <br className="hidden sm:block" /> In One Place
             </h1>
-            <p className="text-gray-500 text-sm font-bold uppercase tracking-[0.4em] max-w-xl mx-auto lg:mx-0">
-              Track your grail figures, manage pre-orders, and control your collection value.
+            <p className="text-gray-500 text-xs md:text-sm font-bold uppercase tracking-[0.2em] md:tracking-[0.4em] max-w-xl mx-auto lg:mx-0">
+              Track grails, manage pre-orders, and control collection value in real-time.
             </p>
-            <div className="flex flex-wrap gap-4 justify-center lg:justify-start">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start pt-4">
               <Link
                 to="/add"
-                className="bg-blue-600 hover:bg-blue-500 text-white px-10 py-5 rounded-2xl font-black uppercase italic tracking-widest transition-all active:scale-95 shadow-2xl shadow-blue-600/20 flex items-center gap-3"
+                className="bg-blue-600 hover:bg-blue-500 text-white px-8 md:px-10 py-4 md:py-5 rounded-xl md:rounded-2xl font-black uppercase italic tracking-widest transition-all active:scale-95 shadow-xl flex items-center justify-center gap-3"
               >
                 <PlusCircle size={20} /> Add New
               </Link>
               <Link
                 to="/collection"
-                className="bg-[#1a1a1a] border border-[#333] hover:border-blue-500/50 text-white px-10 py-5 rounded-2xl font-black uppercase italic tracking-widest transition-all"
+                className="bg-[#1a1a1a] border border-[#333] hover:border-white/20 text-white px-8 md:px-10 py-4 md:py-5 rounded-xl md:rounded-2xl font-black uppercase italic tracking-widest transition-all text-center"
               >
                 Shelf View
               </Link>
             </div>
           </div>
 
-          {/* QUICK STATS WIDGET */}
-          <div className="bg-[#1a1a1a] border border-[#333] p-10 rounded-[3rem] shadow-2xl min-w-[340px] relative overflow-hidden group transition-all hover:border-blue-500/30">
-            <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
-              <DollarSign size={120} className="text-white" />
+          {/* QUICK STATS */}
+          <div className="bg-[#1a1a1a] border border-[#333] p-6 md:p-10 rounded-[2rem] md:rounded-[3rem] shadow-2xl w-full lg:min-w-[360px] lg:w-auto relative overflow-hidden group">
+            <div className="absolute top-4 right-6 md:top-6 md:right-8 p-2 md:p-3 bg-blue-500/10 rounded-xl md:rounded-2xl text-blue-500 animate-pulse">
+              <Zap size={18} fill="currentColor" />
             </div>
-            <h4 className="text-[10px] font-black text-blue-500 uppercase tracking-[0.3em] mb-8 italic">
-              Financial Overview
+            <h4 className="text-[9px] md:text-[10px] font-black text-blue-500 uppercase tracking-[0.3em] mb-6 md:mb-10 italic">
+              Portfolio Intelligence
             </h4>
-            <div className="space-y-8">
+
+            <div className="space-y-8 md:space-y-12">
               <div>
-                <p className="text-gray-500 text-[9px] uppercase font-black tracking-widest mb-1">
-                  Portfolio Value
+                <p className="text-gray-500 text-[8px] md:text-[9px] uppercase font-black tracking-widest mb-1">
+                  Total Collection Value
                 </p>
-                <p className="text-5xl font-black text-white italic tracking-tighter">
+                <p className="text-4xl md:text-5xl font-black text-white italic tracking-tighter">
                   ${stats.totalValue.toLocaleString()}
                 </p>
               </div>
-              <div className="pt-8 border-t border-[#333] flex justify-between items-end">
-                <div>
-                  <p className="text-gray-500 text-[9px] uppercase font-black tracking-widest mb-1">
-                    Items on hand
-                  </p>
-                  <p className="text-3xl font-black text-white italic">
-                    {stats.count} <span className="text-sm not-italic text-blue-500">PCS</span>
-                  </p>
+
+              <div className="pt-6 md:pt-10 border-t border-[#333] flex justify-between items-end gap-4 md:gap-6">
+                <div className="space-y-4 md:space-y-6 flex-1">
+                  <div>
+                    <p className="text-gray-500 text-[8px] md:text-[9px] uppercase font-black tracking-widest mb-1">
+                      Dominant Brand
+                    </p>
+                    <p className="text-lg md:text-xl font-black text-white italic uppercase truncate max-w-[120px] sm:max-w-none">
+                      {stats.topBrand}
+                    </p>
+                  </div>
+                  <div className="h-1 w-full bg-[#121212] rounded-full overflow-hidden flex">
+                    <div className="h-full bg-blue-500 w-[60%]"></div>
+                    <div className="h-full bg-blue-500/40 w-[25%]"></div>
+                    <div className="h-full bg-blue-500/10 w-[15%]"></div>
+                  </div>
                 </div>
-                <div className="text-right text-green-500 font-black italic text-xs uppercase">
-                  + Active Tracking
+                <div className="text-right shrink-0">
+                  <p className="text-gray-600 text-[8px] md:text-[9px] uppercase font-black tracking-widest mb-1">
+                    Collector Rank
+                  </p>
+                  <p className="text-[10px] md:text-xs font-black text-gray-400 uppercase italic leading-tight">
+                    {stats.rank}
+                  </p>
+                  <p className="text-gray-500 text-[9px] md:text-[10px] font-bold mt-1">
+                    ({stats.count} Pcs)
+                  </p>
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* RECENTLY ADDED */}
-        <div className="space-y-8">
-          <div className="flex items-center justify-between border-b border-[#333] pb-6">
-            <h2 className="text-2xl font-black uppercase italic tracking-tighter flex items-center gap-3 text-white">
-              <LayoutGrid className="text-blue-500" /> Recently Added
+        {/* SPOTLIGHT BLOCK */}
+        {spotlight && (
+          <div className="relative group overflow-hidden rounded-[2rem] md:rounded-[3.5rem] border border-[#333] bg-[#1a1a1a] shadow-2xl transition-all hover:border-blue-500/20">
+            <div className="flex flex-col md:flex-row">
+              <div className="w-full md:w-1/3 aspect-[4/5] md:aspect-[3/4] overflow-hidden md:border-r border-[#333] bg-[#121212] relative">
+                <img
+                  src={spotlight.previewImage || spotlight.image}
+                  className="w-full h-full object-cover grayscale-[0.3] group-hover:grayscale-0 transition-all duration-700"
+                  alt={spotlight.name}
+                />
+                <div className="absolute top-4 left-4 p-2 bg-black/60 backdrop-blur-md rounded-lg border border-white/10 text-[8px] font-mono text-blue-400">
+                  <span>ID:{spotlight.id.slice(0, 8)}</span>
+                </div>
+              </div>
+              <div className="p-6 sm:p-8 md:p-12 flex-1 text-left space-y-4 md:space-y-6">
+                <div className="inline-flex items-center gap-2 px-3 py-1 md:px-4 md:py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-500 text-[9px] md:text-[10px] font-black uppercase tracking-widest italic">
+                  Featured Masterpiece
+                </div>
+                <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-black text-white uppercase italic tracking-tighter leading-none">
+                  {spotlight.name}
+                </h2>
+                <p className="text-gray-500 font-bold uppercase tracking-[0.2em] md:tracking-[0.3em] italic text-xs md:text-sm border-b border-[#333] pb-4 truncate max-w-full">
+                  {spotlight.anime}
+                </p>
+
+                <div className="grid grid-cols-2 gap-4 md:gap-x-10 md:gap-y-4 pt-2">
+                  <div className="flex items-center gap-2 md:gap-3">
+                    <Box size={12} className="text-blue-500" />
+                    <p className="text-gray-400 text-[10px] md:text-xs font-bold uppercase truncate">
+                      {spotlight.brand}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2 md:gap-3">
+                    <Target size={12} className="text-blue-500" />
+                    <p className="text-gray-400 text-[10px] md:text-xs font-bold uppercase">
+                      {spotlight.category || 'Scale'}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="pt-4 md:pt-6 flex justify-between items-end border-t border-[#333]">
+                  <div>
+                    <p className="text-gray-600 text-[8px] md:text-[9px] uppercase font-black mb-1">
+                      Asset Value
+                    </p>
+                    <p className="text-3xl md:text-4xl font-black text-white italic tracking-tight leading-none">
+                      ${spotlight.price}
+                    </p>
+                  </div>
+                  <Link
+                    to={`/figure/${spotlight.id}`}
+                    className="inline-flex items-center gap-2 text-[10px] md:text-xs font-black uppercase italic tracking-widest text-white border-b-2 border-blue-500 pb-1 hover:text-blue-500 transition-colors"
+                  >
+                    Open Data <ChevronRight size={14} />
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* INFINITE SLIDER */}
+        <div className="space-y-6 md:space-y-8 overflow-hidden">
+          <div className="flex items-center justify-between border-b border-[#333] pb-4 md:pb-6">
+            <h2 className="text-lg md:text-2xl font-black uppercase italic tracking-tighter flex items-center gap-3 text-white">
+              <LayoutGrid size={18} className="text-blue-500" /> Recently Added
             </h2>
             <Link
               to="/collection"
-              className="text-xs font-black uppercase tracking-widest text-blue-500 hover:text-white flex items-center gap-1 transition-colors"
+              className="text-[10px] md:text-xs font-black uppercase tracking-widest text-blue-500 hover:text-white flex items-center gap-1"
             >
-              Full Library <ChevronRight size={14} />
+              Full <span className="hidden sm:inline">Library</span> <ChevronRight size={14} />
             </Link>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
-            {recentFigures.map((figure) => (
-              <Link
-                key={figure.id}
-                to={`/figure/${figure.id}`}
-                className="group bg-[#1a1a1a] rounded-3xl border border-[#333] overflow-hidden hover:border-blue-500/40 transition-all flex flex-col h-full"
-              >
-                <div className="aspect-[3/4] overflow-hidden bg-[#121212]">
-                  <img
-                    src={figure.previewImage || figure.image}
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                    alt=""
-                  />
+          <div className="relative -mx-4 px-4 sm:mx-0 sm:px-0">
+            <div className="hidden sm:block absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-[#121212] to-transparent z-20 pointer-events-none" />
+            <div className="hidden sm:block absolute inset-y-0 right-0 w-32 bg-gradient-to-l from-[#121212] to-transparent z-20 pointer-events-none" />
+            <div className="animate-marquee cursor-grab active:cursor-grabbing py-4">
+              {[...recentFigures, ...recentFigures].map((figure, index) => (
+                <div
+                  key={`${figure.id}-${index}`}
+                  className="w-[240px] md:w-[300px] px-3 md:px-4 shrink-0"
+                >
+                  <Link
+                    to={`/figure/${figure.id}`}
+                    className="group bg-[#1a1a1a] rounded-[1.5rem] md:rounded-[2.5rem] border border-[#333] overflow-hidden hover:border-blue-500/40 transition-all flex flex-col h-full shadow-xl"
+                  >
+                    <div className="aspect-[3/4] overflow-hidden bg-[#121212]">
+                      <img
+                        src={figure.previewImage || figure.image}
+                        className="w-full h-full object-cover transition-transform duration-700 sm:group-hover:scale-110"
+                        alt=""
+                      />
+                    </div>
+                    <div className="p-4 md:p-6 text-left">
+                      <p className="text-[8px] text-blue-500 font-black uppercase tracking-[0.2em] truncate mb-1 italic">
+                        {figure.anime}
+                      </p>
+                      <h3 className="text-[11px] md:text-sm font-black text-white uppercase italic truncate sm:group-hover:text-blue-500 transition-colors">
+                        {figure.name}
+                      </h3>
+                    </div>
+                  </Link>
                 </div>
-                <div className="p-4 text-left">
-                  <p className="text-[8px] text-blue-500 font-black uppercase tracking-widest truncate mb-1 italic">
-                    {figure.anime}
-                  </p>
-                  <h3 className="text-xs font-black text-white uppercase italic truncate group-hover:text-blue-500 transition-colors">
-                    {figure.name}
-                  </h3>
-                </div>
-              </Link>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
 
         {/* BOTTOM WIDGETS */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pb-12">
-          {/* Pre-order Widget */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 pb-8 md:pb-12">
           {nextPreorder ? (
-            <div className="bg-gradient-to-br from-[#1a1a1a] to-[#121212] border border-[#333] p-8 rounded-[2.5rem] flex items-center gap-8 group hover:border-orange-500/30 transition-all">
-              <div className="w-24 h-32 rounded-xl overflow-hidden border border-[#333] shrink-0">
+            <div className="bg-[#1a1a1a] border border-[#333] p-6 md:p-8 rounded-[1.5rem] md:rounded-[2.5rem] flex items-center gap-6 md:gap-8 group hover:border-orange-500/30 transition-all">
+              <div className="w-16 h-24 md:w-24 md:h-32 rounded-lg md:rounded-xl overflow-hidden border border-[#333] shrink-0">
                 <img src={nextPreorder.screenshot} className="w-full h-full object-cover" alt="" />
               </div>
-              <div className="text-left space-y-2">
+              <div className="text-left space-y-1 md:space-y-2">
                 <div className="flex items-center gap-2 text-orange-500 animate-pulse">
                   <Clock size={14} />
-                  <span className="text-[9px] font-black uppercase tracking-widest">
-                    Incoming Item
+                  <span className="text-[8px] md:text-[9px] font-black uppercase tracking-widest">
+                    Incoming
                   </span>
                 </div>
-                <h3 className="text-xl font-black text-white uppercase italic truncate leading-tight">
+                <h3 className="text-lg md:text-xl font-black text-white uppercase italic truncate leading-tight">
                   {nextPreorder.name}
                 </h3>
-                <p className="text-gray-500 text-[10px] font-bold uppercase tracking-widest">
-                  Release: {nextPreorder.releaseDate}
+                <p className="text-gray-500 text-[9px] md:text-[10px] font-bold uppercase tracking-widest leading-tight">
+                  {nextPreorder.releaseDate}
                 </p>
               </div>
             </div>
           ) : (
-            <div className="bg-[#1a1a1a] border border-[#333] p-8 rounded-[2.5rem] flex items-center justify-center italic text-gray-600 font-bold uppercase text-[10px] tracking-widest">
-              No active pre-orders tracked
+            <div className="bg-[#1a1a1a] border border-[#333] p-6 md:p-8 rounded-[1.5rem] md:rounded-[2.5rem] flex items-center justify-center italic text-gray-600 font-bold uppercase text-[9px] md:text-[10px] tracking-widest">
+              No active pre-orders
             </div>
           )}
 
-          {/* Wishlist Shortcut */}
           <Link
             to="/favorites"
-            className="bg-blue-600/5 border border-blue-500/20 p-8 rounded-[2.5rem] flex items-center justify-between hover:bg-blue-600/10 transition-all group"
+            className="bg-blue-600/5 border border-blue-500/20 p-6 md:p-8 rounded-[1.5rem] md:rounded-[2.5rem] flex items-center justify-between hover:bg-blue-600/10 transition-all group"
           >
-            <div className="flex items-center gap-6">
-              <div className="p-4 bg-blue-500 rounded-2xl text-white shadow-xl shadow-blue-600/20">
-                <Heart size={24} fill="currentColor" />
+            <div className="flex items-center gap-4 md:gap-6">
+              <div className="p-3 md:p-4 bg-blue-500 rounded-xl md:rounded-2xl text-white shadow-lg">
+                <Heart size={20} md:size={24} fill="currentColor" />
               </div>
               <div className="text-left">
-                <h3 className="text-xl font-black text-white uppercase italic tracking-tighter">
-                  Your Wishlist
+                <h3 className="text-lg md:text-xl font-black text-white uppercase italic tracking-tighter">
+                  Wishlist
                 </h3>
-                <p className="text-blue-500 text-[9px] font-black uppercase tracking-widest">
-                  Hunt for new grails
+                <p className="text-blue-500 text-[8px] md:text-[9px] font-black uppercase tracking-widest">
+                  Hunt for grails
                 </p>
               </div>
             </div>
