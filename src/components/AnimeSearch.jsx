@@ -57,7 +57,7 @@ const AnimeSearch = ({ value, onChange }) => {
       <div className="relative">
         <input
           type="text"
-          placeholder="Начните вводить название аниме..."
+          placeholder="Start typing the name of the anime..."
           className="w-full bg-[#121212] border border-[#333] p-4 rounded-xl outline-none focus:border-blue-500 transition-all text-white"
           value={query}
           onChange={(e) => {
