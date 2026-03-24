@@ -1,32 +1,18 @@
 import React, { useState } from 'react';
-import { db, storage, auth } from '../firebase/config';
+import { useNavigate } from 'react-router-dom';
+import { db, storage } from '../firebase/config';
 import { collection, addDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import {
-  PlusCircle,
-  Upload,
-  Loader2,
-  Check,
-  Star,
-  X,
-  Link as LinkIcon,
-  Calendar,
-  Box,
-  ShoppingCart,
-  Info,
-  ShieldCheck,
-  Tag,
-  Camera, // Icon for screenshot
-} from 'lucide-react';
-import CustomSelect from '../components/Select';
+import { PlusCircle, Loader2, CheckCircle2, Sparkles } from 'lucide-react';
+import PhotoUpload from '../components/PhotoUpload';
 import AnimeSearch from '../components/AnimeSearch';
+import CustomSelect from '../components/Select';
 
 const AddFigure = () => {
+  const navigate = useNavigate();
   const [files, setFiles] = useState([]);
-  const [screenshot, setScreenshot] = useState(null); // New state for one screenshot
-  const [previewIdx, setPreviewIdx] = useState(0);
   const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
+  const [showEpicSuccess, setShowEpicSuccess] = useState(null); // Стейт для НОВОЙ анимации
 
   const [formData, setFormData] = useState({
     name: '',
@@ -34,376 +20,88 @@ const AddFigure = () => {
     brand: '',
     price: '',
     gender: 'Male',
-    auctionUrl: '',
     purchaseDate: '',
     conditionGrade: 'New',
-    conditionNotes: '',
     hasBox: 'Yes',
     purchasePlace: '',
   });
 
-  const genderOptions = [
-    { value: 'Male', label: 'Male ♂' },
-    { value: 'Female', label: 'Female ♀' },
-  ];
-
-  const boxOptions = [
-    { value: 'Yes', label: 'Box: Original' },
-    { value: 'No', label: 'Box: Loose / No Box' },
-  ];
-
-  const conditionOptions = [
-    { value: 'New', label: 'New (Sealed)' },
-    { value: 'Like New', label: 'Like New' },
-    { value: 'Good', label: 'Good (Pre-owned)' },
-    { value: 'Minor Damage', label: 'Minor Damage' },
-    { value: 'Damaged', label: 'Damaged' },
-  ];
-
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  const handleCustomChange = (name, value) => {
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleFileChange = (e) => {
-    const selectedFiles = Array.from(e.target.files);
-    if (files.length + selectedFiles.length > 5) return alert('Maximum 5 photos allowed');
-    setFiles([...files, ...selectedFiles]);
-  };
-
-  const handleScreenshotChange = (e) => {
-    if (e.target.files[0]) {
-      setScreenshot(e.target.files[0]);
-    }
-  };
-
-  const removeFile = (index) => {
-    const newFiles = files.filter((_, i) => i !== index);
-    setFiles(newFiles);
-    if (previewIdx === index) setPreviewIdx(0);
-    else if (previewIdx > index) setPreviewIdx(previewIdx - 1);
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (files.length === 0) return alert('Please upload at least one photo');
-
+    if (files.length === 0) return alert('Загрузи фото!');
     setLoading(true);
+
     try {
-      const imageUrls = [];
-      for (const file of files) {
-        const fileRef = ref(storage, `figures/${Date.now()}_${file.name}`);
-        await uploadBytes(fileRef, file);
-        const url = await getDownloadURL(fileRef);
-        imageUrls.push(url);
-      }
-
-      let screenshotUrl = '';
-      if (screenshot) {
-        const screenshotRef = ref(storage, `screenshots/${Date.now()}_${screenshot.name}`);
-        await uploadBytes(screenshotRef, screenshot);
-        screenshotUrl = await getDownloadURL(screenshotRef);
-      }
-
-      const currentUser = auth.currentUser;
-      const rawName = currentUser?.displayName || currentUser?.email || 'Anonymous';
-      const cleanName = rawName.includes('@') ? rawName.split('@')[0] : rawName;
+      const file = files[0];
+      const fileRef = ref(storage, `figures/${Date.now()}`);
+      await uploadBytes(fileRef, file);
+      const url = await getDownloadURL(fileRef);
 
       await addDoc(collection(db, 'figures'), {
         ...formData,
-        images: imageUrls,
-        previewImage: imageUrls[previewIdx],
-        screenshot: screenshotUrl, // Save screenshot URL
-        price: Number(formData.price) || 0,
+        previewImage: url,
         createdAt: new Date(),
-        authorName: cleanName,
-        authorId: currentUser?.uid || 'unknown',
       });
 
-      setSuccess(true);
-      setFiles([]);
-      setScreenshot(null);
-      setFormData({
-        name: '',
-        anime: '',
-        brand: '',
-        price: '',
-        gender: 'Male',
-        auctionUrl: '',
-        purchaseDate: '',
-        conditionGrade: 'New',
-        conditionNotes: '',
-        hasBox: 'Yes',
-        purchasePlace: '',
-      });
+      // ВКЛЮЧАЕМ НОВУЮ АНИМАЦИЮ
+      setShowEpicSuccess({ name: formData.name, img: url });
 
-      setTimeout(() => setSuccess(false), 3000);
-    } catch (error) {
-      console.error(error);
-      alert('Error saving figure: ' + error.message);
+      setTimeout(() => {
+        setShowEpicSuccess(null);
+        navigate('/');
+      }, 3000);
+    } catch (err) {
+      alert(err.message);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-6 text-[#e4e4e4] relative">
-      {success && (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm transition-all duration-300">
-          <div className="bg-[#1a1a1a] border border-green-500/50 p-10 rounded-[3rem] shadow-[0_0_50px_rgba(0,0,0,0.8)] flex flex-col items-center gap-6 animate-in zoom-in duration-300">
-            <div className="bg-green-500 p-4 rounded-full shadow-[0_0_30px_rgba(34,197,94,0.4)]">
-              <Check size={40} className="text-[#121212] stroke-[4px]" />
+    <div className="max-w-4xl mx-auto p-6 text-white relative">
+      {/* НОВАЯ АНИМАЦИЯ (ПРЯМО ЗДЕСЬ) */}
+      {showEpicSuccess && (
+        <div className="fixed inset-0 z-[999] flex items-center justify-center bg-black/90 backdrop-blur-2xl">
+          <div className="relative p-1 bg-gradient-to-b from-blue-500 to-purple-600 rounded-[3rem] animate-in zoom-in duration-500">
+            <div className="bg-[#121212] p-8 rounded-[2.9rem] text-center max-w-xs">
+              <CheckCircle2 size={50} className="text-green-500 mx-auto mb-4 animate-bounce" />
+              <h2 className="text-2xl font-black uppercase italic mb-6">Confirmed!</h2>
+              <div className="aspect-[3/4] rounded-2xl overflow-hidden border-2 border-white/10 mb-4 shadow-2xl">
+                <img src={showEpicSuccess.img} className="w-full h-full object-cover" />
+              </div>
+              <p className="font-black text-blue-400 uppercase truncate">{showEpicSuccess.name}</p>
             </div>
-            <div className="text-center">
-              <h3 className="text-3xl font-black text-white uppercase tracking-tighter italic">
-                Success!
-              </h3>
-              <p className="text-green-400 font-bold text-sm uppercase tracking-[0.2em] mt-2">
-                Figure added to collection
-              </p>
-            </div>
+            <Sparkles
+              className="absolute -top-4 -right-4 text-yellow-400 animate-pulse"
+              size={40}
+            />
           </div>
         </div>
       )}
 
-      <h2 className="text-3xl font-black mb-8 flex items-center gap-3 uppercase tracking-tight">
+      <h2 className="text-3xl font-black mb-8 flex items-center gap-3 uppercase italic">
         <PlusCircle className="text-blue-500" /> Add to Collection
       </h2>
 
       <form
         onSubmit={handleSubmit}
-        className="bg-[#1a1a1a] p-8 rounded-[2.5rem] border border-[#333] space-y-8 shadow-2xl relative"
+        className="bg-[#1a1a1a] p-8 rounded-[2.5rem] border border-[#333] space-y-8"
       >
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <div className="space-y-5">
-            <h3 className="text-blue-500 font-bold text-[10px] uppercase tracking-[0.2em] flex items-center gap-2 mb-2 italic">
-              <Info size={14} /> Basic Information
-            </h3>
-            <input
-              name="name"
-              placeholder="Figure Name *"
-              className="w-full bg-[#121212] border border-[#333] p-4 rounded-xl outline-none focus:border-blue-500 transition-colors"
-              onChange={handleChange}
-              value={formData.name}
-              required
-            />
-            <div className="relative z-[60]">
-              <AnimeSearch
-                value={formData.anime}
-                onChange={(val) => handleCustomChange('anime', val)}
-              />
-            </div>
-            <div className="relative">
-              <Tag className="absolute left-4 top-4 text-gray-600" size={18} />
-              <input
-                name="brand"
-                placeholder="Manufacturer / Brand (e.g. Max Factory)"
-                className="w-full bg-[#121212] border border-[#333] p-4 pl-12 rounded-xl outline-none focus:border-blue-500 transition-colors"
-                onChange={handleChange}
-                value={formData.brand}
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <input
-                name="price"
-                type="number"
-                placeholder="Price ($) *"
-                className="bg-[#121212] border border-[#333] p-4 rounded-xl outline-none focus:border-blue-500 transition-colors"
-                onChange={handleChange}
-                value={formData.price}
-                required
-              />
-              <CustomSelect
-                options={genderOptions}
-                value={formData.gender}
-                onChange={(val) => handleCustomChange('gender', val)}
-                placeholder="Select Gender"
-              />
-            </div>
-          </div>
-          <div className="space-y-5">
-            <h3 className="text-gray-500 font-bold text-[10px] uppercase tracking-[0.2em] flex items-center gap-2 mb-2 italic">
-              <PlusCircle size={14} /> Acquisition Details
-            </h3>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="relative group">
-                <Calendar
-                  className="absolute left-4 top-4 text-gray-600 group-focus-within:text-blue-500 transition-colors"
-                  size={18}
-                />
-                <input
-                  name="purchaseDate"
-                  type="date"
-                  className="w-full bg-[#121212] border border-[#333] p-4 pl-12 rounded-2xl outline-none focus:border-blue-500 text-gray-400 font-mono"
-                  onChange={handleChange}
-                  value={formData.purchaseDate}
-                />
-              </div>
-              <CustomSelect
-                options={boxOptions}
-                value={formData.hasBox}
-                onChange={(val) => handleCustomChange('hasBox', val)}
-              />
-            </div>
-            <CustomSelect
-              icon={ShieldCheck}
-              options={conditionOptions}
-              value={formData.conditionGrade}
-              onChange={(val) => handleCustomChange('conditionGrade', val)}
-              placeholder="Condition Grade"
-            />
-            <div className="relative group">
-              <ShoppingCart
-                className="absolute left-4 top-4 text-gray-600 group-focus-within:text-blue-500 transition-colors"
-                size={18}
-              />
-              <input
-                name="purchasePlace"
-                placeholder="Purchase Place (e.g. AmiAmi)"
-                className="w-full bg-[#121212] border border-[#333] p-4 pl-12 rounded-xl outline-none focus:border-blue-500 transition-colors"
-                onChange={handleChange}
-                value={formData.purchasePlace}
-              />
-            </div>
-          </div>
-        </div>
-
-        <div className="space-y-3">
-          <div className="relative group">
-            <LinkIcon
-              className="absolute left-4 top-4 text-gray-600 group-focus-within:text-blue-500 transition-colors"
-              size={18}
-            />
-            <input
-              name="auctionUrl"
-              placeholder="Auction / Listing URL"
-              className="w-full bg-[#121212] border border-[#333] p-4 pl-12 rounded-xl outline-none focus:border-blue-500 transition-colors"
-              onChange={handleChange}
-              value={formData.auctionUrl}
-            />
-          </div>
-          <textarea
-            name="conditionNotes"
-            placeholder="Additional condition notes or details..."
-            className="w-full bg-[#121212] border border-[#333] p-4 rounded-xl outline-none focus:border-blue-500 h-24 resize-none transition-colors"
-            onChange={handleChange}
-            value={formData.conditionNotes}
-          ></textarea>
-        </div>
-
-        {/* PHOTOS UPLOAD SECTION */}
-        <div className="space-y-5">
-          <label className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-[#333] rounded-[2rem] cursor-pointer hover:bg-[#1f1f1f] hover:border-blue-500/50 transition-all group">
-            <Upload
-              className="text-gray-600 mb-3 group-hover:text-blue-500 group-hover:-translate-y-1 transition-all"
-              size={32}
-            />
-            <span className="text-gray-500 font-medium tracking-wide">
-              Upload Photos (max. 5) *
-            </span>
-            <input
-              type="file"
-              className="hidden"
-              multiple
-              onChange={handleFileChange}
-              accept="image/*"
-            />
-          </label>
-          {files.length > 0 && (
-            <div className="grid grid-cols-5 gap-4">
-              {files.map((file, idx) => (
-                <div
-                  key={idx}
-                  className={`relative aspect-[3/4] rounded-2xl overflow-hidden border-2 transition-all ${
-                    previewIdx === idx
-                      ? 'border-blue-500 shadow-lg shadow-blue-500/20 scale-105'
-                      : 'border-[#333]'
-                  }`}
-                >
-                  <img
-                    src={URL.createObjectURL(file)}
-                    className="w-full h-full object-cover"
-                    alt="preview"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setPreviewIdx(idx)}
-                    className="absolute top-2 left-2 bg-black/70 backdrop-blur-md p-1.5 rounded-lg border border-white/10"
-                  >
-                    <Star
-                      size={14}
-                      className={
-                        previewIdx === idx ? 'text-yellow-400 fill-yellow-400' : 'text-white'
-                      }
-                    />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => removeFile(idx)}
-                    className="absolute top-2 right-2 bg-red-600/80 p-1.5 rounded-lg text-white hover:bg-red-600 transition-colors shadow-lg"
-                  >
-                    <X size={14} />
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* SCREENSHOT UPLOAD SECTION */}
-        <div className="space-y-5 border-t border-[#333] pt-8">
-          <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-[#333] rounded-[2rem] cursor-pointer hover:bg-[#1f1f1f] hover:border-orange-500/50 transition-all group">
-            <Camera
-              className="text-gray-600 mb-3 group-hover:text-orange-400 group-hover:-translate-y-1 transition-all"
-              size={28}
-            />
-            <span className="text-gray-500 font-medium tracking-wide">
-              Upload ONE Screenshot (e.g. Order Confirmation)
-            </span>
-            <input
-              type="file"
-              className="hidden"
-              onChange={handleScreenshotChange}
-              accept="image/*"
-            />
-          </label>
-          {screenshot && (
-            <div className="relative aspect-[16/9] w-full max-w-sm mx-auto rounded-2xl overflow-hidden border-2 border-orange-500 shadow-lg shadow-orange-500/20 scale-105">
-              <img
-                src={URL.createObjectURL(screenshot)}
-                className="w-full h-full object-cover"
-                alt="screenshot preview"
-              />
-              <button
-                type="button"
-                onClick={() => setScreenshot(null)}
-                className="absolute top-2 right-2 bg-red-600/80 p-1.5 rounded-lg text-white hover:bg-red-600 transition-colors shadow-lg"
-              >
-                <X size={14} />
-              </button>
-            </div>
-          )}
-        </div>
-
-        <button
-          disabled={loading}
-          className={`w-full py-5 rounded-[1.5rem] font-black text-xl tracking-widest transition-all flex items-center justify-center gap-3 shadow-xl ${
-            loading
-              ? 'bg-blue-900/50 text-blue-300'
-              : 'bg-blue-600 hover:bg-blue-500 text-white active:scale-[0.98]'
-          }`}
-        >
-          {loading ? (
-            <>
-              <Loader2 className="animate-spin" size={24} />
-              <span>SAVING...</span>
-            </>
-          ) : (
-            'SAVE FIGURE'
-          )}
+        <input
+          placeholder="Name"
+          className="w-full bg-black p-4 rounded-xl border border-[#333]"
+          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+          required
+        />
+        <PhotoUpload
+          files={files}
+          onFileChange={(e) => setFiles([...Array.from(e.target.files)])}
+          onRemove={() => setFiles([])}
+          previewIdx={0}
+          setPreviewIdx={() => {}}
+        />
+        <button className="w-full py-5 bg-blue-600 rounded-2xl font-black text-xl">
+          {loading ? <Loader2 className="animate-spin mx-auto" /> : 'SAVE FIGURE'}
         </button>
       </form>
     </div>

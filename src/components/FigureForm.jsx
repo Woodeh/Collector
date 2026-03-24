@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { db, storage, auth } from '../firebase/config';
-import { collection, addDoc, doc, getDoc, updateDoc, deleteDoc } from 'firebase/firestore';
+import { collection, addDoc, doc, getDoc, updateDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import {
   PlusCircle,
   Upload,
   Loader2,
-  Check,
   Star,
   X,
   Link as LinkIcon,
@@ -16,15 +15,21 @@ import {
   ShieldCheck,
   Tag,
   Edit3,
+  Sparkles,
+  CheckCircle2,
 } from 'lucide-react';
-import { useParams, useNavigate, useLocation } from 'react-router-dom'; // Добавили useLocation
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import CustomSelect from '../components/Select';
 import AnimeSearch from '../components/AnimeSearch';
+
+// Календарь
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
 
 const FigureForm = ({ mode = 'add' }) => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const location = useLocation(); // Слушаем переданные данные
+  const location = useLocation();
   const isEdit = mode === 'edit';
 
   const [files, setFiles] = useState([]);
@@ -32,127 +37,142 @@ const FigureForm = ({ mode = 'add' }) => {
   const [previewIdx, setPreviewIdx] = useState(0);
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(isEdit);
-  const [success, setSuccess] = useState(false);
+  const [epicSuccess, setEpicSuccess] = useState(null);
+
+  // Валюта (по умолчанию USD)
+  const [currency, setCurrency] = useState('USD');
 
   const [formData, setFormData] = useState({
     name: '',
     anime: '',
-    brand: '',
+    brand: 'Bandai Spirits',
     price: '',
     gender: 'Male',
     auctionUrl: '',
     purchaseDate: '',
-    conditionGrade: 'New',
+    conditionGrade: 'New (Sealed)',
     conditionNotes: '',
     hasBox: 'Yes',
-    purchasePlace: '',
+    purchasePlace: 'Jalan Jalan Japan',
   });
 
-  // Логика подхвата данных из Wishlist
-  useEffect(() => {
-    if (!isEdit && location.state?.initialData) {
-      setFormData((prev) => ({
-        ...prev,
-        ...location.state.initialData,
-      }));
-    }
-  }, [location.state, isEdit]);
+  // Курсы валют (примерные, можно обновлять)
+  const EXCHANGE_RATES = {
+    USD: 1,
+    KZT: 0.0022, // 1 KZT ≈ 0.0022 USD
+    CNY: 0.14, // 1 CNY ≈ 0.14 USD
+  };
+
+  const brandOptions = [
+    { value: 'Bandai Spirits', label: 'Bandai Spirits' },
+    { value: 'Sega', label: 'Sega' },
+    { value: 'Taito', label: 'Taito' },
+    { value: 'FuRyu', label: 'FuRyu' },
+    { value: 'Good Smile Company', label: 'Good Smile Co.' },
+    { value: 'Max Factory', label: 'Max Factory' },
+    { value: 'MegaHouse', label: 'MegaHouse' },
+    { value: 'Kotobukiya', label: 'Kotobukiya' },
+    { value: 'Banpresto', label: 'Banpresto' },
+    { value: 'Other', label: 'Other / Original' },
+  ];
+
+  const conditionOptions = [
+    { value: 'New (Sealed)', label: 'New (Sealed)' },
+    { value: 'Like New', label: 'Like New' },
+    { value: 'Good', label: 'Good' },
+    { value: 'Aged', label: 'Aged (Time Wear)' },
+    { value: 'Sticky', label: 'Sticky Plastic' },
+    { value: 'Sun Faded', label: 'Sun Faded' },
+    { value: 'Minor Damage', label: 'Minor Damage' },
+    { value: 'Broken / Fixed', label: 'Broken / Fixed' },
+    { value: 'Junk', label: 'Junk / Parts' },
+    { value: 'Pre-order', label: 'Pre-order' },
+  ];
+
+  const shopOptions = [
+    { value: 'Jalan Jalan Japan', label: 'Jalan Jalan Japan' },
+    { value: 'TaoBao', label: 'TaoBao' },
+    { value: 'OLX', label: 'OLX' },
+    { value: 'AmiAmi', label: 'AmiAmi' },
+    { value: 'Mandarake', label: 'Mandarake' },
+    { value: 'Other', label: 'Other' },
+  ];
 
   useEffect(() => {
+    if (!isEdit && location.state?.initialData) {
+      setFormData((prev) => ({ ...prev, ...location.state.initialData }));
+    }
     if (isEdit && id) {
       const fetchFigure = async () => {
         try {
-          const docRef = doc(db, 'figures', id);
-          const docSnap = await getDoc(docRef);
+          const docSnap = await getDoc(doc(db, 'figures', id));
           if (docSnap.exists()) {
             const data = docSnap.data();
             setFormData(data);
             setExistingImages(data.images || []);
-            const pIdx = data.images?.indexOf(data.previewImage);
-            setPreviewIdx(pIdx !== -1 ? pIdx : 0);
+            setPreviewIdx(data.images?.indexOf(data.previewImage) || 0);
           }
         } catch (error) {
-          console.error('Error fetching figure:', error);
+          console.error(error);
         } finally {
           setFetching(false);
         }
       };
       fetchFigure();
     }
-  }, [id, isEdit]);
+  }, [id, isEdit, location.state]);
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  const handleCustomChange = (name, value) => {
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleFileChange = (e) => {
-    const selectedFiles = Array.from(e.target.files);
-    if (files.length + existingImages.length + selectedFiles.length > 5)
-      return alert('Maximum 5 photos allowed');
-    setFiles([...files, ...selectedFiles]);
-  };
-
-  const removeNewFile = (index) => setFiles(files.filter((_, i) => i !== index));
-  const removeExistingFile = (index) =>
-    setExistingImages(existingImages.filter((_, i) => i !== index));
+  const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
+  const handleCustomChange = (name, value) => setFormData((prev) => ({ ...prev, [name]: value }));
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (files.length === 0 && existingImages.length === 0)
-      return alert('Please upload at least one photo');
+    if (files.length === 0 && existingImages.length === 0) return alert('Please upload photo');
 
     setLoading(true);
     try {
-      const newImageUrls = [];
+      const newUrls = [];
       for (const file of files) {
         const fileRef = ref(storage, `figures/${Date.now()}_${file.name}`);
         await uploadBytes(fileRef, file);
         const url = await getDownloadURL(fileRef);
-        newImageUrls.push(url);
+        newUrls.push(url);
       }
 
-      const allImages = [...existingImages, ...newImageUrls];
+      const allImages = [...existingImages, ...newUrls];
+      const previewImg = allImages[previewIdx] || allImages[0];
       const currentUser = auth.currentUser;
-      const cleanName = (currentUser?.displayName || currentUser?.email || 'Anonymous').split(
-        '@',
-      )[0];
+
+      // КОНВЕРТАЦИЯ ЦЕНЫ В USD
+      const priceInCurrency = Number(formData.price) || 0;
+      const priceInUSD = parseFloat((priceInCurrency * EXCHANGE_RATES[currency]).toFixed(2));
 
       const finalData = {
         ...formData,
         images: allImages,
-        previewImage: allImages[previewIdx] || allImages[0],
-        price: Number(formData.price) || 0,
+        previewImage: previewImg,
+        price: priceInUSD, // Сохраняем всегда в USD
         updatedAt: new Date(),
       };
 
       if (isEdit) {
         await updateDoc(doc(db, 'figures', id), finalData);
       } else {
-        // Создаем запись в коллекции
         await addDoc(collection(db, 'figures'), {
           ...finalData,
           createdAt: new Date(),
-          authorName: cleanName,
+          authorName: (currentUser?.displayName || currentUser?.email || 'Anon').split('@')[0],
           authorId: currentUser?.uid || 'unknown',
         });
-
-        // Если пришли из Wishlist — удаляем оттуда "хотелку"
-        if (location.state?.fromWishlistId) {
-          await deleteDoc(doc(db, 'wishlist', location.state.fromWishlistId));
-        }
       }
 
-      setSuccess(true);
+      setEpicSuccess({ name: formData.name, img: previewImg });
       setTimeout(() => {
-        setSuccess(false);
+        setEpicSuccess(null);
         navigate('/collection');
-      }, 2000);
+      }, 3000);
     } catch (error) {
-      alert('Error: ' + error.message);
+      alert(error.message);
     } finally {
       setLoading(false);
     }
@@ -166,42 +186,87 @@ const FigureForm = ({ mode = 'add' }) => {
     );
 
   return (
-    <div className="max-w-4xl mx-auto p-6 text-[#e4e4e4] relative text-left">
-      {success && (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm transition-all duration-300">
-          <div className="bg-[#1a1a1a] border border-green-500/50 p-10 rounded-[3rem] shadow-2xl flex flex-col items-center gap-6 animate-in zoom-in duration-300">
-            <div className="bg-green-500 p-4 rounded-full shadow-[0_0_30px_rgba(34,197,94,0.4)]">
-              <Check size={40} className="text-[#121212] stroke-[4px]" />
+    <div className="max-w-4xl mx-auto p-6 text-[#e4e4e4] relative text-left font-sans">
+      <style>{`
+        .react-datepicker-wrapper { width: 100%; }
+        .react-datepicker {
+          background-color: #1a1a1a !important;
+          border: 1px solid #333 !important;
+          border-radius: 1.5rem !important;
+          font-family: inherit !important;
+          color: white !important;
+          overflow: hidden;
+        }
+        .react-datepicker__header {
+          background-color: #121212 !important;
+          border-bottom: 1px solid #333 !important;
+          border-radius: 0 !important;
+        }
+        .react-datepicker__current-month, .react-datepicker__day-name, .react-datepicker__day {
+          color: white !important;
+          font-weight: 800 !important;
+          text-transform: uppercase !important;
+          font-size: 10px !important;
+          letter-spacing: 0.05em !important;
+        }
+        .react-datepicker__day:hover {
+          background-color: #2563eb !important;
+          border-radius: 0.5rem !important;
+        }
+        .react-datepicker__day--selected {
+          background-color: #2563eb !important;
+          border-radius: 0.5rem !important;
+        }
+        .react-datepicker__day--outside-month { color: #444 !important; }
+      `}</style>
+
+      {epicSuccess && (
+        <div className="fixed inset-0 z-[500] flex items-center justify-center p-4 bg-black/90 backdrop-blur-2xl animate-in fade-in duration-500">
+          <div className="relative w-full max-w-sm animate-in zoom-in duration-300">
+            <div className="absolute -inset-4 bg-blue-500/20 blur-3xl rounded-full animate-pulse" />
+            <div className="relative bg-[#1a1a1a] border border-[#333] rounded-[3rem] p-8 shadow-2xl text-center">
+              <CheckCircle2 size={48} className="text-green-500 mx-auto mb-4 animate-bounce" />
+              <h3 className="text-3xl font-black text-white uppercase italic tracking-tighter mb-6">
+                {isEdit ? 'Updated!' : 'Captured!'}
+              </h3>
+              <div className="relative aspect-[3/4] rounded-2xl overflow-hidden border-2 border-blue-500/50 mb-6 shadow-2xl">
+                <img src={epicSuccess.img} alt="p" className="w-full h-full object-cover" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+                <p className="absolute bottom-4 left-4 right-4 text-white font-black uppercase italic truncate">
+                  {epicSuccess.name}
+                </p>
+                <Sparkles className="absolute top-3 right-3 text-yellow-400 animate-pulse" />
+              </div>
+              <p className="text-blue-500 font-bold text-[10px] uppercase tracking-[0.3em] animate-pulse italic">
+                Processing data...
+              </p>
             </div>
-            <h3 className="text-3xl font-black text-white uppercase italic tracking-tighter text-center">
-              {isEdit
-                ? 'Updated!'
-                : location.state?.fromWishlistId
-                ? 'Moved to Collection!'
-                : 'Saved!'}
-            </h3>
           </div>
         </div>
       )}
 
-      <h2 className="text-3xl font-black mb-8 flex items-center gap-3 uppercase tracking-tight">
-        {isEdit ? <Edit3 className="text-blue-500" /> : <PlusCircle className="text-blue-500" />}
+      <h2 className="text-4xl font-black mb-10 flex items-center gap-4 uppercase tracking-tighter italic">
+        {isEdit ? (
+          <Edit3 className="text-blue-500" size={32} />
+        ) : (
+          <PlusCircle className="text-blue-500" size={32} />
+        )}
         {isEdit ? 'Edit Details' : 'Add Figure'}
       </h2>
 
       <form
         onSubmit={handleSubmit}
-        className="bg-[#1a1a1a] p-8 rounded-[2.5rem] border border-[#333] space-y-8 shadow-2xl"
+        className="bg-[#1a1a1a] p-10 rounded-[3rem] border border-[#333] space-y-8 shadow-2xl"
       >
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <div className="space-y-5">
-            <h3 className="text-blue-500 font-bold text-[10px] uppercase tracking-[0.2em] flex items-center gap-2 mb-2 italic">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+          <div className="space-y-6">
+            <h3 className="text-blue-500 font-black text-[11px] uppercase tracking-[0.25em] flex items-center gap-2 italic">
               <Info size={14} /> Basic Information
             </h3>
             <input
               name="name"
               placeholder="Name *"
-              className="w-full bg-[#121212] border border-[#333] p-4 rounded-xl outline-none focus:border-blue-500 text-white font-bold"
+              className="w-full bg-[#121212] border border-[#333] p-4.5 rounded-2xl outline-none focus:border-blue-500 font-bold text-white placeholder:text-gray-700"
               onChange={handleChange}
               value={formData.name}
               required
@@ -212,49 +277,69 @@ const FigureForm = ({ mode = 'add' }) => {
                 onChange={(val) => handleCustomChange('anime', val)}
               />
             </div>
-            <div className="relative">
-              <Tag className="absolute left-4 top-4 text-gray-600" size={18} />
-              <input
-                name="brand"
-                placeholder="Manufacturer / Brand"
-                className="w-full bg-[#121212] border border-[#333] p-4 pl-12 rounded-xl outline-none focus:border-blue-500 text-white font-bold"
-                onChange={handleChange}
-                value={formData.brand}
-              />
+            <CustomSelect
+              icon={Tag}
+              options={brandOptions}
+              value={formData.brand}
+              onChange={(val) => handleCustomChange('brand', val)}
+            />
+
+            <div className="space-y-2">
+              <div className="grid grid-cols-[1fr_auto] gap-3">
+                <input
+                  name="price"
+                  type="number"
+                  placeholder={`Price (${currency}) *`}
+                  className="bg-[#121212] border border-[#333] p-4.5 rounded-2xl outline-none focus:border-blue-500 font-bold text-white placeholder:text-gray-700"
+                  onChange={handleChange}
+                  value={formData.price}
+                  required
+                />
+                <select
+                  value={currency}
+                  onChange={(e) => setCurrency(e.target.value)}
+                  className="bg-[#121212] border border-[#333] px-4 rounded-2xl outline-none text-white font-black text-xs cursor-pointer hover:border-blue-500 transition-colors appearance-none"
+                >
+                  <option value="USD">$</option>
+                  <option value="KZT">₸</option>
+                  <option value="CNY">¥</option>
+                </select>
+              </div>
+              <p className="text-[9px] text-gray-500 font-bold uppercase tracking-widest pl-2">
+                Will be saved as USD
+              </p>
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              <input
-                name="price"
-                type="number"
-                placeholder="Price ($) *"
-                className="bg-[#121212] border border-[#333] p-4 rounded-xl outline-none focus:border-blue-500 text-white font-bold"
-                onChange={handleChange}
-                value={formData.price}
-                required
-              />
-              <CustomSelect
-                options={[
-                  { value: 'Male', label: 'Male ♂' },
-                  { value: 'Female', label: 'Female ♀' },
-                ]}
-                value={formData.gender}
-                onChange={(val) => handleCustomChange('gender', val)}
-              />
-            </div>
+
+            <CustomSelect
+              options={[
+                { value: 'Male', label: 'Male' },
+                { value: 'Female', label: 'Female' },
+              ]}
+              value={formData.gender}
+              onChange={(val) => handleCustomChange('gender', val)}
+            />
           </div>
 
-          <div className="space-y-5">
-            <h3 className="text-gray-500 font-bold text-[10px] uppercase tracking-[0.2em] flex items-center gap-2 mb-2 italic">
+          <div className="space-y-6">
+            <h3 className="text-gray-500 font-black text-[11px] uppercase tracking-[0.25em] flex items-center gap-2 italic">
               <PlusCircle size={14} /> Details
             </h3>
             <div className="grid grid-cols-2 gap-4">
-              <input
-                name="purchaseDate"
-                type="date"
-                className="bg-[#121212] border border-[#333] p-4 rounded-xl outline-none focus:border-blue-500 text-white"
-                onChange={handleChange}
-                value={formData.purchaseDate}
-              />
+              <div className="relative group">
+                <Calendar
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600 pointer-events-none z-10"
+                  size={18}
+                />
+                <DatePicker
+                  selected={formData.purchaseDate ? new Date(formData.purchaseDate) : null}
+                  onChange={(date) =>
+                    handleCustomChange('purchaseDate', date ? date.toISOString().split('T')[0] : '')
+                  }
+                  dateFormat="yyyy-MM-dd"
+                  placeholderText="YYYY-MM-DD"
+                  className="w-full bg-[#121212] border border-[#333] p-4.5 pl-12 rounded-2xl outline-none text-white font-bold uppercase text-[11px] tracking-widest focus:border-blue-500 transition-colors cursor-pointer"
+                />
+              </div>
               <CustomSelect
                 options={[
                   { value: 'Yes', label: 'Box: Original' },
@@ -266,35 +351,30 @@ const FigureForm = ({ mode = 'add' }) => {
             </div>
             <CustomSelect
               icon={ShieldCheck}
-              options={[
-                { value: 'New', label: 'New (Sealed)' },
-                { value: 'Like New', label: 'Like New' },
-                { value: 'Good', label: 'Good' },
-                { value: 'Damaged', label: 'Damaged' },
-              ]}
+              options={conditionOptions}
               value={formData.conditionGrade}
               onChange={(val) => handleCustomChange('conditionGrade', val)}
             />
-            <div className="relative group">
-              <ShoppingCart className="absolute left-4 top-4 text-gray-600" size={18} />
-              <input
-                name="purchasePlace"
-                placeholder="Shop Name"
-                className="w-full bg-[#121212] border border-[#333] p-4 pl-12 rounded-xl outline-none focus:border-blue-500 text-white font-bold"
-                onChange={handleChange}
-                value={formData.purchasePlace}
-              />
-            </div>
+            <CustomSelect
+              icon={ShoppingCart}
+              options={shopOptions}
+              value={formData.purchasePlace}
+              onChange={(val) => handleCustomChange('purchasePlace', val)}
+            />
           </div>
         </div>
 
-        <div className="space-y-3">
-          <div className="relative group">
-            <LinkIcon className="absolute left-4 top-4 text-gray-600" size={18} />
+        {/* ... Остальная часть формы (URL, Notes, Photos, Button) без изменений ... */}
+        <div className="space-y-4 pt-4 border-t border-[#333]/50">
+          <div className="relative">
+            <LinkIcon
+              className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600"
+              size={18}
+            />
             <input
               name="auctionUrl"
               placeholder="Listing / Store URL"
-              className="w-full bg-[#121212] border border-[#333] p-4 pl-12 rounded-xl outline-none focus:border-blue-500 text-white font-bold"
+              className="w-full bg-[#121212] border border-[#333] p-4.5 pl-12 rounded-2xl outline-none font-bold text-white placeholder:text-gray-700 focus:border-blue-500 transition-colors"
               onChange={handleChange}
               value={formData.auctionUrl}
             />
@@ -302,43 +382,44 @@ const FigureForm = ({ mode = 'add' }) => {
           <textarea
             name="conditionNotes"
             placeholder="Notes..."
-            className="w-full bg-[#121212] border border-[#333] p-4 rounded-xl outline-none focus:border-blue-500 h-20 resize-none font-bold text-white"
+            className="w-full bg-[#121212] border border-[#333] p-5 rounded-2xl outline-none h-24 resize-none font-bold text-white placeholder:text-gray-700 focus:border-blue-500 transition-colors"
             onChange={handleChange}
             value={formData.conditionNotes}
           ></textarea>
         </div>
 
-        {/* PHOTOS SECTION */}
-        <div className="space-y-5">
-          <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-[#333] rounded-[2rem] cursor-pointer hover:bg-[#1f1f1f] transition-all group">
-            <Upload className="text-gray-600 mb-2 group-hover:text-blue-500" size={28} />
-            <span className="text-gray-500 font-black text-[10px] uppercase tracking-widest">
+        <div className="space-y-6">
+          <label className="flex flex-col items-center justify-center w-full h-36 border-2 border-dashed border-[#333] rounded-[2.5rem] cursor-pointer hover:bg-[#1f1f1f] hover:border-blue-500/50 transition-all group">
+            <Upload
+              className="text-gray-600 mb-2 group-hover:text-blue-500 transition-transform group-hover:-translate-y-1"
+              size={32}
+            />
+            <span className="text-gray-500 font-black text-[10px] uppercase tracking-[0.3em]">
               Photos (Max 5)
             </span>
             <input
               type="file"
               className="hidden"
               multiple
-              onChange={handleFileChange}
+              onChange={(e) => setFiles([...files, ...Array.from(e.target.files)])}
               accept="image/*"
             />
           </label>
-
           <div className="grid grid-cols-5 gap-4">
             {existingImages.map((url, idx) => (
               <div
                 key={`old-${idx}`}
-                className={`relative aspect-[3/4] rounded-2xl overflow-hidden border-2 ${
+                className={`relative aspect-[3/4] rounded-2xl overflow-hidden border-2 transition-all ${
                   previewIdx === idx
-                    ? 'border-blue-500 shadow-lg shadow-blue-500/20'
+                    ? 'border-blue-500 shadow-[0_0_20px_rgba(59,130,246,0.2)]'
                     : 'border-[#333]'
                 }`}
               >
-                <img src={url} className="w-full h-full object-cover" alt="figure" />
+                <img src={url} className="w-full h-full object-cover" alt="f" />
                 <button
                   type="button"
                   onClick={() => setPreviewIdx(idx)}
-                  className="absolute top-2 left-2 bg-black/70 p-1.5 rounded-lg"
+                  className="absolute top-2 left-2 bg-black/70 p-1.5 rounded-lg hover:bg-blue-600 transition-colors"
                 >
                   <Star
                     size={14}
@@ -349,8 +430,8 @@ const FigureForm = ({ mode = 'add' }) => {
                 </button>
                 <button
                   type="button"
-                  onClick={() => removeExistingFile(idx)}
-                  className="absolute top-2 right-2 bg-red-600 p-1.5 rounded-lg text-white"
+                  onClick={() => setExistingImages(existingImages.filter((_, i) => i !== idx))}
+                  className="absolute top-2 right-2 bg-red-600/80 p-1.5 rounded-lg hover:bg-red-600 transition-colors text-white"
                 >
                   <X size={14} />
                 </button>
@@ -359,17 +440,17 @@ const FigureForm = ({ mode = 'add' }) => {
             {files.map((file, idx) => (
               <div
                 key={`new-${idx}`}
-                className="relative aspect-[3/4] rounded-2xl overflow-hidden border-2 border-blue-500/50 opacity-60"
+                className="relative aspect-[3/4] rounded-2xl overflow-hidden border-2 border-blue-500/30"
               >
                 <img
                   src={URL.createObjectURL(file)}
                   className="w-full h-full object-cover"
-                  alt="new"
+                  alt="n"
                 />
                 <button
                   type="button"
-                  onClick={() => removeNewFile(idx)}
-                  className="absolute top-2 right-2 bg-red-600 p-1.5 rounded-lg text-white"
+                  onClick={() => setFiles(files.filter((_, i) => i !== idx))}
+                  className="absolute top-2 right-2 bg-red-600/80 p-1.5 rounded-lg text-white"
                 >
                   <X size={14} />
                 </button>
@@ -380,14 +461,14 @@ const FigureForm = ({ mode = 'add' }) => {
 
         <button
           disabled={loading}
-          className="w-full py-5 rounded-[1.5rem] bg-blue-600 hover:bg-blue-500 text-white font-black text-xl tracking-widest transition-all shadow-xl flex items-center justify-center gap-3 uppercase active:scale-95"
+          className="w-full py-6 rounded-[2rem] bg-blue-600 hover:bg-blue-500 text-white font-black text-xl tracking-widest transition-all shadow-[0_10px_40px_rgba(37,99,235,0.3)] active:scale-[0.98] uppercase italic flex items-center justify-center gap-3"
         >
           {loading ? (
             <Loader2 className="animate-spin" size={24} />
           ) : isEdit ? (
             'Save Changes'
           ) : (
-            'Add Figure'
+            'Add to Collection'
           )}
         </button>
       </form>

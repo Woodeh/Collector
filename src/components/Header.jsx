@@ -5,12 +5,11 @@ import {
   PlusCircle,
   Home,
   Clock,
-  Heart,
+  Heart, // ВЕРНУЛ ИКОНКУ
   LayoutDashboard,
   ChevronDown,
   ChevronUp,
   DollarSign,
-  Package,
   User,
   LogIn,
 } from 'lucide-react';
@@ -49,26 +48,36 @@ const Header = () => {
     const unsubAuth = onAuthStateChanged(auth, (currentUser) => setUser(currentUser));
 
     const unsubFigures = onSnapshot(collection(db, 'figures'), (snap) => {
-      let total = 0;
+      let totalValue = 0;
+      let count = 0;
       const brandsMap = {};
+
       snap.docs.forEach((doc) => {
         const data = doc.data();
-        total += Number(data.price) || 0;
-        const brand = data.brand || 'Other';
-        brandsMap[brand] = (brandsMap[brand] || 0) + 1;
+        if (data.conditionGrade?.toLowerCase().trim() !== 'pre-order') {
+          totalValue += Number(data.price) || 0;
+          count++;
+          const brand = data.brand || 'Other';
+          brandsMap[brand] = (brandsMap[brand] || 0) + 1;
+        }
       });
+
       const formattedBrands = Object.keys(brandsMap).map((brand) => ({
         name: brand,
         value: brandsMap[brand],
       }));
+
       setBrandData(formattedBrands);
-      setCollectionStats({ totalValue: total, count: snap.size });
+      setCollectionStats({ totalValue, count });
     });
 
     const unsubPreorders = onSnapshot(collection(db, 'preorders'), (snap) => {
-      let total = 0;
-      snap.docs.forEach((doc) => (total += Number(doc.data().price || 0)));
-      setPreorderStats({ totalValue: total, count: snap.size });
+      let totalPreValue = 0;
+      snap.docs.forEach((doc) => {
+        const data = doc.data();
+        totalPreValue += Number(data.totalPrice) || 0;
+      });
+      setPreorderStats({ totalValue: totalPreValue, count: snap.size });
     });
 
     return () => {
@@ -81,7 +90,6 @@ const Header = () => {
   return (
     <header className="sticky top-0 z-[100]">
       <nav className="bg-[#1a1a1a] border-b border-[#333] p-4 px-8 flex items-center shadow-xl relative z-20 font-bold">
-        {/* ЛОГОТИП С ВЕРНУТОЙ АНИМАЦИЕЙ */}
         <div className="flex-1">
           <Link to="/" className="flex items-center gap-3 group select-none w-fit">
             <div className="w-10 h-10 rounded-full border border-[#333] overflow-hidden group-hover:border-blue-500/50 transition-all duration-500 group-hover:shadow-[0_0_15px_rgba(59,130,246,0.3)]">
@@ -100,7 +108,6 @@ const Header = () => {
           </Link>
         </div>
 
-        {/* ПРАВАЯ ЧАСТЬ (Группировка навигации и профиля) */}
         <div className="flex items-center gap-8">
           <div className="flex gap-6 text-[11px] font-bold uppercase tracking-widest items-center">
             <NavLink
@@ -133,6 +140,19 @@ const Header = () => {
             >
               <Clock size={16} /> <span className="hidden lg:inline">Pre-Orders</span>
             </NavLink>
+
+            {/* ВЕРНУЛ FAVORITES */}
+            <NavLink
+              to="/wishlist"
+              className={({ isActive }) =>
+                `flex items-center gap-1.5 transition-colors ${
+                  isActive ? 'text-pink-500' : 'text-gray-400 hover:text-white'
+                }`
+              }
+            >
+              <Heart size={16} /> <span className="hidden lg:inline">Wishlist</span>
+            </NavLink>
+
             <NavLink
               to="/add"
               className="text-blue-500 hover:text-blue-400 transition flex items-center gap-1.5"
@@ -167,7 +187,6 @@ const Header = () => {
                 <button
                   onClick={() => signOut(auth)}
                   className="w-11 h-11 rounded-2xl bg-[#121212] border border-[#333] flex items-center justify-center text-blue-500 hover:border-blue-500 hover:bg-blue-500 transition-all hover:text-white shadow-lg active:scale-95"
-                  title="Logout"
                 >
                   <User size={20} />
                 </button>
@@ -177,22 +196,21 @@ const Header = () => {
                 to="/login"
                 className="flex items-center gap-2 p-2 px-5 rounded-2xl bg-blue-600 text-white font-black uppercase text-[10px] tracking-widest hover:bg-blue-500 transition-all shadow-lg active:scale-95"
               >
-                <LogIn size={16} />
-                <span>Login</span>
+                <LogIn size={16} /> <span>Login</span>
               </Link>
             )}
           </div>
         </div>
       </nav>
 
-      {/* DASHBOARD PANEL (С использованием всех переменных) */}
+      {/* DASHBOARD PANEL */}
       <div
         className={`bg-[#121212]/95 backdrop-blur-xl border-b border-[#333] transition-all duration-500 ease-in-out overflow-hidden ${
           isDashOpen ? 'max-h-[450px] py-8 opacity-100' : 'max-h-0 py-0 opacity-0'
         }`}
       >
         <div className="max-w-7xl mx-auto px-8 grid grid-cols-1 md:grid-cols-3 gap-10 items-center">
-          <div className="space-y-4 bg-[#1a1a1a]/50 p-6 rounded-[2rem] border border-[#333] text-left">
+          <div className="space-y-4 bg-[#1a1a1a]/50 p-6 rounded-[2rem] border border-[#333] text-left shadow-2xl">
             <h4 className="text-[10px] font-black text-gray-600 uppercase tracking-[0.3em] italic mb-2">
               Overview
             </h4>
@@ -250,28 +268,28 @@ const Header = () => {
                 {collectionStats.count}
               </span>
               <span className="text-[8px] text-gray-600 uppercase font-black tracking-[0.2em] mt-1">
-                Total Items
+                Items on Hand
               </span>
             </div>
           </div>
 
-          <div className="bg-[#1a1a1a]/50 p-6 rounded-[2rem] border border-[#333] max-h-[220px] overflow-y-auto scrollbar-hide text-left">
+          <div className="bg-[#1a1a1a]/50 p-6 rounded-[2rem] border border-[#333] max-h-[220px] overflow-y-auto scrollbar-hide text-left shadow-2xl">
             <h4 className="text-[10px] font-black text-gray-600 uppercase tracking-[0.3em] italic mb-4">
               Manufacturers
             </h4>
             <div className="space-y-3">
-              {brandData.slice(0, 10).map((entry, index) => (
+              {brandData.map((entry, index) => (
                 <div key={index} className="flex justify-between items-center group">
                   <div className="flex items-center gap-3">
                     <div
                       className="w-2.5 h-2.5 rounded-full"
                       style={{ backgroundColor: COLORS[index % COLORS.length] }}
                     ></div>
-                    <span className="text-xs text-gray-300 font-bold uppercase truncate group-hover:text-white transition-colors">
+                    <span className="text-xs text-gray-300 font-bold uppercase group-hover:text-white transition-colors">
                       {entry.name}
                     </span>
                   </div>
-                  <span className="text-white font-black italic text-sm ml-2">{entry.value}</span>
+                  <span className="text-white font-black italic text-sm">{entry.value}</span>
                 </div>
               ))}
             </div>
