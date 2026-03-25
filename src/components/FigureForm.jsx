@@ -17,11 +17,13 @@ import {
   Edit3,
   Sparkles,
   CheckCircle2,
+  Scan, // Добавил иконку скана
 } from 'lucide-react';
-import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom'; // Убрал useLocation
 import CustomSelect from '../components/Select';
 import AnimeSearch from '../components/AnimeSearch';
 import CharacterSearch from '../components/CharacterSearch';
+import Scanner from '../components/Scanner'; // Импорт твоего нового компонента сканера
 
 // DnD Kit
 import {
@@ -98,16 +100,15 @@ const SortablePhotoItem = ({ id, url, isPreview, onSetPreview, onRemove }) => {
 const FigureForm = ({ mode = 'add' }) => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const location = useLocation();
   const isEdit = mode === 'edit';
 
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(isEdit);
   const [epicSuccess, setEpicSuccess] = useState(null);
   const [isDraggingOver, setIsDraggingOver] = useState(false);
+  const [isScannerOpen, setIsScannerOpen] = useState(false); // Состояние модалки сканера
   const [currency, setCurrency] = useState('USD');
 
-  // Единое состояние для всех медиа (объекты с id, url и типом)
   const [mediaItems, setMediaItems] = useState([]);
   const [previewId, setPreviewId] = useState(null);
 
@@ -168,9 +169,6 @@ const FigureForm = ({ mode = 'add' }) => {
   ];
 
   useEffect(() => {
-    if (!isEdit && location.state?.initialData) {
-      setFormData((prev) => ({ ...prev, ...location.state.initialData }));
-    }
     if (isEdit && id) {
       const fetchFigure = async () => {
         try {
@@ -178,13 +176,9 @@ const FigureForm = ({ mode = 'add' }) => {
           if (docSnap.exists()) {
             const data = docSnap.data();
             setFormData(data);
-
-            // Загружаем картинки в медиа-стейт
             const images = data.images || [];
             const items = images.map((url) => ({ id: url, url, type: 'existing' }));
             setMediaItems(items);
-
-            // Устанавливаем превью
             if (data.previewImage) {
               setPreviewId(data.previewImage);
             } else if (items.length > 0) {
@@ -199,7 +193,7 @@ const FigureForm = ({ mode = 'add' }) => {
       };
       fetchFigure();
     }
-  }, [id, isEdit, location.state]);
+  }, [id, isEdit]);
 
   const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
   const handleCustomChange = (name, value) => setFormData((prev) => ({ ...prev, [name]: value }));
@@ -249,7 +243,6 @@ const FigureForm = ({ mode = 'add' }) => {
     setLoading(true);
     try {
       const finalUrls = [];
-
       for (const item of mediaItems) {
         if (item.type === 'existing') {
           finalUrls.push(item.url);
@@ -262,7 +255,6 @@ const FigureForm = ({ mode = 'add' }) => {
       }
 
       const previewUrl = finalUrls[mediaItems.findIndex((i) => i.id === previewId)] || finalUrls[0];
-
       const priceInCurrency = Number(formData.price) || 0;
       const priceInUSD = parseFloat((priceInCurrency * EXCHANGE_RATES[currency]).toFixed(2));
 
@@ -304,6 +296,8 @@ const FigureForm = ({ mode = 'add' }) => {
 
   return (
     <div className="max-w-4xl mx-auto p-6 text-[#e4e4e4] relative text-left font-sans">
+      <Scanner isOpen={isScannerOpen} onClose={() => setIsScannerOpen(false)} />
+
       <style>{`
         .react-datepicker-wrapper { width: 100%; }
         .react-datepicker { background-color: #1a1a1a !important; border: 1px solid #333 !important; border-radius: 1.5rem !important; color: white !important; }
@@ -329,10 +323,28 @@ const FigureForm = ({ mode = 'add' }) => {
         </div>
       )}
 
-      <h2 className="text-4xl font-black mb-10 flex items-center gap-4 uppercase tracking-tighter italic">
-        {isEdit ? <Edit3 className="text-blue-500" /> : <PlusCircle className="text-blue-500" />}
-        {isEdit ? 'Edit Details' : 'Add Figure'}
-      </h2>
+      {/* ШАПКА ФОРМЫ С КНОПКОЙ СКАНЕРА */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 mb-10">
+        <h2 className="text-4xl font-black flex items-center gap-4 uppercase tracking-tighter italic">
+          {isEdit ? (
+            <Edit3 className="text-blue-500" size={32} />
+          ) : (
+            <PlusCircle className="text-blue-500" size={32} />
+          )}
+          {isEdit ? 'Edit Details' : 'Add Figure'}
+        </h2>
+
+        <button
+          type="button"
+          onClick={() => setIsScannerOpen(true)}
+          className="flex items-center gap-3 bg-[#1a1a1a] border border-[#333] hover:border-blue-500/50 text-blue-500 px-6 py-3 rounded-2xl transition-all group active:scale-95 shadow-xl"
+        >
+          <Scan size={18} className="group-hover:rotate-90 transition-transform duration-500" />
+          <span className="font-black uppercase italic text-[10px] tracking-widest text-white">
+            Visual Search
+          </span>
+        </button>
+      </div>
 
       <form
         onSubmit={handleSubmit}
@@ -359,7 +371,6 @@ const FigureForm = ({ mode = 'add' }) => {
               value={formData.brand}
               onChange={(val) => handleCustomChange('brand', val)}
             />
-
             <div className="space-y-2">
               <div className="grid grid-cols-[1fr_auto] gap-3">
                 <input
@@ -382,7 +393,6 @@ const FigureForm = ({ mode = 'add' }) => {
                 </select>
               </div>
             </div>
-
             <CustomSelect
               options={[
                 { value: 'Male', label: 'Male' },
@@ -410,7 +420,7 @@ const FigureForm = ({ mode = 'add' }) => {
                   }
                   dateFormat="yyyy-MM-dd"
                   placeholderText="YYYY-MM-DD"
-                  className="w-full bg-[#121212] border border-[#333] p-4.5 pl-12 rounded-2xl text-white font-bold text-[11px]"
+                  className="w-full bg-[#121212] border border-[#333] p-4.5 rounded-2xl text-white font-bold text-[11px]"
                 />
               </div>
               <CustomSelect
@@ -472,7 +482,6 @@ const FigureForm = ({ mode = 'add' }) => {
             />
           </label>
 
-          {/* GALLERY WITH SORTABLE */}
           <DndContext
             sensors={sensors}
             collisionDetection={closestCenter}
