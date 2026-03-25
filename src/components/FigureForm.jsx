@@ -23,9 +23,77 @@ import CustomSelect from '../components/Select';
 import AnimeSearch from '../components/AnimeSearch';
 import CharacterSearch from '../components/CharacterSearch';
 
+// DnD Kit
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  horizontalListSortingStrategy,
+  useSortable,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+
 // Календарь
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
+
+// Вспомогательный компонент для сортируемого фото
+const SortablePhotoItem = ({ id, url, isPreview, onSetPreview, onRemove }) => {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id,
+  });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    zIndex: isDragging ? 100 : 1,
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={`relative aspect-[3/4] rounded-2xl overflow-hidden border-2 transition-all ${
+        isPreview ? 'border-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.3)]' : 'border-[#333]'
+      } ${isDragging ? 'opacity-50' : 'opacity-100'}`}
+    >
+      <img src={url} className="w-full h-full object-cover pointer-events-none" alt="preview" />
+
+      {/* Область для перетаскивания (вся картинка) */}
+      <div
+        {...attributes}
+        {...listeners}
+        className="absolute inset-0 cursor-grab active:cursor-grabbing"
+      />
+
+      <button
+        type="button"
+        onPointerDown={(e) => e.stopPropagation()}
+        onClick={onSetPreview}
+        className="absolute top-2 left-2 z-20 bg-black/70 p-1.5 rounded-lg hover:bg-blue-600 transition-colors"
+      >
+        <Star size={14} className={isPreview ? 'text-yellow-400 fill-yellow-400' : 'text-white'} />
+      </button>
+
+      <button
+        type="button"
+        onPointerDown={(e) => e.stopPropagation()}
+        onClick={onRemove}
+        className="absolute top-2 right-2 z-20 bg-red-600/80 p-1.5 rounded-lg text-white"
+      >
+        <X size={14} />
+      </button>
+    </div>
+  );
+};
 
 const FigureForm = ({ mode = 'add' }) => {
   const { id } = useParams();
@@ -33,15 +101,15 @@ const FigureForm = ({ mode = 'add' }) => {
   const location = useLocation();
   const isEdit = mode === 'edit';
 
-  const [files, setFiles] = useState([]);
-  const [existingImages, setExistingImages] = useState([]);
-  const [previewIdx, setPreviewIdx] = useState(0); // Индекс главного фото
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(isEdit);
   const [epicSuccess, setEpicSuccess] = useState(null);
-
-  const [isDragging, setIsDragging] = useState(false);
+  const [isDraggingOver, setIsDraggingOver] = useState(false);
   const [currency, setCurrency] = useState('USD');
+
+  // Единое состояние для всех медиа (объекты с id, url и типом)
+  const [mediaItems, setMediaItems] = useState([]);
+  const [previewId, setPreviewId] = useState(null);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -57,11 +125,12 @@ const FigureForm = ({ mode = 'add' }) => {
     purchasePlace: 'Jalan Jalan Japan',
   });
 
-  const EXCHANGE_RATES = {
-    USD: 1,
-    KZT: 0.0022,
-    CNY: 0.14,
-  };
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  );
+
+  const EXCHANGE_RATES = { USD: 1, KZT: 0.0022, CNY: 0.14 };
 
   const brandOptions = [
     { value: 'Bandai Spirits', label: 'Bandai Spirits' },
@@ -109,10 +178,18 @@ const FigureForm = ({ mode = 'add' }) => {
           if (docSnap.exists()) {
             const data = docSnap.data();
             setFormData(data);
-            setExistingImages(data.images || []);
-            // Находим индекс текущего превью среди всех картинок
-            const currentIdx = data.images?.indexOf(data.previewImage);
-            setPreviewIdx(currentIdx !== -1 ? currentIdx : 0);
+
+            // Загружаем картинки в медиа-стейт
+            const images = data.images || [];
+            const items = images.map((url) => ({ id: url, url, type: 'existing' }));
+            setMediaItems(items);
+
+            // Устанавливаем превью
+            if (data.previewImage) {
+              setPreviewId(data.previewImage);
+            } else if (items.length > 0) {
+              setPreviewId(items[0].id);
+            }
           }
         } catch (error) {
           console.error(error);
@@ -127,43 +204,64 @@ const FigureForm = ({ mode = 'add' }) => {
   const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
   const handleCustomChange = (name, value) => setFormData((prev) => ({ ...prev, [name]: value }));
 
-  const handleDragOver = (e) => {
-    e.preventDefault();
-    setIsDragging(true);
+  const handleFiles = (newFiles) => {
+    const validFiles = Array.from(newFiles).filter((f) => f.type.startsWith('image/'));
+    const items = validFiles.map((file) => ({
+      id: Math.random().toString(36).substr(2, 9),
+      url: URL.createObjectURL(file),
+      file: file,
+      type: 'new',
+    }));
+
+    setMediaItems((prev) => {
+      const combined = [...prev, ...items].slice(0, 5);
+      if (!previewId && combined.length > 0) setPreviewId(combined[0].id);
+      return combined;
+    });
   };
-  const handleDragLeave = () => {
-    setIsDragging(false);
-  };
-  const handleDrop = (e) => {
-    e.preventDefault();
-    setIsDragging(false);
-    const droppedFiles = Array.from(e.dataTransfer.files);
-    const imageFiles = droppedFiles.filter((file) => file.type.startsWith('image/'));
-    if (imageFiles.length > 0) {
-      setFiles((prev) => [...prev, ...imageFiles].slice(0, 5));
+
+  const handleDragEnd = (event) => {
+    const { active, over } = event;
+    if (active.id !== over.id) {
+      setMediaItems((items) => {
+        const oldIndex = items.findIndex((i) => i.id === active.id);
+        const newIndex = items.findIndex((i) => i.id === over.id);
+        return arrayMove(items, oldIndex, newIndex);
+      });
     }
+  };
+
+  const removeItem = (id) => {
+    setMediaItems((prev) => {
+      const filtered = prev.filter((item) => item.id !== id);
+      if (previewId === id && filtered.length > 0) setPreviewId(filtered[0].id);
+      return filtered;
+    });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (files.length === 0 && existingImages.length === 0) return alert('Please upload photo');
+    if (mediaItems.length === 0) return alert('Please upload photo');
 
     const currentUser = auth.currentUser;
-    if (!currentUser) return alert('You must be logged in to save figures');
+    if (!currentUser) return alert('You must be logged in');
 
     setLoading(true);
     try {
-      const newUrls = [];
-      for (const file of files) {
-        const fileRef = ref(storage, `figures/${Date.now()}_${file.name}`);
-        await uploadBytes(fileRef, file);
-        const url = await getDownloadURL(fileRef);
-        newUrls.push(url);
+      const finalUrls = [];
+
+      for (const item of mediaItems) {
+        if (item.type === 'existing') {
+          finalUrls.push(item.url);
+        } else {
+          const fileRef = ref(storage, `figures/${Date.now()}_${item.file.name}`);
+          await uploadBytes(fileRef, item.file);
+          const url = await getDownloadURL(fileRef);
+          finalUrls.push(url);
+        }
       }
 
-      const allImages = [...existingImages, ...newUrls];
-      // Важно: берем картинку по выбранному индексу превью
-      const previewImg = allImages[previewIdx] || allImages[0];
+      const previewUrl = finalUrls[mediaItems.findIndex((i) => i.id === previewId)] || finalUrls[0];
 
       const priceInCurrency = Number(formData.price) || 0;
       const priceInUSD = parseFloat((priceInCurrency * EXCHANGE_RATES[currency]).toFixed(2));
@@ -171,8 +269,8 @@ const FigureForm = ({ mode = 'add' }) => {
       const finalData = {
         ...formData,
         userId: currentUser.uid,
-        images: allImages,
-        previewImage: previewImg, // Сохраняем выбранное главное фото
+        images: finalUrls,
+        previewImage: previewUrl,
         price: priceInUSD,
         updatedAt: new Date(),
       };
@@ -188,11 +286,8 @@ const FigureForm = ({ mode = 'add' }) => {
         });
       }
 
-      setEpicSuccess({ name: formData.name, img: previewImg });
-      setTimeout(() => {
-        setEpicSuccess(null);
-        navigate('/collection');
-      }, 3000);
+      setEpicSuccess({ name: formData.name, img: previewUrl });
+      setTimeout(() => navigate('/collection'), 3000);
     } catch (error) {
       alert(error.message);
     } finally {
@@ -211,68 +306,31 @@ const FigureForm = ({ mode = 'add' }) => {
     <div className="max-w-4xl mx-auto p-6 text-[#e4e4e4] relative text-left font-sans">
       <style>{`
         .react-datepicker-wrapper { width: 100%; }
-        .react-datepicker {
-          background-color: #1a1a1a !important;
-          border: 1px solid #333 !important;
-          border-radius: 1.5rem !important;
-          font-family: inherit !important;
-          color: white !important;
-          overflow: hidden;
-        }
-        .react-datepicker__header {
-          background-color: #121212 !important;
-          border-bottom: 1px solid #333 !important;
-          border-radius: 0 !important;
-        }
-        .react-datepicker__current-month, .react-datepicker__day-name, .react-datepicker__day {
-          color: white !important;
-          font-weight: 800 !important;
-          text-transform: uppercase !important;
-          font-size: 10px !important;
-          letter-spacing: 0.05em !important;
-        }
-        .react-datepicker__day:hover {
-          background-color: #2563eb !important;
-          border-radius: 0.5rem !important;
-        }
-        .react-datepicker__day--selected {
-          background-color: #2563eb !important;
-          border-radius: 0.5rem !important;
-        }
-        .react-datepicker__day--outside-month { color: #444 !important; }
+        .react-datepicker { background-color: #1a1a1a !important; border: 1px solid #333 !important; border-radius: 1.5rem !important; color: white !important; }
+        .react-datepicker__header { background-color: #121212 !important; border-bottom: 1px solid #333 !important; }
+        .react-datepicker__current-month, .react-datepicker__day-name, .react-datepicker__day { color: white !important; font-size: 10px !important; }
+        .react-datepicker__day--selected { background-color: #2563eb !important; }
       `}</style>
 
       {epicSuccess && (
         <div className="fixed inset-0 z-[500] flex items-center justify-center p-4 bg-black/90 backdrop-blur-2xl animate-in fade-in duration-500">
-          <div className="relative w-full max-w-sm animate-in zoom-in duration-300">
-            <div className="absolute -inset-4 bg-blue-500/20 blur-3xl rounded-full animate-pulse" />
-            <div className="relative bg-[#1a1a1a] border border-[#333] rounded-[3rem] p-8 shadow-2xl text-center">
-              <CheckCircle2 size={48} className="text-green-500 mx-auto mb-4 animate-bounce" />
-              <h3 className="text-3xl font-black text-white uppercase italic tracking-tighter mb-6">
-                {isEdit ? 'Updated!' : 'Captured!'}
-              </h3>
-              <div className="relative aspect-[3/4] rounded-2xl overflow-hidden border-2 border-blue-500/50 mb-6 shadow-2xl">
-                <img src={epicSuccess.img} alt="p" className="w-full h-full object-cover" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
-                <p className="absolute bottom-4 left-4 right-4 text-white font-black uppercase italic truncate">
-                  {epicSuccess.name}
-                </p>
-                <Sparkles className="absolute top-3 right-3 text-yellow-400 animate-pulse" />
-              </div>
-              <p className="text-blue-500 font-bold text-[10px] uppercase tracking-[0.3em] animate-pulse italic">
-                Processing data...
-              </p>
-            </div>
+          <div className="relative bg-[#1a1a1a] border border-[#333] rounded-[3rem] p-8 text-center max-w-sm">
+            <CheckCircle2 size={48} className="text-green-500 mx-auto mb-4" />
+            <h3 className="text-3xl font-black text-white uppercase italic mb-6">Success!</h3>
+            <img
+              src={epicSuccess.img}
+              className="w-full aspect-[3/4] object-cover rounded-2xl mb-4 border-2 border-blue-500"
+              alt="success"
+            />
+            <p className="text-blue-500 font-bold animate-pulse uppercase tracking-widest text-xs">
+              Redirecting...
+            </p>
           </div>
         </div>
       )}
 
       <h2 className="text-4xl font-black mb-10 flex items-center gap-4 uppercase tracking-tighter italic">
-        {isEdit ? (
-          <Edit3 className="text-blue-500" size={32} />
-        ) : (
-          <PlusCircle className="text-blue-500" size={32} />
-        )}
+        {isEdit ? <Edit3 className="text-blue-500" /> : <PlusCircle className="text-blue-500" />}
         {isEdit ? 'Edit Details' : 'Add Figure'}
       </h2>
 
@@ -285,19 +343,16 @@ const FigureForm = ({ mode = 'add' }) => {
             <h3 className="text-blue-500 font-black text-[11px] uppercase tracking-[0.25em] flex items-center gap-2 italic">
               <Info size={14} /> Basic Information
             </h3>
-
             <CharacterSearch
               value={formData.name}
               onChange={(val) => handleCustomChange('name', val)}
             />
-
             <div className="relative z-[60]">
               <AnimeSearch
                 value={formData.anime}
                 onChange={(val) => handleCustomChange('anime', val)}
               />
             </div>
-
             <CustomSelect
               icon={Tag}
               options={brandOptions}
@@ -311,7 +366,7 @@ const FigureForm = ({ mode = 'add' }) => {
                   name="price"
                   type="number"
                   placeholder={`Price (${currency}) *`}
-                  className="bg-[#121212] border border-[#333] p-4.5 rounded-2xl outline-none focus:border-blue-500 font-bold text-white placeholder:text-gray-700"
+                  className="bg-[#121212] border border-[#333] p-4.5 rounded-2xl outline-none focus:border-blue-500 font-bold text-white"
                   onChange={handleChange}
                   value={formData.price}
                   required
@@ -319,16 +374,13 @@ const FigureForm = ({ mode = 'add' }) => {
                 <select
                   value={currency}
                   onChange={(e) => setCurrency(e.target.value)}
-                  className="bg-[#121212] border border-[#333] px-4 rounded-2xl outline-none text-white font-black text-xs cursor-pointer hover:border-blue-500 transition-colors appearance-none"
+                  className="bg-[#121212] border border-[#333] px-4 rounded-2xl text-white font-black text-xs appearance-none"
                 >
                   <option value="USD">$</option>
                   <option value="KZT">₸</option>
                   <option value="CNY">¥</option>
                 </select>
               </div>
-              <p className="text-[9px] text-gray-500 font-bold uppercase tracking-widest pl-2">
-                Will be saved as USD
-              </p>
             </div>
 
             <CustomSelect
@@ -346,9 +398,9 @@ const FigureForm = ({ mode = 'add' }) => {
               <PlusCircle size={14} /> Details
             </h3>
             <div className="grid grid-cols-2 gap-4">
-              <div className="relative group">
+              <div className="relative">
                 <Calendar
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600 pointer-events-none z-10"
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600 z-10"
                   size={18}
                 />
                 <DatePicker
@@ -358,7 +410,7 @@ const FigureForm = ({ mode = 'add' }) => {
                   }
                   dateFormat="yyyy-MM-dd"
                   placeholderText="YYYY-MM-DD"
-                  className="w-full bg-[#121212] border border-[#333] p-4.5 pl-12 rounded-2xl outline-none text-white font-bold uppercase text-[11px] tracking-widest focus:border-blue-500 transition-colors cursor-pointer"
+                  className="w-full bg-[#121212] border border-[#333] p-4.5 pl-12 rounded-2xl text-white font-bold text-[11px]"
                 />
               </div>
               <CustomSelect
@@ -388,113 +440,64 @@ const FigureForm = ({ mode = 'add' }) => {
         {/* DRAG & DROP AREA */}
         <div className="space-y-6 pt-4 border-t border-[#333]/50">
           <label
-            onDragOver={handleDragOver}
-            onDragLeave={handleDragLeave}
-            onDrop={handleDrop}
-            className={`flex flex-col items-center justify-center w-full h-36 border-2 border-dashed rounded-[2.5rem] cursor-pointer transition-all group relative overflow-hidden ${
-              isDragging
+            onDragOver={(e) => {
+              e.preventDefault();
+              setIsDraggingOver(true);
+            }}
+            onDragLeave={() => setIsDraggingOver(false)}
+            onDrop={(e) => {
+              e.preventDefault();
+              setIsDraggingOver(false);
+              handleFiles(e.dataTransfer.files);
+            }}
+            className={`flex flex-col items-center justify-center w-full h-36 border-2 border-dashed rounded-[2.5rem] cursor-pointer transition-all ${
+              isDraggingOver
                 ? 'border-blue-500 bg-blue-500/10'
-                : 'border-[#333] hover:bg-[#1f1f1f] hover:border-blue-500/50'
+                : 'border-[#333] hover:border-blue-500/50'
             }`}
           >
             <Upload
-              className={`mb-2 transition-all ${
-                isDragging ? 'text-blue-500 scale-110' : 'text-gray-600'
-              }`}
+              className={isDraggingOver ? 'text-blue-500 scale-110' : 'text-gray-600'}
               size={32}
             />
             <span className="text-gray-500 font-black text-[10px] uppercase tracking-[0.3em]">
-              Photos (Max 5) / Drag & Drop
+              Photos (Max 5) / Drag thumbnails to reorder
             </span>
             <input
               type="file"
               className="hidden"
               multiple
-              onChange={(e) => setFiles([...files, ...Array.from(e.target.files)].slice(0, 5))}
+              onChange={(e) => handleFiles(e.target.files)}
               accept="image/*"
             />
           </label>
 
-          {/* GALLERY WITH PREVIEW SELECTION */}
-          <div className="grid grid-cols-5 gap-4">
-            {/* Рендерим уже существующие картинки (при редактировании) */}
-            {existingImages.map((url, idx) => (
-              <div
-                key={`old-${idx}`}
-                className={`relative aspect-[3/4] rounded-2xl overflow-hidden border-2 transition-all ${
-                  previewIdx === idx
-                    ? 'border-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.3)]'
-                    : 'border-[#333]'
-                }`}
+          {/* GALLERY WITH SORTABLE */}
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
+          >
+            <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
+              <SortableContext
+                items={mediaItems.map((i) => i.id)}
+                strategy={horizontalListSortingStrategy}
               >
-                <img src={url} className="w-full h-full object-cover" alt="f" />
-                <button
-                  type="button"
-                  onClick={() => setPreviewIdx(idx)}
-                  className="absolute top-2 left-2 bg-black/70 p-1.5 rounded-lg hover:bg-blue-600 transition-colors"
-                >
-                  <Star
-                    size={14}
-                    className={
-                      previewIdx === idx ? 'text-yellow-400 fill-yellow-400' : 'text-white'
-                    }
+                {mediaItems.map((item) => (
+                  <SortablePhotoItem
+                    key={item.id}
+                    id={item.id}
+                    url={item.url}
+                    isPreview={previewId === item.id}
+                    onSetPreview={() => setPreviewId(item.id)}
+                    onRemove={() => removeItem(item.id)}
                   />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setExistingImages(existingImages.filter((_, i) => i !== idx))}
-                  className="absolute top-2 right-2 bg-red-600/80 p-1.5 rounded-lg text-white"
-                >
-                  <X size={14} />
-                </button>
-              </div>
-            ))}
-
-            {/* Рендерим новые выбранные файлы */}
-            {files.map((file, idx) => {
-              const currentFileIdx = existingImages.length + idx;
-              return (
-                <div
-                  key={`new-${idx}`}
-                  className={`relative aspect-[3/4] rounded-2xl overflow-hidden border-2 transition-all ${
-                    previewIdx === currentFileIdx
-                      ? 'border-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.3)]'
-                      : 'border-[#333]/30'
-                  }`}
-                >
-                  <img
-                    src={URL.createObjectURL(file)}
-                    className="w-full h-full object-cover"
-                    alt="n"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setPreviewIdx(currentFileIdx)}
-                    className="absolute top-2 left-2 bg-black/70 p-1.5 rounded-lg hover:bg-blue-600 transition-colors"
-                  >
-                    <Star
-                      size={14}
-                      className={
-                        previewIdx === currentFileIdx
-                          ? 'text-yellow-400 fill-yellow-400'
-                          : 'text-white'
-                      }
-                    />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setFiles(files.filter((_, i) => i !== idx))}
-                    className="absolute top-2 right-2 bg-red-600/80 p-1.5 rounded-lg text-white"
-                  >
-                    <X size={14} />
-                  </button>
-                </div>
-              );
-            })}
-          </div>
+                ))}
+              </SortableContext>
+            </div>
+          </DndContext>
         </div>
 
-        {/* ... Остальная часть формы (URL, Notes, Button) ... */}
         <div className="space-y-4 pt-4 border-t border-[#333]/50">
           <div className="relative">
             <LinkIcon
@@ -504,7 +507,7 @@ const FigureForm = ({ mode = 'add' }) => {
             <input
               name="auctionUrl"
               placeholder="Listing / Store URL"
-              className="w-full bg-[#121212] border border-[#333] p-4.5 pl-12 rounded-2xl outline-none font-bold text-white focus:border-blue-500 transition-colors"
+              className="w-full bg-[#121212] border border-[#333] p-4.5 pl-12 rounded-2xl font-bold text-white focus:border-blue-500"
               onChange={handleChange}
               value={formData.auctionUrl}
             />
@@ -512,7 +515,7 @@ const FigureForm = ({ mode = 'add' }) => {
           <textarea
             name="conditionNotes"
             placeholder="Notes..."
-            className="w-full bg-[#121212] border border-[#333] p-5 rounded-2xl outline-none h-24 resize-none font-bold text-white focus:border-blue-500 transition-colors"
+            className="w-full bg-[#121212] border border-[#333] p-5 rounded-2xl outline-none h-24 resize-none font-bold text-white focus:border-blue-500"
             onChange={handleChange}
             value={formData.conditionNotes}
           ></textarea>
@@ -520,7 +523,7 @@ const FigureForm = ({ mode = 'add' }) => {
 
         <button
           disabled={loading}
-          className="w-full py-6 rounded-[2rem] bg-blue-600 hover:bg-blue-500 text-white font-black text-xl tracking-widest transition-all shadow-[0_10px_40px_rgba(37,99,235,0.3)] active:scale-[0.98] uppercase italic flex items-center justify-center gap-3"
+          className="w-full py-6 rounded-[2rem] bg-blue-600 hover:bg-blue-500 text-white font-black text-xl tracking-widest transition-all shadow-xl active:scale-[0.98] uppercase italic flex items-center justify-center gap-3"
         >
           {loading ? (
             <Loader2 className="animate-spin" size={24} />
