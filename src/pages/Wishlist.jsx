@@ -109,12 +109,12 @@ const Wishlist = () => {
   return (
     <div className="min-h-screen bg-[#121212] p-4 md:p-10 text-[#e4e4e4] font-sans">
       <div className="max-w-7xl mx-auto text-left">
-        {/* HEADER: Приведен к масштабу Collection */}
+        {/* HEADER */}
         <div className="flex justify-between items-center mb-8 border-b border-[#333] pb-6">
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
               <Heart className="text-pink-500 fill-pink-500" size={24} />
-              <h2 className="text-2xl md:text-3xl font-black uppercase italic tracking-tighter text-white">
+              <h2 className="text-2xl md:text-3xl font-black uppercase italic tracking-tighter text-white leading-none">
                 Wishlist
               </h2>
             </div>
@@ -124,13 +124,13 @@ const Wishlist = () => {
           </div>
           <button
             onClick={() => setShowForm(true)}
-            className="bg-pink-600 hover:bg-pink-500 text-white px-6 py-3 rounded-xl font-black uppercase italic text-xs tracking-widest flex items-center gap-2 transition-all active:scale-95 shadow-lg"
+            className="bg-pink-600 hover:bg-pink-500 text-white px-6 py-3 rounded-xl font-black uppercase italic text-xs tracking-widest flex items-center gap-2 transition-all active:scale-95 shadow-lg cursor-pointer"
           >
             <Plus size={16} /> <span className="hidden sm:inline">Add Target</span>
           </button>
         </div>
 
-        {/* GRID: Карточки стали компактнее */}
+        {/* GRID */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
           {items.map((item) => (
             <div
@@ -146,7 +146,7 @@ const Wishlist = () => {
                   </span>
                   <button
                     onClick={() => handleDelete(item.id)}
-                    className="text-gray-700 hover:text-red-500 transition-colors"
+                    className="text-gray-700 hover:text-red-500 transition-colors cursor-pointer"
                   >
                     <Trash2 size={14} />
                   </button>
@@ -162,7 +162,7 @@ const Wishlist = () => {
                 <div className="flex items-center justify-between pt-4 border-t border-[#333]/50">
                   <div>
                     <p className="text-gray-600 text-[7px] uppercase font-black tracking-widest mb-0.5">
-                      Price
+                      Estimated
                     </p>
                     <div className="text-xl font-black text-white italic tracking-tight">
                       ${item.price}
@@ -175,14 +175,14 @@ const Wishlist = () => {
                         href={item.link}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="bg-[#121212] p-2.5 rounded-xl text-gray-500 hover:text-pink-500 border border-[#333] transition-colors"
+                        className="bg-[#121212] p-2.5 rounded-xl text-gray-500 hover:text-pink-500 border border-[#333] transition-colors cursor-pointer"
                       >
                         <ExternalLink size={16} />
                       </a>
                     )}
                     <button
                       onClick={() => handleGotIt(item)}
-                      className="bg-green-600/10 hover:bg-green-600 text-green-500 hover:text-white p-2.5 px-4 rounded-xl transition-all flex items-center gap-2 font-black uppercase italic text-[10px]"
+                      className="bg-green-600/10 hover:bg-green-600 text-green-500 hover:text-white p-2.5 px-4 rounded-xl transition-all flex items-center gap-2 font-black uppercase italic text-[10px] cursor-pointer"
                     >
                       <CheckCircle size={16} />
                       <span>Got it</span>
@@ -202,13 +202,13 @@ const Wishlist = () => {
           </div>
         )}
 
-        {/* MODAL: Теперь аккуратный, как на других страницах */}
+        {/* MODAL */}
         {showForm && (
           <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-300">
             <div className="bg-[#1a1a1a] border border-[#333] w-full max-w-md rounded-[2rem] p-8 relative shadow-2xl">
               <button
                 onClick={() => setShowForm(false)}
-                className="absolute top-6 right-6 text-gray-500 hover:text-white"
+                className="absolute top-6 right-6 text-gray-500 hover:text-white cursor-pointer"
               >
                 <X size={20} />
               </button>
@@ -220,7 +220,7 @@ const Wishlist = () => {
               <form onSubmit={handleSubmit} className="space-y-4">
                 <input
                   placeholder="Figure Name *"
-                  className="w-full bg-[#121212] border border-[#333] p-4 rounded-xl outline-none focus:border-pink-600 text-sm text-white font-bold"
+                  className="w-full bg-[#121212] border border-[#333] p-4 rounded-xl outline-none focus:border-pink-600 text-sm text-white font-bold cursor-text"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   required
@@ -232,28 +232,28 @@ const Wishlist = () => {
                 <div className="grid grid-cols-2 gap-3">
                   <input
                     placeholder="Brand"
-                    className="w-full bg-[#121212] border border-[#333] p-4 rounded-xl outline-none text-sm text-white font-bold"
+                    className="w-full bg-[#121212] border border-[#333] p-4 rounded-xl outline-none text-sm text-white font-bold cursor-text"
                     value={formData.brand}
                     onChange={(e) => setFormData({ ...formData, brand: e.target.value })}
                   />
                   <input
                     type="number"
                     placeholder="Price ($)"
-                    className="w-full bg-[#121212] border border-[#333] p-4 rounded-xl outline-none text-sm text-white font-bold"
+                    className="w-full bg-[#121212] border border-[#333] p-4 rounded-xl outline-none text-sm text-white font-bold cursor-text"
                     value={formData.price}
                     onChange={(e) => setFormData({ ...formData, price: e.target.value })}
                   />
                 </div>
                 <input
                   placeholder="Link (URL)"
-                  className="w-full bg-[#121212] border border-[#333] p-4 rounded-xl outline-none text-sm text-white font-bold"
+                  className="w-full bg-[#121212] border border-[#333] p-4 rounded-xl outline-none text-sm text-white font-bold cursor-text"
                   value={formData.link}
                   onChange={(e) => setFormData({ ...formData, link: e.target.value })}
                 />
 
                 <button
                   disabled={submitting}
-                  className="w-full bg-pink-600 py-4 rounded-xl font-black text-sm hover:bg-pink-500 text-white uppercase italic tracking-widest transition-all active:scale-95"
+                  className="w-full bg-pink-600 py-4 rounded-xl font-black text-sm hover:bg-pink-500 text-white uppercase italic tracking-widest transition-all active:scale-95 cursor-pointer disabled:cursor-not-allowed"
                 >
                   {submitting ? 'Adding...' : 'Add to Wishlist'}
                 </button>

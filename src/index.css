@@ -36,3 +36,12 @@ body {
 .bg-accent { background-color: rgb(var(--accent)); }
 .border-accent { border-color: rgb(var(--accent)); }
 .shadow-accent { shadow-color: rgba(var(--accent), 0.2); }
+
+.recharts-wrapper .recharts-surface:focus {
+  outline: none;
+}
+
+.recharts-rectangle:focus, 
+.recharts-pie-sector:focus {
+  outline: none;
+}
