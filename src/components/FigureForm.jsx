@@ -2,32 +2,17 @@ import React, { useState, useEffect } from 'react';
 import { db, storage, auth } from '../firebase/config';
 import { collection, addDoc, doc, getDoc, updateDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { PlusCircle, Upload, Loader2, Link as LinkIcon, Edit3 } from 'lucide-react';
+import { PlusCircle, Loader2, Link as LinkIcon, Edit3 } from 'lucide-react';
 import { useParams, useNavigate } from 'react-router-dom';
 
-// ИМПОРТЫ КОМПОНЕНТОВ (Импортируем без фигурных скобок, так как там export default)
-import SortablePhotoItem from './SortablePhotoItem';
 import SuccessModal from './SuccessModal';
 import SpecsSection from './SpecsSection';
 import BasicInfoSection from './BasicInfoSection';
+import PhotoUploadSection from './PhotoUploadSection';
 
-// DnD Kit
-import {
-  DndContext,
-  closestCenter,
-  KeyboardSensor,
-  PointerSensor,
-  useSensor,
-  useSensors,
-} from '@dnd-kit/core';
-import {
-  arrayMove,
-  SortableContext,
-  sortableKeyboardCoordinates,
-  horizontalListSortingStrategy,
-} from '@dnd-kit/sortable';
+import { useSensor, useSensors, PointerSensor, KeyboardSensor } from '@dnd-kit/core';
+import { arrayMove, sortableKeyboardCoordinates } from '@dnd-kit/sortable';
 
-// Стили
 import 'react-datepicker/dist/react-datepicker.css';
 
 const FigureForm = ({ mode = 'add' }) => {
@@ -67,10 +52,17 @@ const FigureForm = ({ mode = 'add' }) => {
 
   const brandOptions = [
     { value: 'Bandai Spirits', label: 'Bandai Spirits' },
+    { value: 'Bandai Masterlise', label: 'Bandai Masterlise' },
+    { value: 'MegaHouse', label: 'MegaHouse' },
     { value: 'Sega', label: 'Sega' },
     { value: 'Taito', label: 'Taito' },
     { value: 'FuRyu', label: 'FuRyu' },
     { value: 'Good Smile Company', label: 'Good Smile Co.' },
+    { value: 'Kotobukiya', label: 'Kotobukiya' },
+    { value: 'Aniplex', label: 'Aniplex' },
+    { value: 'Alter', label: 'Alter' },
+    { value: 'Banpresto', label: 'Banpresto' },
+    { value: 'Ichiban Kuji', label: 'Ichiban Kuji' },
     { value: 'Other', label: 'Other / Original' },
   ];
 
@@ -79,6 +71,8 @@ const FigureForm = ({ mode = 'add' }) => {
     { value: 'Like New', label: 'Like New' },
     { value: 'Good', label: 'Good' },
     { value: 'Minor Damage', label: 'Minor Damage' },
+    { value: 'Missing Parts', label: 'Missing Parts' },
+    { value: 'Poor', label: 'Poor Condition' },
   ];
 
   const shopOptions = [
@@ -253,64 +247,18 @@ const FigureForm = ({ mode = 'add' }) => {
           />
         </div>
 
-        <div className="space-y-4 pt-4 border-t border-[#333]/50">
-          <label
-            onDragOver={(e) => {
-              e.preventDefault();
-              setIsDraggingOver(true);
-            }}
-            onDragLeave={() => setIsDraggingOver(false)}
-            onDrop={(e) => {
-              e.preventDefault();
-              setIsDraggingOver(false);
-              handleFiles(e.dataTransfer.files);
-            }}
-            className={`flex flex-col items-center justify-center w-full h-28 sm:h-36 border-2 border-dashed rounded-2xl sm:rounded-[2.5rem] cursor-pointer transition-all ${
-              isDraggingOver
-                ? 'border-blue-500 bg-blue-500/10'
-                : 'border-[#333] hover:border-blue-500/50'
-            }`}
-          >
-            <Upload
-              className={isDraggingOver ? 'text-blue-500 scale-110' : 'text-gray-600'}
-              size={24}
-            />
-            <span className="text-gray-500 font-black text-[9px] uppercase tracking-widest mt-2 px-4 text-center">
-              Photos (Max 5)
-            </span>
-            <input
-              type="file"
-              className="hidden"
-              multiple
-              onChange={(e) => handleFiles(e.target.files)}
-              accept="image/*"
-            />
-          </label>
-
-          <DndContext
-            sensors={sensors}
-            collisionDetection={closestCenter}
-            onDragEnd={handleDragEnd}
-          >
-            <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 sm:gap-4">
-              <SortableContext
-                items={mediaItems.map((i) => i.id)}
-                strategy={horizontalListSortingStrategy}
-              >
-                {mediaItems.map((item) => (
-                  <SortablePhotoItem
-                    key={item.id}
-                    id={item.id}
-                    url={item.url}
-                    isPreview={previewId === item.id}
-                    onSetPreview={() => setPreviewId(item.id)}
-                    onRemove={() => removeItem(item.id)}
-                  />
-                ))}
-              </SortableContext>
-            </div>
-          </DndContext>
-        </div>
+        {/* СЕКЦИЯ ЗАГРУЗКИ ФОТО */}
+        <PhotoUploadSection
+          isDraggingOver={isDraggingOver}
+          setIsDraggingOver={setIsDraggingOver}
+          handleFiles={handleFiles}
+          sensors={sensors}
+          handleDragEnd={handleDragEnd}
+          mediaItems={mediaItems}
+          previewId={previewId}
+          setPreviewId={setPreviewId}
+          removeItem={removeItem}
+        />
 
         <div className="space-y-4 pt-4 border-t border-[#333]/50">
           <div className="relative">
