@@ -1,14 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { db, auth } from '../firebase/config'; // Добавил auth
-import { collection, query, orderBy, limit, getDocs, where } from 'firebase/firestore'; // Добавил where
-import { onAuthStateChanged } from 'firebase/auth'; // Добавил слушатель юзера
+import { db, auth } from '../firebase/config';
+import { collection, query, orderBy, limit, getDocs, where } from 'firebase/firestore';
+import { onAuthStateChanged } from 'firebase/auth';
 import { Link } from 'react-router-dom';
 import {
   LayoutGrid,
   PlusCircle,
   Clock,
   Loader2,
-  DollarSign,
   Heart,
   ChevronRight,
   Zap,
@@ -25,7 +24,6 @@ const Home = () => {
   const [user, setUser] = useState(null);
 
   useEffect(() => {
-    // 1. Сначала проверяем, кто залогинен
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
       if (currentUser) {
@@ -34,26 +32,22 @@ const Home = () => {
         setLoading(false);
       }
     });
-
     return () => unsubscribe();
   }, []);
 
   const fetchData = async (uid) => {
     try {
-      // 2. Тянем ЛИЧНУЮ статистику
       const qAll = query(collection(db, 'figures'), where('userId', '==', uid));
       const allFiguresSnap = await getDocs(qAll);
       const allDocs = allFiguresSnap.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
 
       if (allDocs.length > 0) {
-        // Spotlight только из своих
         setSpotlight(allDocs[Math.floor(Math.random() * allDocs.length)]);
       }
 
-      // 3. Последние добавления (ТОЛЬКО СВОИ)
       const recentQ = query(
         collection(db, 'figures'),
-        where('userId', '==', uid), // Фильтр юзера
+        where('userId', '==', uid),
         orderBy('createdAt', 'desc'),
         limit(10),
       );
@@ -82,7 +76,6 @@ const Home = () => {
         rank: getRank(allDocs.length),
       });
 
-      // 4. Предзаказы (ТОЛЬКО СВОИ)
       const qPre = query(collection(db, 'preorders'), where('userId', '==', uid));
       const preorderSnap = await getDocs(qPre);
       if (!preorderSnap.empty) {
@@ -103,7 +96,6 @@ const Home = () => {
       </div>
     );
 
-  // Если не залогинен — просим войти
   if (!user)
     return (
       <div className="h-screen flex flex-col items-center justify-center bg-[#121212] space-y-6">
@@ -122,6 +114,24 @@ const Home = () => {
       <style>{`
         @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
         .animate-marquee { display: flex; width: max-content; animation: marquee 40s linear infinite; }
+        
+        /* Плавное неоновое свечение без дерганий */
+        @keyframes soft-glow {
+          0%, 100% { 
+            opacity: 1; 
+            text-shadow: 0 0 10px rgba(59, 130, 246, 0.4), 0 0 20px rgba(59, 130, 246, 0.2);
+          }
+          50% { 
+            opacity: 0.7; 
+            text-shadow: 0 0 25px rgba(59, 130, 246, 0.7), 0 0 40px rgba(59, 130, 246, 0.3);
+          }
+        }
+
+        .animate-blink { 
+          animation: soft-glow 4s ease-in-out infinite; 
+          will-change: opacity, text-shadow;
+        }
+
         @media (hover: hover) { .animate-marquee:hover { animation-play-state: paused; } }
       `}</style>
 
@@ -130,15 +140,15 @@ const Home = () => {
         <div className="flex flex-col lg:flex-row justify-between items-center lg:items-start gap-10 md:gap-16">
           <div className="flex-1 text-center lg:text-left space-y-6 md:space-y-8 lg:pt-8">
             <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-8xl font-black uppercase italic tracking-tighter leading-[0.9] text-white">
-              Your <span className="text-blue-500">Universe</span>{' '}
-              <br className="hidden sm:block" /> In One Place
+              Beyond The <br />
+              Standard <span className="text-blue-500 animate-blink">Display</span>
             </h1>
             <p className="text-gray-500 text-xs md:text-sm font-bold uppercase tracking-[0.2em] md:tracking-[0.4em] max-w-xl mx-auto lg:mx-0">
               Welcome back,{' '}
               <span className="text-white italic">
                 {user.displayName || user.email.split('@')[0]}
               </span>
-              . Database is live.
+              . System check complete.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start pt-4">
               <Link
@@ -345,7 +355,7 @@ const Home = () => {
           )}
 
           <Link
-            to="/favorites"
+            to="/wishlist"
             className="bg-blue-600/5 border border-blue-500/20 p-6 md:p-8 rounded-[1.5rem] md:rounded-[2.5rem] flex items-center justify-between hover:bg-blue-600/10 transition-all group"
           >
             <div className="flex items-center gap-4 md:gap-6">

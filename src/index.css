@@ -26,3 +26,13 @@ body {
 .tilt-card {
   transform-style: preserve-3d;
 }
+
+:root {
+  --accent: 59, 130, 246; /* По умолчанию синий (RGB) */
+}
+
+
+.text-accent { color: rgb(var(--accent)); }
+.bg-accent { background-color: rgb(var(--accent)); }
+.border-accent { border-color: rgb(var(--accent)); }
+.shadow-accent { shadow-color: rgba(var(--accent), 0.2); }

@@ -9,7 +9,7 @@ import {
   doc,
   deleteDoc,
   where,
-} from 'firebase/firestore'; // Добавил where
+} from 'firebase/firestore';
 import {
   Plus,
   Loader2,
@@ -19,9 +19,10 @@ import {
   ExternalLink,
   Trash2,
   CheckCircle,
+  Target,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { onAuthStateChanged } from 'firebase/auth'; // Добавил слушатель
+import { onAuthStateChanged } from 'firebase/auth';
 import AnimeSearch from '../components/AnimeSearch';
 
 const Wishlist = () => {
@@ -32,45 +33,28 @@ const Wishlist = () => {
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
 
-  const [formData, setFormData] = useState({
-    name: '',
-    anime: '',
-    brand: '',
-    price: '',
-    link: '',
-  });
+  const [formData, setFormData] = useState({ name: '', anime: '', brand: '', price: '', link: '' });
 
   useEffect(() => {
     const unsubAuth = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
       if (currentUser) {
-        // ФИЛЬТР ПО USERID ТЕКУЩЕГО ПОЛЬЗОВАТЕЛЯ
         const q = query(
           collection(db, 'wishlist'),
           where('userId', '==', currentUser.uid),
           orderBy('createdAt', 'desc'),
         );
 
-        const unsubscribeSnap = onSnapshot(
-          q,
-          (snapshot) => {
-            const docs = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-            setItems(docs);
-            setLoading(false);
-          },
-          (error) => {
-            console.error('Wishlist error:', error);
-            setLoading(false);
-          },
-        );
-
+        const unsubscribeSnap = onSnapshot(q, (snapshot) => {
+          const docs = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+          setItems(docs);
+          setLoading(false);
+        });
         return () => unsubscribeSnap();
       } else {
         setLoading(false);
-        setItems([]);
       }
     });
-
     return () => unsubAuth();
   }, []);
 
@@ -91,26 +75,26 @@ const Wishlist = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!user) return alert('Log in to add wishes');
+    if (!user) return;
     setSubmitting(true);
     try {
       await addDoc(collection(db, 'wishlist'), {
         ...formData,
-        userId: user.uid, // ОБЯЗАТЕЛЬНАЯ ПРИВЯЗКА К ЮЗЕРУ
+        userId: user.uid,
         price: Number(formData.price),
         createdAt: new Date(),
       });
       setShowForm(false);
       setFormData({ name: '', anime: '', brand: '', price: '', link: '' });
     } catch (error) {
-      alert('Error: ' + error.message);
+      console.error(error);
     } finally {
       setSubmitting(false);
     }
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm('Remove from Wishlist?')) {
+    if (window.confirm('Remove this grail?')) {
       await deleteDoc(doc(db, 'wishlist', id));
     }
   };
@@ -122,118 +106,121 @@ const Wishlist = () => {
       </div>
     );
 
-  // Если не залогинен — показываем заглушку
-  if (!user)
-    return (
-      <div className="h-screen flex flex-col items-center justify-center bg-[#121212] space-y-6">
-        <Heart className="text-gray-800" size={80} />
-        <h1 className="text-xl font-black uppercase italic text-gray-500">
-          Login to save your grails
-        </h1>
-        <button
-          onClick={() => navigate('/login')}
-          className="bg-pink-600 px-8 py-3 rounded-2xl font-black uppercase text-white shadow-xl"
-        >
-          Sign In
-        </button>
-      </div>
-    );
-
   return (
-    <div className="min-h-screen bg-[#121212] p-6 text-[#e4e4e4]">
+    <div className="min-h-screen bg-[#121212] p-4 md:p-10 text-[#e4e4e4] font-sans">
       <div className="max-w-7xl mx-auto text-left">
-        <div className="flex justify-between items-center mb-10 border-b border-[#333] pb-6">
-          <div className="flex items-center gap-3">
-            <Heart className="text-pink-500 fill-pink-500" size={30} />
-            <h2 className="text-3xl font-black uppercase italic tracking-tighter text-white">
-              Wishlist
-            </h2>
+        {/* HEADER: Приведен к масштабу Collection */}
+        <div className="flex justify-between items-center mb-8 border-b border-[#333] pb-6">
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              <Heart className="text-pink-500 fill-pink-500" size={24} />
+              <h2 className="text-2xl md:text-3xl font-black uppercase italic tracking-tighter text-white">
+                Wishlist
+              </h2>
+            </div>
+            <span className="bg-[#1a1a1a] px-3 py-1 rounded-full text-pink-500 text-xs font-black border border-[#333]">
+              {items.length}
+            </span>
           </div>
           <button
             onClick={() => setShowForm(true)}
-            className="bg-pink-600 hover:bg-pink-500 text-white px-8 py-3 rounded-2xl font-bold flex items-center gap-2 transition-all active:scale-95 shadow-xl"
+            className="bg-pink-600 hover:bg-pink-500 text-white px-6 py-3 rounded-xl font-black uppercase italic text-xs tracking-widest flex items-center gap-2 transition-all active:scale-95 shadow-lg"
           >
-            <Plus size={20} /> Add Target
+            <Plus size={16} /> <span className="hidden sm:inline">Add Target</span>
           </button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        {/* GRID: Карточки стали компактнее */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
           {items.map((item) => (
             <div
               key={item.id}
-              className="bg-[#1a1a1a] border border-[#333] rounded-[2rem] p-6 relative group overflow-hidden flex flex-col justify-between hover:border-pink-500/30 transition-all"
+              className="bg-[#1a1a1a] border border-[#333] rounded-[1.5rem] p-5 relative overflow-hidden flex flex-col justify-between hover:border-pink-500/30 transition-all group"
             >
+              <div className="absolute left-0 top-8 bottom-8 w-0.5 bg-pink-600 opacity-40" />
+
               <div className="relative z-10">
-                <div className="flex justify-between items-start mb-4">
-                  <span className="text-[10px] font-black bg-pink-500/10 text-pink-500 px-3 py-1 rounded-full uppercase tracking-widest italic">
-                    {item.brand || 'Unknown Brand'}
+                <div className="flex justify-between items-start mb-3">
+                  <span className="text-[8px] font-black bg-pink-600/10 text-pink-500 px-2 py-1 rounded-md uppercase tracking-widest border border-pink-500/10 truncate max-w-[140px]">
+                    {item.brand || 'Premium'}
                   </span>
                   <button
                     onClick={() => handleDelete(item.id)}
-                    className="text-gray-600 hover:text-red-500 transition-colors"
+                    className="text-gray-700 hover:text-red-500 transition-colors"
                   >
-                    <Trash2 size={18} />
+                    <Trash2 size={14} />
                   </button>
                 </div>
 
-                <h3 className="text-xl font-bold text-white mb-1 leading-tight uppercase italic">
-                  {item.name}
-                </h3>
-                <p className="text-gray-500 text-xs font-medium mb-4 italic uppercase tracking-widest">
+                <p className="text-blue-500 text-[9px] font-black uppercase italic tracking-widest mb-0.5 truncate">
                   {item.anime}
                 </p>
+                <h3 className="text-base md:text-lg font-black text-white uppercase italic tracking-tighter leading-tight mb-6 line-clamp-2 min-h-[2.5rem]">
+                  {item.name}
+                </h3>
 
-                <div className="flex items-center justify-between mt-6 pt-4 border-t border-[#333]">
-                  <div className="text-2xl font-black text-white italic">${item.price}</div>
+                <div className="flex items-center justify-between pt-4 border-t border-[#333]/50">
+                  <div>
+                    <p className="text-gray-600 text-[7px] uppercase font-black tracking-widest mb-0.5">
+                      Price
+                    </p>
+                    <div className="text-xl font-black text-white italic tracking-tight">
+                      ${item.price}
+                    </div>
+                  </div>
 
                   <div className="flex gap-2">
-                    <button
-                      onClick={() => handleGotIt(item)}
-                      className="bg-green-500/10 hover:bg-green-500 text-green-500 hover:text-white p-3 rounded-xl transition-all flex items-center gap-2 font-bold text-xs"
-                      title="Convert to Collection"
-                    >
-                      <CheckCircle size={20} />
-                      <span className="hidden group-hover:block uppercase italic">Got It!</span>
-                    </button>
-
                     {item.link && (
                       <a
                         href={item.link}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="bg-[#222] hover:bg-[#333] p-3 rounded-xl text-pink-500 transition-all border border-white/5"
+                        className="bg-[#121212] p-2.5 rounded-xl text-gray-500 hover:text-pink-500 border border-[#333] transition-colors"
                       >
-                        <ExternalLink size={20} />
+                        <ExternalLink size={16} />
                       </a>
                     )}
+                    <button
+                      onClick={() => handleGotIt(item)}
+                      className="bg-green-600/10 hover:bg-green-600 text-green-500 hover:text-white p-2.5 px-4 rounded-xl transition-all flex items-center gap-2 font-black uppercase italic text-[10px]"
+                    >
+                      <CheckCircle size={16} />
+                      <span>Got it</span>
+                    </button>
                   </div>
                 </div>
               </div>
             </div>
           ))}
-          {items.length === 0 && (
-            <div className="col-span-full py-20 text-center opacity-20 italic">
-              <p className="font-black uppercase tracking-[0.3em]">No target grails identified</p>
-            </div>
-          )}
         </div>
 
+        {/* Пустое состояние */}
+        {items.length === 0 && (
+          <div className="py-20 text-center opacity-10">
+            <Heart size={60} className="mx-auto mb-4" />
+            <p className="font-black uppercase tracking-[0.3em] text-sm">Wishlist Empty</p>
+          </div>
+        )}
+
+        {/* MODAL: Теперь аккуратный, как на других страницах */}
         {showForm && (
-          <div className="fixed inset-0 z-[150] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md overflow-y-auto">
-            <div className="bg-[#1a1a1a] border border-[#333] w-full max-w-lg rounded-[3rem] p-10 relative my-auto animate-in zoom-in duration-300">
+          <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-300">
+            <div className="bg-[#1a1a1a] border border-[#333] w-full max-w-md rounded-[2rem] p-8 relative shadow-2xl">
               <button
                 onClick={() => setShowForm(false)}
-                className="absolute top-8 right-8 text-gray-500 hover:text-white"
+                className="absolute top-6 right-6 text-gray-500 hover:text-white"
               >
-                <X size={24} />
+                <X size={20} />
               </button>
-              <h2 className="text-2xl font-black mb-8 uppercase italic tracking-tighter text-white">
-                New Wish
+
+              <h2 className="text-xl font-black mb-6 uppercase italic tracking-tighter text-white">
+                New Grail Target
               </h2>
-              <form onSubmit={handleSubmit} className="space-y-5">
+
+              <form onSubmit={handleSubmit} className="space-y-4">
                 <input
                   placeholder="Figure Name *"
-                  className="w-full bg-[#121212] border border-[#333] p-4 rounded-xl outline-none focus:border-pink-500 text-white font-bold"
+                  className="w-full bg-[#121212] border border-[#333] p-4 rounded-xl outline-none focus:border-pink-600 text-sm text-white font-bold"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   required
@@ -242,33 +229,33 @@ const Wishlist = () => {
                   value={formData.anime}
                   onChange={(val) => setFormData({ ...formData, anime: val })}
                 />
-                <input
-                  placeholder="Brand"
-                  className="w-full bg-[#121212] border border-[#333] p-4 rounded-xl outline-none focus:border-pink-500 text-white font-bold"
-                  value={formData.brand}
-                  onChange={(e) => setFormData({ ...formData, brand: e.target.value })}
-                />
-                <input
-                  type="number"
-                  placeholder="Approx. Price ($)"
-                  className="w-full bg-[#121212] border border-[#333] p-4 rounded-xl outline-none focus:border-pink-500 text-white font-bold"
-                  value={formData.price}
-                  onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                />
-                <div className="relative">
-                  <LinkIcon className="absolute left-4 top-4 text-gray-600" size={18} />
+                <div className="grid grid-cols-2 gap-3">
                   <input
-                    placeholder="Product Link (URL)"
-                    className="w-full bg-[#121212] border border-[#333] p-4 pl-12 rounded-xl outline-none focus:border-pink-500 text-white font-bold"
-                    value={formData.link}
-                    onChange={(e) => setFormData({ ...formData, link: e.target.value })}
+                    placeholder="Brand"
+                    className="w-full bg-[#121212] border border-[#333] p-4 rounded-xl outline-none text-sm text-white font-bold"
+                    value={formData.brand}
+                    onChange={(e) => setFormData({ ...formData, brand: e.target.value })}
+                  />
+                  <input
+                    type="number"
+                    placeholder="Price ($)"
+                    className="w-full bg-[#121212] border border-[#333] p-4 rounded-xl outline-none text-sm text-white font-bold"
+                    value={formData.price}
+                    onChange={(e) => setFormData({ ...formData, price: e.target.value })}
                   />
                 </div>
+                <input
+                  placeholder="Link (URL)"
+                  className="w-full bg-[#121212] border border-[#333] p-4 rounded-xl outline-none text-sm text-white font-bold"
+                  value={formData.link}
+                  onChange={(e) => setFormData({ ...formData, link: e.target.value })}
+                />
+
                 <button
                   disabled={submitting}
-                  className="w-full bg-pink-600 py-4 rounded-2xl font-black text-lg hover:bg-pink-500 text-white shadow-xl uppercase italic tracking-widest"
+                  className="w-full bg-pink-600 py-4 rounded-xl font-black text-sm hover:bg-pink-500 text-white uppercase italic tracking-widest transition-all active:scale-95"
                 >
-                  {submitting ? 'ADDING...' : 'ADD TO WISHLIST'}
+                  {submitting ? 'Adding...' : 'Add to Wishlist'}
                 </button>
               </form>
             </div>
