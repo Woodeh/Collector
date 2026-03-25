@@ -59,7 +59,7 @@ const FigureForm = ({ mode = 'add' }) => {
     { value: 'FuRyu', label: 'FuRyu' },
     { value: 'Good Smile Company', label: 'Good Smile Co.' },
     { value: 'Kotobukiya', label: 'Kotobukiya' },
-    { value: 'Aniplex', label: 'Aniplex' },
+    { value: 'Inart', label: 'Inart' },
     { value: 'Alter', label: 'Alter' },
     { value: 'Banpresto', label: 'Banpresto' },
     { value: 'Ichiban Kuji', label: 'Ichiban Kuji' },
