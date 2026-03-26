@@ -3,23 +3,8 @@ import { auth, db } from '../firebase/config';
 import { onAuthStateChanged } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
 import { collection, onSnapshot, query, where, doc, updateDoc } from 'firebase/firestore';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import {
-  PieChart,
-  Pie,
-  Cell,
-  ResponsiveContainer,
-  Tooltip,
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-} from 'recharts';
-import {
-  User,
-  LogOut,
-  DollarSign,
-  Clock,
-  Target,
   X,
   Info,
   Layers,
@@ -27,7 +12,12 @@ import {
   ChevronLeft,
   History,
   TrendingUp,
+  Target,
 } from 'lucide-react';
+
+// Импорт вынесенных компонентов
+import ProfileHeader from '../components/ProfileHeader';
+import StatsAndCharts from '../components/StatsAndCharts';
 
 const CustomTooltip = ({ active, payload }) => {
   if (active && payload && payload.length) {
@@ -62,13 +52,11 @@ const Profile = () => {
 
   const COLORS = ['#3b82f6', '#ec4899', '#f97316', '#8b5cf6', '#22c55e', '#eab308', '#ef4444'];
 
-  // Функция прокрутки слайдера
   const scroll = (direction) => {
     if (scrollRef.current) {
       const { scrollLeft, clientWidth } = scrollRef.current;
       const scrollTo =
         direction === 'left' ? scrollLeft - clientWidth / 1.5 : scrollLeft + clientWidth / 1.5;
-
       scrollRef.current.scrollTo({ left: scrollTo, behavior: 'smooth' });
     }
   };
@@ -78,7 +66,6 @@ const Profile = () => {
       setUser(currentUser);
       if (currentUser) {
         const qFigures = query(collection(db, 'figures'), where('userId', '==', currentUser.uid));
-
         const unsubFigures = onSnapshot(qFigures, (snap) => {
           const figuresList = [];
           let totalValue = 0,
@@ -103,7 +90,6 @@ const Profile = () => {
               .sort((a, b) => b.createdAt?.seconds - a.createdAt?.seconds)
               .slice(0, 10),
           );
-
           setAnimeData(
             Object.keys(animeMap)
               .map((n) => ({ name: n, value: animeMap[n] }))
@@ -234,106 +220,17 @@ const Profile = () => {
       )}
 
       <div className="max-w-7xl mx-auto space-y-8 relative z-10 text-left">
-        {/* HEADER */}
-        <div className="flex flex-col md:flex-row justify-between items-center bg-[#1a1a1a] border border-[#333] p-8 rounded-[3rem] gap-6 shadow-2xl relative z-10 text-left">
-          <div className="flex items-center gap-6 text-left">
-            <div className="w-20 h-20 bg-blue-600 rounded-[2rem] flex items-center justify-center shadow-lg">
-              <User size={40} className="text-white" />
-            </div>
-            <div className="text-left">
-              <h1 className="text-3xl font-black uppercase italic text-white leading-none text-left">
-                {user.displayName || user.email.split('@')[0]}
-              </h1>
-              <p className="text-blue-500 font-bold text-sm mt-1">{user.email}</p>
-            </div>
-          </div>
-          <button
-            onClick={() => {
-              auth.signOut();
-              navigate('/login');
-            }}
-            className="flex items-center gap-2 bg-red-600 hover:bg-red-500 text-white px-8 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all cursor-pointer shadow-lg active:scale-95"
-          >
-            <LogOut size={16} /> Logout
-          </button>
-        </div>
+        <ProfileHeader user={user} navigate={navigate} />
 
-        {/* STATS GRID */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 relative z-10 text-left">
-          <div className="lg:col-span-4 space-y-8">
-            <div className="bg-[#1a1a1a] border border-[#333] p-8 rounded-[3rem] space-y-6 shadow-2xl text-left">
-              <h4 className="text-[10px] font-black text-gray-600 uppercase tracking-[0.3em] italic text-left">
-                Financial Hub
-              </h4>
-              <div className="space-y-4 text-left">
-                {[
-                  {
-                    label: 'Total Value',
-                    val: collectionStats.totalValue,
-                    color: 'text-white',
-                    icon: <DollarSign size={18} />,
-                    bg: 'bg-blue-500/10',
-                  },
-                  {
-                    label: 'Pre-order Debt',
-                    val: preorderStats.totalValue,
-                    color: 'text-orange-500',
-                    icon: <Clock size={18} />,
-                    bg: 'bg-orange-500/10',
-                  },
-                  {
-                    label: 'Wishlist Budget',
-                    val: wishlistStats.totalValue,
-                    color: 'text-pink-500',
-                    icon: <Target size={18} />,
-                    bg: 'bg-pink-500/10',
-                  },
-                ].map((stat, i) => (
-                  <div
-                    key={i}
-                    className="flex items-center gap-4 p-4 bg-[#121212] rounded-2xl border border-white/5 transition-all hover:border-white/10 text-left text-left"
-                  >
-                    <div className={`p-3 ${stat.bg} rounded-xl ${stat.color}`}>{stat.icon}</div>
-                    <div className="text-left">
-                      <p className="text-[8px] text-gray-500 uppercase font-black mb-1">
-                        {stat.label}
-                      </p>
-                      <p className={`text-xl font-black ${stat.color} italic leading-none`}>
-                        ${stat.val.toLocaleString()}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-            <div className="bg-[#1a1a1a] border border-[#333] p-8 rounded-[3rem] shadow-2xl h-[400px] text-left">
-              <h4 className="text-[10px] font-black text-gray-600 uppercase tracking-[0.3em] italic mb-6 text-left text-left">
-                Top Franchises
-              </h4>
-              <ResponsiveContainer width="100%" height="90%">
-                <BarChart data={animeData} layout="vertical" margin={{ left: -20, right: 20 }}>
-                  <XAxis type="number" hide />
-                  <YAxis
-                    dataKey="name"
-                    type="category"
-                    axisLine={false}
-                    tickLine={false}
-                    tick={{ fill: '#666', fontSize: 10, fontWeight: 'bold' }}
-                    width={80}
-                  />
-                  <Tooltip content={<CustomTooltip />} cursor={{ fill: 'transparent' }} />
-                  <Bar
-                    dataKey="value"
-                    fill="#3b82f6"
-                    radius={[0, 10, 10, 0]}
-                    barSize={20}
-                    className="cursor-pointer outline-none"
-                  />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
+          <StatsAndCharts
+            collectionStats={collectionStats}
+            preorderStats={preorderStats}
+            wishlistStats={wishlistStats}
+            animeData={animeData}
+          />
 
+          {/* MAIN GRAIL CARD */}
           <div className="lg:col-span-4 relative group/container text-left">
             <div className="bg-[#1a1a1a] border border-[#333] rounded-[3rem] shadow-3xl h-full overflow-hidden flex flex-col relative z-10 transition-all duration-500 group hover:border-blue-500/30">
               <button
@@ -375,7 +272,7 @@ const Profile = () => {
                   </div>
                 </div>
               ) : (
-                <div className="h-full flex items-center justify-center opacity-10 font-black italic text-left text-left text-left">
+                <div className="h-full flex items-center justify-center opacity-10 font-black italic text-left">
                   Empty Shelf
                 </div>
               )}
@@ -383,13 +280,14 @@ const Profile = () => {
           </div>
 
           <div className="lg:col-span-4 space-y-8 text-left">
-            <div className="bg-[#1a1a1a] border border-[#333] p-8 rounded-[3rem] shadow-2xl relative group overflow-hidden text-left text-left">
+            {/* NEXT ARRIVAL */}
+            <div className="bg-[#1a1a1a] border border-[#333] p-8 rounded-[3rem] shadow-2xl relative group overflow-hidden text-left">
               <h4 className="text-[10px] font-black text-gray-600 uppercase tracking-[0.3em] italic mb-6">
                 Next Arrival
               </h4>
               {nextRelease ? (
                 <div className="space-y-6 text-left">
-                  <div className="text-left text-left">
+                  <div className="text-left">
                     <p className="text-orange-500 font-black uppercase text-[9px] tracking-widest mb-1 italic leading-none text-left">
                       {nextRelease.anime}
                     </p>
@@ -428,6 +326,8 @@ const Profile = () => {
                 </p>
               )}
             </div>
+
+            {/* BRANDS SPLIT */}
             <div className="bg-[#1a1a1a] border border-[#333] p-8 rounded-[3rem] shadow-2xl min-h-[400px] flex flex-col text-left">
               <div className="flex items-center justify-between mb-8 text-left">
                 <h4 className="text-[10px] font-black text-gray-600 uppercase tracking-[0.3em] italic text-left">
@@ -436,7 +336,7 @@ const Profile = () => {
                 <Layers size={14} className="text-gray-700" />
               </div>
               <div className="flex flex-col gap-6 text-left">
-                <div className="h-40 w-full relative text-left text-left">
+                <div className="h-40 w-full relative text-left">
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
                       <Pie
@@ -470,12 +370,12 @@ const Profile = () => {
                   {brandData.slice(0, 5).map((brand, i) => (
                     <div key={i} className="space-y-1.5 text-left">
                       <div className="flex justify-between items-end">
-                        <div className="flex items-center gap-2 text-left text-left">
+                        <div className="flex items-center gap-2 text-left">
                           <div
-                            className="w-1 h-1 rounded-full text-left text-left"
+                            className="w-1 h-1 rounded-full"
                             style={{ backgroundColor: COLORS[i % COLORS.length] }}
                           />
-                          <p className="text-[10px] font-black text-white uppercase italic truncate max-w-[120px] text-left text-left">
+                          <p className="text-[10px] font-black text-white uppercase italic truncate max-w-[120px] text-left">
                             {brand.name}
                           </p>
                         </div>
@@ -500,8 +400,8 @@ const Profile = () => {
           </div>
         </div>
 
-        {/* BOTTOM BLOCK: FULL-FEATURED SLIDER */}
-        <div className="bg-[#1a1a1a] border border-[#333] rounded-[3rem] p-10 shadow-3xl relative z-10 text-left overflow-hidden text-left">
+        {/* BOTTOM BLOCK: SLIDER */}
+        <div className="bg-[#1a1a1a] border border-[#333] rounded-[3rem] p-10 shadow-3xl relative z-10 text-left overflow-hidden">
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-10 gap-4 text-left">
             <div className="flex items-center gap-4 text-left">
               <div className="p-3 bg-blue-500/10 rounded-2xl text-blue-500 text-left">
@@ -516,7 +416,6 @@ const Profile = () => {
                 </p>
               </div>
             </div>
-
             <div className="flex items-center gap-3 self-end md:self-auto text-left">
               <button
                 onClick={() => scroll('left')}
@@ -532,7 +431,6 @@ const Profile = () => {
               </button>
             </div>
           </div>
-
           <div
             ref={scrollRef}
             className="flex gap-6 overflow-x-auto pb-6 pt-2 custom-scrollbar hide-scrollbar scroll-smooth active:cursor-grabbing select-none text-left"
@@ -542,19 +440,19 @@ const Profile = () => {
                 <div
                   key={fig.id}
                   onClick={() => navigate(`/figure/${fig.id}`)}
-                  className="flex-shrink-0 w-64 bg-[#121212] border border-white/5 rounded-3xl p-5 group hover:border-blue-500/40 transition-all duration-500 cursor-pointer relative text-left text-left"
+                  className="flex-shrink-0 w-64 bg-[#121212] border border-white/5 rounded-3xl p-5 group hover:border-blue-500/40 transition-all duration-500 cursor-pointer relative text-left"
                 >
                   <div className="absolute top-4 right-4 z-10 opacity-0 group-hover:opacity-100 transition-opacity bg-blue-600 rounded-lg p-1.5 shadow-lg text-left">
                     <Info size={14} className="text-white" />
                   </div>
-                  <div className="w-full h-40 rounded-2xl overflow-hidden mb-5 bg-[#1a1a1a] relative text-left text-left">
+                  <div className="w-full h-40 rounded-2xl overflow-hidden mb-5 bg-[#1a1a1a] relative text-left">
                     <img
                       src={fig.previewImage || fig.image}
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                       alt=""
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent opacity-60 text-left"></div>
-                    <div className="absolute bottom-3 left-3 flex items-center gap-2 text-left text-left">
+                    <div className="absolute bottom-3 left-3 flex items-center gap-2 text-left">
                       <span className="bg-blue-600 text-[8px] font-black text-white px-2 py-0.5 rounded uppercase italic text-left">
                         Recent
                       </span>
@@ -579,17 +477,16 @@ const Profile = () => {
                 </div>
               ))
             ) : (
-              <div className="w-full py-20 flex flex-col items-center justify-center opacity-10 text-left text-left text-left">
-                <TrendingUp size={48} className="mb-4 text-left text-left" />
+              <div className="w-full py-20 flex flex-col items-center justify-center opacity-10 text-left">
+                <TrendingUp size={48} className="mb-4 text-left" />
                 <p className="font-black italic uppercase tracking-widest text-left">Empty Vault</p>
               </div>
             )}
-
             <div
               onClick={() => navigate('/add-figure')}
-              className="flex-shrink-0 w-64 bg-blue-600/5 border border-dashed border-blue-500/20 rounded-3xl p-5 flex flex-col items-center justify-center text-center group hover:bg-blue-600/10 hover:border-blue-500/40 transition-all duration-500 cursor-pointer text-left text-left text-left"
+              className="flex-shrink-0 w-64 bg-blue-600/5 border border-dashed border-blue-500/20 rounded-3xl p-5 flex flex-col items-center justify-center text-center group hover:bg-blue-600/10 hover:border-blue-500/40 transition-all duration-500 cursor-pointer text-left"
             >
-              <div className="w-12 h-12 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-500 mb-4 group-hover:scale-110 transition-transform text-left text-left text-left">
+              <div className="w-12 h-12 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-500 mb-4 group-hover:scale-110 transition-transform text-left">
                 <Target size={24} />
               </div>
               <p className="text-[10px] font-black text-white uppercase tracking-widest italic text-left">
