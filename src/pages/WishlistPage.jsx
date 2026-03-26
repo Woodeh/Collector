@@ -4,6 +4,7 @@ import {
   collection,
   addDoc,
   query,
+  orderBy,
   onSnapshot,
   doc,
   deleteDoc,
@@ -14,6 +15,7 @@ import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { Loader2, Heart, Plus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { onAuthStateChanged } from 'firebase/auth';
+
 import { WishlistCard, WishlistForm } from '../components/wishlist';
 
 const WishlistPage = () => {
@@ -25,6 +27,7 @@ const WishlistPage = () => {
   const [editingId, setEditingId] = useState(null);
   const navigate = useNavigate();
 
+  // Добавили 'image' в formData для хранения URL ссылки
   const [formData, setFormData] = useState({
     name: '',
     anime: '',
@@ -40,16 +43,13 @@ const WishlistPage = () => {
     const unsubAuth = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
       if (currentUser) {
-        const q = query(collection(db, 'wishlist'), where('userId', '==', currentUser.uid));
-
+        const q = query(
+          collection(db, 'wishlist'),
+          where('userId', '==', currentUser.uid),
+          orderBy('createdAt', 'desc'),
+        );
         const unsubscribeSnap = onSnapshot(q, (snapshot) => {
-          const docs = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-          const sortedDocs = docs.sort((a, b) => {
-            const dateA = a.createdAt?.seconds || 0;
-            const dateB = b.createdAt?.seconds || 0;
-            return dateB - dateA;
-          });
-          setItems(sortedDocs);
+          setItems(snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
           setLoading(false);
         });
         return () => unsubscribeSnap();
@@ -65,6 +65,7 @@ const WishlistPage = () => {
     if (file) {
       setImageFile(file);
       setImagePreview(URL.createObjectURL(file));
+      // Очищаем текстовое поле ссылки, если выбрали файл, чтобы не было путаницы
       setFormData((prev) => ({ ...prev, image: '' }));
     }
   };
@@ -85,7 +86,7 @@ const WishlistPage = () => {
       brand: item.brand,
       price: item.price,
       link: item.link || '',
-      image: item.image || '',
+      image: item.image || '', // Ссылка на фото подтянется сюда
     });
     setImagePreview(item.image || null);
     setImageFile(null);
@@ -98,8 +99,10 @@ const WishlistPage = () => {
     setSubmitting(true);
 
     try {
+      // По умолчанию берем то, что в поле ссылки (image) или старое превью
       let finalImageUrl = formData.image || imagePreview;
 
+      // Если же юзер выбрал локальный файл, загружаем его в Storage
       if (imageFile) {
         const storageRef = ref(storage, `wishlist/${user.uid}/${Date.now()}_${imageFile.name}`);
         await uploadBytes(storageRef, imageFile);
@@ -112,7 +115,7 @@ const WishlistPage = () => {
         brand: formData.brand,
         price: Number(formData.price),
         link: formData.link,
-        image: finalImageUrl || '',
+        image: finalImageUrl || '', // Сохраняем итоговую ссылку
         updatedAt: new Date(),
       };
 
@@ -129,6 +132,7 @@ const WishlistPage = () => {
       setImageFile(null);
     } catch (error) {
       console.error('Submit error:', error);
+      alert('Ошибка при сохранении');
     } finally {
       setSubmitting(false);
     }

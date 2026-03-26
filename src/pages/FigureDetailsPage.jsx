@@ -107,6 +107,7 @@ const FigureDetailsPage = () => {
               </h1>
             </div>
 
+            {/* СЕТКА ХАРАКТЕРИСТИК (ВМЕСТО STATCARD) */}
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               {/* PRICE */}
               <div className="bg-[#1a1a1a] p-6 rounded-[2rem] border border-[#333]">
