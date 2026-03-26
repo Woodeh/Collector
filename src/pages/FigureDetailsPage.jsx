@@ -15,7 +15,7 @@ import {
 
 import FigureSlider from '../components/FigureSlider';
 
-const FigureDetails = () => {
+const FigureDetailsPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [figure, setFigure] = useState(null);
@@ -241,4 +241,4 @@ const FigureDetails = () => {
   );
 };
 
-export default FigureDetails;
+export default FigureDetailsPage;

@@ -1,15 +1,15 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Header from './components/Header';
-import Collection from './pages/Collection';
-import Login from './pages/Login.jsx';
-import FigureDetails from './pages/FigureDetails';
-import PreOrders from './pages/PreOrders';
-import Wishlist from './pages/Wishlist';
-import Home from './pages/Home';
+import Collection from './pages/CollectionPage';
+import Login from './pages/LoginPage';
+import FigureDetails from './pages/FigureDetailsPage';
+import PreOrders from './pages/PreOrdersPage';
+import Wishlist from './pages/WishlistPage';
+import Home from './pages/HomePage';
 import FigureForm from './components/FigureForm';
-import Profile from './pages/Profile.jsx';
-import Community from './pages/Community';
+import Profile from './pages/ProfilePage';
+import Community from './pages/CommunityPage';
 
 function App() {
   return (

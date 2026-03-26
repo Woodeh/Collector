@@ -8,7 +8,7 @@ import PhotoUpload from '../components/PhotoUpload';
 import AnimeSearch from '../components/AnimeSearch';
 import CustomSelect from '../components/Select';
 
-const AddFigure = () => {
+const AddFigurePage = () => {
   const navigate = useNavigate();
   const [files, setFiles] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -108,4 +108,4 @@ const AddFigure = () => {
   );
 };
 
-export default AddFigure;
+export default AddFigurePage;

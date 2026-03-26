@@ -25,7 +25,7 @@ import { useNavigate } from 'react-router-dom';
 import { onAuthStateChanged } from 'firebase/auth';
 import AnimeSearch from '../components/AnimeSearch';
 
-const Wishlist = () => {
+const WishlistPage = () => {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -266,4 +266,4 @@ const Wishlist = () => {
   );
 };
 
-export default Wishlist;
+export default WishlistPage;

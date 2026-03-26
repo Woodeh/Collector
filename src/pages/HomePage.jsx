@@ -7,7 +7,7 @@ import { LayoutGrid, Loader2, ChevronRight, Clock, Heart } from 'lucide-react';
 
 import { HeroSection, QuickStats, SpotlightCard } from '../components/home';
 
-const Home = () => {
+const HomePage = () => {
   const [recentFigures, setRecentFigures] = useState([]);
   const [spotlight, setSpotlight] = useState(null);
   const [nextPreorder, setNextPreorder] = useState(null);
@@ -208,4 +208,4 @@ const Home = () => {
   );
 };
 
-export default Home;
+export default HomePage;

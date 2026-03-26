@@ -8,7 +8,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { LogIn, Lock, Mail, UserPlus, Loader2 } from 'lucide-react';
 
-const Login = () => {
+const LoginPage = () => {
   const [isLogin, setIsLogin] = useState(true); // Состояние: вход или регистрация
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -137,4 +137,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default LoginPage;
