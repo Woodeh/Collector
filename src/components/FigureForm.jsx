@@ -9,6 +9,7 @@ import SuccessModal from './SuccessModal';
 import SpecsSection from './SpecsSection';
 import BasicInfoSection from './BasicInfoSection';
 import PhotoUploadSection from './PhotoUploadSection';
+import ImageCropper from './ImageCropper';
 
 import { useSensor, useSensors, PointerSensor, KeyboardSensor } from '@dnd-kit/core';
 import { arrayMove, sortableKeyboardCoordinates } from '@dnd-kit/sortable';
@@ -28,6 +29,7 @@ const FigureForm = ({ mode = 'add' }) => {
   const [currency, setCurrency] = useState('USD');
   const [mediaItems, setMediaItems] = useState([]);
   const [previewId, setPreviewId] = useState(null);
+  const [cropTarget, setCropTarget] = useState(null);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -120,6 +122,7 @@ const FigureForm = ({ mode = 'add' }) => {
       useWebWorker: true,
       fileType: 'image/webp',
     };
+
     try {
       const compressedItems = await Promise.all(
         validFiles.map(async (file) => {
@@ -139,10 +142,53 @@ const FigureForm = ({ mode = 'add' }) => {
         return combined;
       });
     } catch (error) {
-      console.error('Compression error:', error);
+      console.error(error);
     } finally {
       setLoading(false);
     }
+  };
+
+  const openCropperForItem = (id) => {
+    const item = mediaItems.find((i) => i.id === id);
+    if (!item) return;
+    setCropTarget({ id: item.id, url: item.url, name: item.file?.name || 'edit.webp' });
+  };
+
+  const onCropFinal = async (croppedBlob) => {
+    const targetId = cropTarget.id;
+    const targetName = cropTarget.name;
+    const oldUrl = cropTarget.url;
+    setCropTarget(null);
+    setLoading(true);
+
+    try {
+      const croppedFile = new File([croppedBlob], targetName, { type: 'image/webp' });
+      const finalFile = await imageCompression(croppedFile, {
+        maxSizeMB: 0.8,
+        fileType: 'image/webp',
+      });
+      const finalUrl = URL.createObjectURL(finalFile);
+
+      if (oldUrl.startsWith('blob:')) URL.revokeObjectURL(oldUrl);
+
+      setMediaItems((prev) =>
+        prev.map((item) =>
+          item.id === targetId ? { ...item, url: finalUrl, file: finalFile, type: 'new' } : item,
+        ),
+      );
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const removeItem = (id) => {
+    setMediaItems((prev) => {
+      const filtered = prev.filter((item) => item.id !== id);
+      if (previewId === id && filtered.length > 0) setPreviewId(filtered[0].id);
+      return filtered;
+    });
   };
 
   const handleDragEnd = (event) => {
@@ -154,14 +200,6 @@ const FigureForm = ({ mode = 'add' }) => {
         return arrayMove(items, oldIndex, newIndex);
       });
     }
-  };
-
-  const removeItem = (id) => {
-    setMediaItems((prev) => {
-      const filtered = prev.filter((item) => item.id !== id);
-      if (previewId === id && filtered.length > 0) setPreviewId(filtered[0].id);
-      return filtered;
-    });
   };
 
   const handleSubmit = async (e) => {
@@ -191,6 +229,7 @@ const FigureForm = ({ mode = 'add' }) => {
         price: priceInUSD,
         updatedAt: new Date(),
       };
+
       if (isEdit) {
         await updateDoc(doc(db, 'figures', id), finalData);
       } else {
@@ -212,16 +251,8 @@ const FigureForm = ({ mode = 'add' }) => {
     }
   };
 
-  // ФИКС ЦВЕТОВ И ШРИФТОВ
-  const inputBaseClass = `
-    w-full bg-[#121212] border border-[#333] p-4 pl-12 rounded-xl 
-    font-bold text-white text-sm 
-    focus:border-blue-500 focus:bg-[#121212] focus:text-white
-    outline-none transition-all 
-    placeholder:text-gray-700 placeholder:font-normal placeholder:italic
-  `
-    .replace(/\s+/g, ' ')
-    .trim();
+  const inputBaseClass =
+    'w-full bg-[#121212] !bg-[#121212] border border-[#333] p-4 pl-12 rounded-xl font-bold text-white text-sm outline-none transition-all focus:border-blue-500 placeholder:text-gray-700 autofill:shadow-[0_0_0_30px_#121212_inset] autofill:text-fill-white';
 
   if (fetching)
     return (
@@ -233,28 +264,41 @@ const FigureForm = ({ mode = 'add' }) => {
 
   return (
     <div className="w-full max-w-4xl mx-auto px-4 py-6 sm:p-6 text-[#e4e4e4] relative text-left font-sans tracking-tight">
+      <style>{`
+        input, select, textarea { font-family: inherit !important; background-color: #121212 !important; }
+        .react-datepicker-wrapper { width: 100% !important; }
+        .react-datepicker__input-container input { 
+           width: 100% !important; height: 54px !important; background-color: #121212 !important; 
+           color: white !important; border: 1px solid #333 !important; padding-left: 3rem !important;
+           border-radius: 0.75rem !important; font-weight: 700 !important;
+        }
+        .react-datepicker { background-color: #1a1a1a !important; border: 1px solid #333 !important; color: white !important; }
+        .react-datepicker__header { background-color: #121212 !important; border-bottom: 1px solid #333 !important; }
+        .react-datepicker__current-month, .react-datepicker__day-name, .react-datepicker__day { color: white !important; }
+        .react-datepicker__day--selected { background-color: #2563eb !important; }
+      `}</style>
+
+      {cropTarget && (
+        <ImageCropper
+          image={cropTarget.url}
+          onCropComplete={onCropFinal}
+          onCancel={() => setCropTarget(null)}
+        />
+      )}
+
       {loading && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-[999] flex flex-col items-center justify-center animate-in fade-in duration-300">
-          <div className="relative">
-            <Loader2 className="animate-spin text-blue-500 mb-6" size={60} />
-            <Zap
-              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-blue-400/30 animate-pulse"
-              size={30}
-            />
-          </div>
-          <h3 className="text-xl font-black uppercase italic tracking-[0.2em] text-white animate-pulse text-center px-4">
-            Optimizing Visual Data
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-[999] flex flex-col items-center justify-center">
+          <Loader2 className="animate-spin text-blue-500 mb-6" size={60} />
+          <h3 className="text-xl font-black uppercase italic tracking-[0.2em] text-white animate-pulse">
+            Processing...
           </h3>
-          <p className="text-[10px] text-blue-500 mt-2 font-mono uppercase tracking-widest opacity-60">
-            Applying WebP Compression Matrix...
-          </p>
         </div>
       )}
 
       <SuccessModal data={epicSuccess} />
 
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8 sm:mb-10 text-left">
-        <h2 className="text-3xl sm:text-4xl font-black flex items-center gap-4 uppercase tracking-tighter italic text-white text-left">
+      <div className="mb-10 text-left">
+        <h2 className="text-3xl sm:text-4xl font-black flex items-center gap-4 uppercase italic text-white leading-none">
           {isEdit ? (
             <Edit3 className="text-blue-500" size={28} />
           ) : (
@@ -266,9 +310,9 @@ const FigureForm = ({ mode = 'add' }) => {
 
       <form
         onSubmit={handleSubmit}
-        className="bg-[#1a1a1a] p-5 sm:p-10 rounded-[2rem] sm:rounded-[3rem] border border-[#333] space-y-8 shadow-2xl"
+        className="bg-[#1a1a1a] p-5 sm:p-10 rounded-[2rem] sm:rounded-[3rem] border border-[#333] space-y-12 shadow-2xl"
       >
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 sm:gap-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-10 text-left">
           <BasicInfoSection
             formData={formData}
             handleCustomChange={handleCustomChange}
@@ -285,9 +329,8 @@ const FigureForm = ({ mode = 'add' }) => {
           />
         </div>
 
-        {/* FULL FIGURE NAME - ИСПРАВЛЕННЫЙ ОТСТУП И СТИЛЬ */}
-        <div className="mt-10 pt-8 border-t border-[#333]/50 space-y-4">
-          <label className="text-[10px] font-black uppercase tracking-[0.2em] text-blue-500 italic ml-1 block">
+        <div className="mt-12 pt-10 border-t border-[#333]/50 space-y-4 text-left">
+          <label className="text-[10px] font-black uppercase tracking-[0.2em] text-blue-500 italic block">
             Full Figure Name
           </label>
           <div className="relative">
@@ -306,19 +349,22 @@ const FigureForm = ({ mode = 'add' }) => {
           </div>
         </div>
 
-        <PhotoUploadSection
-          isDraggingOver={isDraggingOver}
-          setIsDraggingOver={setIsDraggingOver}
-          handleFiles={handleFiles}
-          sensors={sensors}
-          handleDragEnd={handleDragEnd}
-          mediaItems={mediaItems}
-          previewId={previewId}
-          setPreviewId={setPreviewId}
-          removeItem={removeItem}
-        />
+        <div className="pt-2">
+          <PhotoUploadSection
+            isDraggingOver={isDraggingOver}
+            setIsDraggingOver={setIsDraggingOver}
+            handleFiles={handleFiles}
+            sensors={sensors}
+            handleDragEnd={handleDragEnd}
+            mediaItems={mediaItems}
+            previewId={previewId}
+            setPreviewId={setPreviewId}
+            removeItem={removeItem}
+            onCropItem={openCropperForItem}
+          />
+        </div>
 
-        <div className="space-y-6 pt-8 border-t border-[#333]/50 text-left">
+        <div className="space-y-6 pt-10 border-t border-[#333]/50">
           <div className="relative">
             <LinkIcon
               className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600"
@@ -338,7 +384,7 @@ const FigureForm = ({ mode = 'add' }) => {
             <textarea
               name="conditionNotes"
               placeholder="Condition notes..."
-              className={`${inputBaseClass} h-32 resize-none pt-4 leading-relaxed`}
+              className={`${inputBaseClass} h-32 resize-none pt-4 pl-12`}
               onChange={handleChange}
               value={formData.conditionNotes || ''}
             ></textarea>
@@ -347,15 +393,9 @@ const FigureForm = ({ mode = 'add' }) => {
 
         <button
           disabled={loading}
-          className="w-full py-5 sm:py-6 rounded-xl sm:rounded-[2rem] bg-blue-600 hover:bg-blue-500 text-white font-black text-lg sm:text-xl tracking-widest transition-all shadow-xl active:scale-95 uppercase italic flex items-center justify-center gap-3 disabled:opacity-50"
+          className="w-full py-6 rounded-[2rem] bg-blue-600 hover:bg-blue-500 text-white font-black text-xl tracking-widest uppercase italic transition-all active:scale-95 shadow-xl shadow-blue-600/20"
         >
-          {loading ? (
-            <Loader2 className="animate-spin" size={24} />
-          ) : isEdit ? (
-            'Save Changes'
-          ) : (
-            'Add to Collection'
-          )}
+          {isEdit ? 'Save Changes' : 'Add to Collection'}
         </button>
       </form>
     </div>
