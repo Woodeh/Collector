@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { db, storage, auth } from '../firebase/config';
 import { collection, addDoc, doc, getDoc, updateDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { PlusCircle, Loader2, Link as LinkIcon, Edit3 } from 'lucide-react';
+import { PlusCircle, Loader2, Link as LinkIcon, Edit3, Zap } from 'lucide-react';
 import { useParams, useNavigate } from 'react-router-dom';
 
 import SuccessModal from './SuccessModal';
@@ -12,6 +12,7 @@ import PhotoUploadSection from './PhotoUploadSection';
 
 import { useSensor, useSensors, PointerSensor, KeyboardSensor } from '@dnd-kit/core';
 import { arrayMove, sortableKeyboardCoordinates } from '@dnd-kit/sortable';
+import imageCompression from 'browser-image-compression';
 
 import 'react-datepicker/dist/react-datepicker.css';
 
@@ -108,20 +109,45 @@ const FigureForm = ({ mode = 'add' }) => {
   const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
   const handleCustomChange = (name, value) => setFormData((prev) => ({ ...prev, [name]: value }));
 
-  const handleFiles = (newFiles) => {
-    const validFiles = Array.from(newFiles).filter((f) => f.type.startsWith('image/'));
-    const items = validFiles.map((file) => ({
-      id: Math.random().toString(36).substr(2, 9),
-      url: URL.createObjectURL(file),
-      file: file,
-      type: 'new',
-    }));
+  const handleFiles = async (newFiles) => {
+    const fileArray = Array.from(newFiles);
+    const validFiles = fileArray.filter((f) => f.type.startsWith('image/'));
 
-    setMediaItems((prev) => {
-      const combined = [...prev, ...items].slice(0, 5);
-      if (!previewId && combined.length > 0) setPreviewId(combined[0].id);
-      return combined;
-    });
+    setLoading(true);
+
+    const compressionOptions = {
+      maxSizeMB: 0.8,
+      maxWidthOrHeight: 1200,
+      useWebWorker: true,
+      fileType: 'image/webp',
+    };
+
+    try {
+      const compressedItems = await Promise.all(
+        validFiles.map(async (file) => {
+          let finalFile = file;
+          if (file.size > 200 * 1024) {
+            finalFile = await imageCompression(file, compressionOptions);
+          }
+          return {
+            id: Math.random().toString(36).substr(2, 9),
+            url: URL.createObjectURL(finalFile),
+            file: finalFile,
+            type: 'new',
+          };
+        }),
+      );
+
+      setMediaItems((prev) => {
+        const combined = [...prev, ...compressedItems].slice(0, 5);
+        if (!previewId && combined.length > 0) setPreviewId(combined[0].id);
+        return combined;
+      });
+    } catch (error) {
+      console.error('Compression error:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleDragEnd = (event) => {
@@ -153,8 +179,8 @@ const FigureForm = ({ mode = 'add' }) => {
         if (item.type === 'existing') {
           finalUrls.push(item.url);
         } else {
-          const fileRef = ref(storage, `figures/${Date.now()}_${item.file.name}`);
-          await uploadBytes(fileRef, item.file);
+          const fileRef = ref(storage, `figures/${Date.now()}_${item.id}.webp`);
+          await uploadBytes(fileRef, item.file, { contentType: 'image/webp' });
           const url = await getDownloadURL(fileRef);
           finalUrls.push(url);
         }
@@ -212,10 +238,29 @@ const FigureForm = ({ mode = 'add' }) => {
         .react-datepicker__day--selected { background-color: #2563eb !important; }
       `}</style>
 
+      {/* ТОТАЛЬНЫЙ ОВЕРЛЕЙ ОПТИМИЗАЦИИ */}
+      {loading && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-[999] flex flex-col items-center justify-center animate-in fade-in duration-300">
+          <div className="relative">
+            <Loader2 className="animate-spin text-blue-500 mb-6" size={60} />
+            <Zap
+              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-blue-400/30 animate-pulse"
+              size={30}
+            />
+          </div>
+          <h3 className="text-xl font-black uppercase italic tracking-[0.2em] text-white animate-pulse">
+            Optimizing Visual Data
+          </h3>
+          <p className="text-[10px] text-blue-500 mt-2 font-mono uppercase tracking-widest opacity-60">
+            Applying WebP Compression Matrix...
+          </p>
+        </div>
+      )}
+
       <SuccessModal data={epicSuccess} />
 
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8 sm:mb-10">
-        <h2 className="text-3xl sm:text-4xl font-black flex items-center gap-4 uppercase tracking-tighter italic text-white">
+        <h2 className="text-3xl sm:text-4xl font-black flex items-center gap-4 uppercase tracking-tighter italic text-white text-left">
           {isEdit ? (
             <Edit3 className="text-blue-500" size={28} />
           ) : (
@@ -238,7 +283,6 @@ const FigureForm = ({ mode = 'add' }) => {
             setCurrency={setCurrency}
             handleChange={handleChange}
           />
-
           <SpecsSection
             formData={formData}
             handleCustomChange={handleCustomChange}
@@ -247,7 +291,6 @@ const FigureForm = ({ mode = 'add' }) => {
           />
         </div>
 
-        {/* СЕКЦИЯ ЗАГРУЗКИ ФОТО */}
         <PhotoUploadSection
           isDraggingOver={isDraggingOver}
           setIsDraggingOver={setIsDraggingOver}
@@ -271,7 +314,7 @@ const FigureForm = ({ mode = 'add' }) => {
               placeholder="Listing URL"
               className="w-full bg-[#121212] border border-[#333] p-4 pl-10 rounded-xl font-bold text-white text-sm focus:border-blue-500 outline-none"
               onChange={handleChange}
-              value={formData.auctionUrl}
+              value={formData.auctionUrl || ''}
             />
           </div>
           <textarea
@@ -279,13 +322,13 @@ const FigureForm = ({ mode = 'add' }) => {
             placeholder="Condition notes..."
             className="w-full bg-[#121212] border border-[#333] p-4 rounded-xl outline-none h-24 resize-none font-bold text-white text-sm focus:border-blue-500"
             onChange={handleChange}
-            value={formData.conditionNotes}
+            value={formData.conditionNotes || ''}
           ></textarea>
         </div>
 
         <button
           disabled={loading}
-          className="w-full py-5 sm:py-6 rounded-xl sm:rounded-[2rem] bg-blue-600 hover:bg-blue-500 text-white font-black text-lg sm:text-xl tracking-widest transition-all shadow-xl active:scale-95 uppercase italic flex items-center justify-center gap-3"
+          className="w-full py-5 sm:py-6 rounded-xl sm:rounded-[2rem] bg-blue-600 hover:bg-blue-500 text-white font-black text-lg sm:text-xl tracking-widest transition-all shadow-xl active:scale-95 uppercase italic flex items-center justify-center gap-3 disabled:opacity-50"
         >
           {loading ? (
             <Loader2 className="animate-spin" size={24} />
