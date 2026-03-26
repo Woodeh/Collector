@@ -11,6 +11,7 @@ import {
   ShieldCheck,
   User,
   ChevronRight,
+  FileText, // Добавил иконку для красоты
 } from 'lucide-react';
 
 import FigureSlider from '../components/FigureSlider';
@@ -98,18 +99,26 @@ const FigureDetailsPage = () => {
           />
 
           <div className="flex flex-col gap-8">
-            <div className="space-y-2">
+            <div className="space-y-3">
               <div className="flex items-center gap-2 text-blue-500 font-black uppercase tracking-[0.3em] text-[10px] italic">
                 <Tag size={12} /> {figure.anime}
               </div>
               <h1 className="text-5xl md:text-7xl font-black text-white leading-[0.9] tracking-tighter italic uppercase">
                 {figure.name}
               </h1>
+
+              {/* ПОДРОБНОЕ НАЗВАНИЕ (Full Designation) */}
+              {figure.fullDisplayName && (
+                <div className="mt-4 border-l-2 border-blue-500/30 pl-4 py-1">
+                  <p className="text-gray-500 font-bold uppercase tracking-[0.15em] text-[11px] md:text-xs italic leading-relaxed">
+                    {figure.fullDisplayName}
+                  </p>
+                </div>
+              )}
             </div>
 
-            {/* СЕТКА ХАРАКТЕРИСТИК (ВМЕСТО STATCARD) */}
+            {/* СЕТКА ХАРАКТЕРИСТИК */}
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-              {/* PRICE */}
               <div className="bg-[#1a1a1a] p-6 rounded-[2rem] border border-[#333]">
                 <p className="text-gray-500 text-[9px] uppercase mb-2 font-black tracking-widest leading-none">
                   Price
@@ -120,7 +129,6 @@ const FigureDetailsPage = () => {
                 </p>
               </div>
 
-              {/* GENDER */}
               <div className="bg-[#1a1a1a] p-6 rounded-[2rem] border border-[#333]">
                 <p className="text-gray-500 text-[9px] uppercase mb-2 font-black tracking-widest leading-none">
                   Gender
@@ -128,7 +136,6 @@ const FigureDetailsPage = () => {
                 <p className="text-xl font-black text-white uppercase">{figure.gender}</p>
               </div>
 
-              {/* BRAND */}
               <div className="bg-[#1a1a1a] p-6 rounded-[2rem] border border-[#333]">
                 <p className="text-gray-500 text-[9px] uppercase mb-2 font-black tracking-widest leading-none">
                   Brand
@@ -141,7 +148,6 @@ const FigureDetailsPage = () => {
                 </p>
               </div>
 
-              {/* BOX INTEGRITY */}
               <div className="bg-[#1a1a1a] p-6 rounded-[2rem] border border-[#333] col-span-2 md:col-span-3">
                 <p className="text-gray-500 text-[9px] uppercase mb-2 font-black tracking-widest leading-none">
                   Box Integrity

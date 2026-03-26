@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { db, storage, auth } from '../firebase/config';
 import { collection, addDoc, doc, getDoc, updateDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { PlusCircle, Loader2, Link as LinkIcon, Edit3, Zap } from 'lucide-react';
+import { PlusCircle, Loader2, Link as LinkIcon, Edit3, Zap, FileText } from 'lucide-react';
 import { useParams, useNavigate } from 'react-router-dom';
 
 import SuccessModal from './SuccessModal';
@@ -26,14 +26,14 @@ const FigureForm = ({ mode = 'add' }) => {
   const [epicSuccess, setEpicSuccess] = useState(null);
   const [isDraggingOver, setIsDraggingOver] = useState(false);
   const [currency, setCurrency] = useState('USD');
-
   const [mediaItems, setMediaItems] = useState([]);
   const [previewId, setPreviewId] = useState(null);
 
   const [formData, setFormData] = useState({
     name: '',
+    fullDisplayName: '',
     anime: '',
-    brand: 'Bandai Spirits',
+    brand: '',
     price: '',
     gender: 'Male',
     auctionUrl: '',
@@ -41,7 +41,7 @@ const FigureForm = ({ mode = 'add' }) => {
     conditionGrade: 'New (Sealed)',
     conditionNotes: '',
     hasBox: 'Yes',
-    purchasePlace: 'Jalan Jalan Japan',
+    purchasePlace: '',
   });
 
   const sensors = useSensors(
@@ -53,6 +53,7 @@ const FigureForm = ({ mode = 'add' }) => {
 
   const brandOptions = [
     { value: 'Bandai Spirits', label: 'Bandai Spirits' },
+    { value: 'BANDAI', label: 'BANDAI' },
     { value: 'Bandai Masterlise', label: 'Bandai Masterlise' },
     { value: 'MegaHouse', label: 'MegaHouse' },
     { value: 'Sega', label: 'Sega' },
@@ -112,23 +113,18 @@ const FigureForm = ({ mode = 'add' }) => {
   const handleFiles = async (newFiles) => {
     const fileArray = Array.from(newFiles);
     const validFiles = fileArray.filter((f) => f.type.startsWith('image/'));
-
     setLoading(true);
-
     const compressionOptions = {
       maxSizeMB: 0.8,
       maxWidthOrHeight: 1200,
       useWebWorker: true,
       fileType: 'image/webp',
     };
-
     try {
       const compressedItems = await Promise.all(
         validFiles.map(async (file) => {
           let finalFile = file;
-          if (file.size > 200 * 1024) {
-            finalFile = await imageCompression(file, compressionOptions);
-          }
+          if (file.size > 200 * 1024) finalFile = await imageCompression(file, compressionOptions);
           return {
             id: Math.random().toString(36).substr(2, 9),
             url: URL.createObjectURL(finalFile),
@@ -137,7 +133,6 @@ const FigureForm = ({ mode = 'add' }) => {
           };
         }),
       );
-
       setMediaItems((prev) => {
         const combined = [...prev, ...compressedItems].slice(0, 5);
         if (!previewId && combined.length > 0) setPreviewId(combined[0].id);
@@ -185,11 +180,9 @@ const FigureForm = ({ mode = 'add' }) => {
           finalUrls.push(url);
         }
       }
-
       const previewIndex = mediaItems.findIndex((i) => i.id === previewId);
       const previewUrl = finalUrls[previewIndex !== -1 ? previewIndex : 0];
       const priceInUSD = parseFloat((Number(formData.price) * EXCHANGE_RATES[currency]).toFixed(2));
-
       const finalData = {
         ...formData,
         userId: auth.currentUser.uid,
@@ -198,7 +191,6 @@ const FigureForm = ({ mode = 'add' }) => {
         price: priceInUSD,
         updatedAt: new Date(),
       };
-
       if (isEdit) {
         await updateDoc(doc(db, 'figures', id), finalData);
       } else {
@@ -211,7 +203,6 @@ const FigureForm = ({ mode = 'add' }) => {
           authorId: auth.currentUser.uid,
         });
       }
-
       setEpicSuccess({ name: formData.name, img: previewUrl });
       setTimeout(() => navigate('/collection'), 3000);
     } catch (error) {
@@ -221,24 +212,27 @@ const FigureForm = ({ mode = 'add' }) => {
     }
   };
 
+  // ФИКС ЦВЕТОВ И ШРИФТОВ
+  const inputBaseClass = `
+    w-full bg-[#121212] border border-[#333] p-4 pl-12 rounded-xl 
+    font-bold text-white text-sm 
+    focus:border-blue-500 focus:bg-[#121212] focus:text-white
+    outline-none transition-all 
+    placeholder:text-gray-700 placeholder:font-normal placeholder:italic
+  `
+    .replace(/\s+/g, ' ')
+    .trim();
+
   if (fetching)
     return (
       <div className="h-screen flex items-center justify-center bg-[#121212]">
-        <Loader2 className="animate-spin text-blue-500" size={40} />
+        {' '}
+        <Loader2 className="animate-spin text-blue-500" size={40} />{' '}
       </div>
     );
 
   return (
-    <div className="w-full max-w-4xl mx-auto px-4 py-6 sm:p-6 text-[#e4e4e4] relative text-left font-sans">
-      <style>{`
-        .react-datepicker-wrapper { width: 100%; }
-        .react-datepicker { background-color: #1a1a1a !important; border: 1px solid #333 !important; border-radius: 1rem !important; color: white !important; }
-        .react-datepicker__header { background-color: #121212 !important; border-bottom: 1px solid #333 !important; }
-        .react-datepicker__current-month, .react-datepicker__day-name, .react-datepicker__day { color: white !important; }
-        .react-datepicker__day--selected { background-color: #2563eb !important; }
-      `}</style>
-
-      {/* ТОТАЛЬНЫЙ ОВЕРЛЕЙ ОПТИМИЗАЦИИ */}
+    <div className="w-full max-w-4xl mx-auto px-4 py-6 sm:p-6 text-[#e4e4e4] relative text-left font-sans tracking-tight">
       {loading && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-[999] flex flex-col items-center justify-center animate-in fade-in duration-300">
           <div className="relative">
@@ -248,7 +242,7 @@ const FigureForm = ({ mode = 'add' }) => {
               size={30}
             />
           </div>
-          <h3 className="text-xl font-black uppercase italic tracking-[0.2em] text-white animate-pulse">
+          <h3 className="text-xl font-black uppercase italic tracking-[0.2em] text-white animate-pulse text-center px-4">
             Optimizing Visual Data
           </h3>
           <p className="text-[10px] text-blue-500 mt-2 font-mono uppercase tracking-widest opacity-60">
@@ -259,7 +253,7 @@ const FigureForm = ({ mode = 'add' }) => {
 
       <SuccessModal data={epicSuccess} />
 
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8 sm:mb-10">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8 sm:mb-10 text-left">
         <h2 className="text-3xl sm:text-4xl font-black flex items-center gap-4 uppercase tracking-tighter italic text-white text-left">
           {isEdit ? (
             <Edit3 className="text-blue-500" size={28} />
@@ -272,9 +266,9 @@ const FigureForm = ({ mode = 'add' }) => {
 
       <form
         onSubmit={handleSubmit}
-        className="bg-[#1a1a1a] p-5 sm:p-10 rounded-[2rem] sm:rounded-[3rem] border border-[#333] space-y-6 sm:space-y-8 shadow-2xl"
+        className="bg-[#1a1a1a] p-5 sm:p-10 rounded-[2rem] sm:rounded-[3rem] border border-[#333] space-y-8 shadow-2xl"
       >
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 sm:gap-10">
           <BasicInfoSection
             formData={formData}
             handleCustomChange={handleCustomChange}
@@ -291,6 +285,27 @@ const FigureForm = ({ mode = 'add' }) => {
           />
         </div>
 
+        {/* FULL FIGURE NAME - ИСПРАВЛЕННЫЙ ОТСТУП И СТИЛЬ */}
+        <div className="mt-10 pt-8 border-t border-[#333]/50 space-y-4">
+          <label className="text-[10px] font-black uppercase tracking-[0.2em] text-blue-500 italic ml-1 block">
+            Full Figure Name
+          </label>
+          <div className="relative">
+            <FileText
+              className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600"
+              size={18}
+            />
+            <input
+              name="fullDisplayName"
+              autoComplete="off"
+              placeholder="example: My Hero Academia: You're next Trio-Try-iT Figure - Katsuki Bakugo"
+              className={inputBaseClass}
+              onChange={handleChange}
+              value={formData.fullDisplayName || ''}
+            />
+          </div>
+        </div>
+
         <PhotoUploadSection
           isDraggingOver={isDraggingOver}
           setIsDraggingOver={setIsDraggingOver}
@@ -303,27 +318,31 @@ const FigureForm = ({ mode = 'add' }) => {
           removeItem={removeItem}
         />
 
-        <div className="space-y-4 pt-4 border-t border-[#333]/50">
+        <div className="space-y-6 pt-8 border-t border-[#333]/50 text-left">
           <div className="relative">
             <LinkIcon
               className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600"
-              size={16}
+              size={18}
             />
             <input
               name="auctionUrl"
+              autoComplete="off"
               placeholder="Listing URL"
-              className="w-full bg-[#121212] border border-[#333] p-4 pl-10 rounded-xl font-bold text-white text-sm focus:border-blue-500 outline-none"
+              className={inputBaseClass}
               onChange={handleChange}
               value={formData.auctionUrl || ''}
             />
           </div>
-          <textarea
-            name="conditionNotes"
-            placeholder="Condition notes..."
-            className="w-full bg-[#121212] border border-[#333] p-4 rounded-xl outline-none h-24 resize-none font-bold text-white text-sm focus:border-blue-500"
-            onChange={handleChange}
-            value={formData.conditionNotes || ''}
-          ></textarea>
+          <div className="relative">
+            <Zap className="absolute left-4 top-5 text-gray-600" size={18} />
+            <textarea
+              name="conditionNotes"
+              placeholder="Condition notes..."
+              className={`${inputBaseClass} h-32 resize-none pt-4 leading-relaxed`}
+              onChange={handleChange}
+              value={formData.conditionNotes || ''}
+            ></textarea>
+          </div>
         </div>
 
         <button
