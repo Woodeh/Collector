@@ -4,13 +4,12 @@ import { collection, query, orderBy, onSnapshot } from 'firebase/firestore';
 import { LayoutGrid, Users, Search, Info, User } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
-const Community = () => {
+const CommunityPage = () => {
   const [figures, setFigures] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
-    // Здесь мы НЕ используем where(userId), чтобы видеть ВСЁ
     const q = query(collection(db, 'figures'), orderBy('createdAt', 'desc'));
 
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
@@ -46,7 +45,6 @@ const Community = () => {
   return (
     <div className="min-h-screen bg-[#121212] p-4 md:p-8 text-[#e4e4e4] pb-20">
       <div className="max-w-7xl mx-auto space-y-10">
-        {/* Заголовок */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 border-b border-[#333] pb-10">
           <div className="space-y-2 text-left">
             <div className="flex items-center gap-3 text-blue-500 mb-2">
@@ -75,14 +73,12 @@ const Community = () => {
           </div>
         </div>
 
-        {/* Сетка */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
           {filteredFigures.map((figure) => (
             <div
               key={figure.id}
               className="group relative bg-[#1a1a1a] rounded-[2rem] border border-[#333] overflow-hidden hover:border-blue-500/50 transition-all duration-500 shadow-2xl flex flex-col"
             >
-              {/* Фото */}
               <div className="aspect-[3/4] overflow-hidden bg-black relative">
                 <img
                   src={figure.previewImage || figure.image}
@@ -91,7 +87,6 @@ const Community = () => {
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#1a1a1a] via-transparent to-transparent opacity-60" />
 
-                {/* Владелец */}
                 <div className="absolute bottom-3 left-3 flex items-center gap-2 bg-black/40 backdrop-blur-md px-2 py-1 rounded-lg border border-white/5">
                   <User size={10} className="text-blue-500" />
                   <span className="text-[8px] font-black uppercase text-gray-300 tracking-tighter">
@@ -100,7 +95,6 @@ const Community = () => {
                 </div>
               </div>
 
-              {/* Инфо */}
               <div className="p-4 text-left space-y-2 flex-grow">
                 <p className="text-[8px] text-blue-500 font-black uppercase tracking-widest truncate italic">
                   {figure.anime}
@@ -128,4 +122,4 @@ const Community = () => {
   );
 };
 
-export default Community;
+export default CommunityPage;

@@ -6,10 +6,9 @@ import { Loader2, Monitor } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import Modal from '../components/Modal';
 
-// Импорт новых компонентов
 import { FigureCard, CollectionHeader, CollectionFilters } from '../components/collection';
 
-const Collection = () => {
+const CollectionPage = () => {
   const [figures, setFigures] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -148,4 +147,4 @@ const Collection = () => {
   );
 };
 
-export default Collection;
+export default CollectionPage;

@@ -14,7 +14,7 @@ import {
   NextArrival,
 } from '../components/profile/index';
 
-const Profile = () => {
+const ProfilePage = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [allFigures, setAllFigures] = useState([]);
@@ -179,4 +179,4 @@ const Profile = () => {
   );
 };
 
-export default Profile;
+export default ProfilePage;

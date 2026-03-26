@@ -9,10 +9,10 @@ import { useNavigate } from 'react-router-dom';
 import { LogIn, Lock, Mail, UserPlus, Loader2 } from 'lucide-react';
 
 const LoginPage = () => {
-  const [isLogin, setIsLogin] = useState(true); // Состояние: вход или регистрация
+  const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [name, setName] = useState(''); // Для регистрации
+  const [name, setName] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -26,10 +26,9 @@ const LoginPage = () => {
       } else {
         // РЕГИСТРАЦИЯ
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        // Добавляем имя пользователя в профиль Firebase
         await updateProfile(userCredential.user, { displayName: name });
       }
-      navigate('/'); // После успеха кидаем на главную (Dashboard)
+      navigate('/');
     } catch (error) {
       alert('Error: ' + error.message);
     } finally {
@@ -40,7 +39,6 @@ const LoginPage = () => {
   return (
     <div className="min-h-[80vh] flex items-center justify-center p-4">
       <div className="w-full max-w-[400px] bg-[#1a1a1a] rounded-[2.5rem] border border-[#333] p-8 md:p-10 shadow-2xl">
-        {/* Заголовок */}
         <div className="text-center mb-8 space-y-2">
           <div className="inline-flex p-3 bg-blue-500/10 rounded-2xl text-blue-500 mb-2">
             {isLogin ? <LogIn size={24} /> : <UserPlus size={24} />}
@@ -54,7 +52,6 @@ const LoginPage = () => {
         </div>
 
         <form onSubmit={handleAuth} className="space-y-4">
-          {/* Поле ИМЯ (только для регистрации) */}
           {!isLogin && (
             <div className="space-y-1">
               <label className="block text-[10px] font-black uppercase tracking-widest text-gray-500 ml-4">
@@ -71,7 +68,6 @@ const LoginPage = () => {
             </div>
           )}
 
-          {/* Поле EMAIL */}
           <div className="space-y-1">
             <label className="block text-[10px] font-black uppercase tracking-widest text-gray-500 ml-4">
               Email
@@ -89,7 +85,6 @@ const LoginPage = () => {
             </div>
           </div>
 
-          {/* Поле ПАРОЛЬ */}
           <div className="space-y-1">
             <label className="block text-[10px] font-black uppercase tracking-widest text-gray-500 ml-4">
               Password
@@ -107,7 +102,6 @@ const LoginPage = () => {
             </div>
           </div>
 
-          {/* Кнопка действия */}
           <button
             type="submit"
             disabled={loading}
@@ -123,7 +117,6 @@ const LoginPage = () => {
           </button>
         </form>
 
-        {/* Переключатель режимов */}
         <div className="mt-8 text-center">
           <button
             onClick={() => setIsLogin(!isLogin)}
