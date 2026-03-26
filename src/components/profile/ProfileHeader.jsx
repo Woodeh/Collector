@@ -1,6 +1,6 @@
 import React from 'react';
 import { User, LogOut } from 'lucide-react';
-import { auth } from '../firebase/config';
+import { auth } from '../../firebase/config';
 
 const ProfileHeader = ({ user, navigate }) => {
   return (

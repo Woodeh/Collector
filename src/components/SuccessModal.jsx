@@ -24,4 +24,4 @@ const SuccessModal = ({ data }) => {
   );
 };
 
-export default SuccessModal; // <--- КРИТИЧНО: ПРОВЕРЬ ЭТУ СТРОКУ
+export default SuccessModal;
