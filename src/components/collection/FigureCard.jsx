@@ -5,26 +5,33 @@ import { Link } from 'react-router-dom';
 export default function FigureCard({ figure, onEdit, onDelete }) {
   return (
     <div className="relative group bg-[#1a1a1a] rounded-[2rem] border border-[#333] overflow-hidden hover:border-blue-500/50 transition-all duration-500 flex flex-col shadow-2xl h-full text-left">
-      <div className="absolute top-4 right-4 z-40 flex gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform -translate-y-2 group-hover:translate-y-0">
-        <button
-          onClick={(e) => {
-            e.preventDefault();
-            onEdit();
-          }}
-          className="bg-black/60 hover:bg-blue-600 text-white p-2.5 rounded-xl backdrop-blur-md border border-white/10 transition-all shadow-lg cursor-pointer"
-        >
-          <Pencil size={14} />
-        </button>
-        <button
-          onClick={(e) => {
-            e.preventDefault();
-            onDelete();
-          }}
-          className="bg-black/60 hover:bg-red-600 text-white p-2.5 rounded-xl backdrop-blur-md border border-white/10 transition-all shadow-lg cursor-pointer"
-        >
-          <Trash2 size={14} />
-        </button>
-      </div>
+      {/* Обертка кнопок: показываем только если передана хотя бы одна функция */}
+      {(onEdit || onDelete) && (
+        <div className="absolute top-4 right-4 z-40 flex gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform -translate-y-2 group-hover:translate-y-0">
+          {onEdit && (
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                onEdit();
+              }}
+              className="bg-black/60 hover:bg-blue-600 text-white p-2.5 rounded-xl backdrop-blur-md border border-white/10 transition-all shadow-lg cursor-pointer"
+            >
+              <Pencil size={14} />
+            </button>
+          )}
+          {onDelete && (
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                onDelete();
+              }}
+              className="bg-black/60 hover:bg-red-600 text-white p-2.5 rounded-xl backdrop-blur-md border border-white/10 transition-all shadow-lg cursor-pointer"
+            >
+              <Trash2 size={14} />
+            </button>
+          )}
+        </div>
+      )}
 
       <Link to={`/figure/${figure.id}`} className="flex flex-col h-full cursor-pointer">
         <div className="aspect-[10/12] overflow-hidden bg-[#121212] relative">
