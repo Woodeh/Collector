@@ -6,10 +6,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   ArrowLeft,
   Loader2,
-  ShoppingCart,
   ExternalLink,
   ShieldCheck,
-  User,
   ChevronRight,
   ChevronLeft,
   Cpu,
@@ -28,6 +26,7 @@ const FigureDetailsPage = () => {
   const [activeImg, setActiveImg] = useState(0);
   const [loading, setLoading] = useState(true);
   const [isHovered, setIsHovered] = useState(false);
+  const [imageError, setImageError] = useState(false); // Состояние для ошибки загрузки
 
   const timerRef = useRef(null);
 
@@ -38,35 +37,57 @@ const FigureDetailsPage = () => {
   useEffect(() => {
     const fetchFigureAndArt = async () => {
       setLoading(true);
+      setImageError(false); // Сброс ошибки при смене ID
       try {
         const docSnap = await getDoc(doc(db, 'figures', id));
         if (docSnap.exists()) {
           const data = docSnap.data();
           setFigure(data);
 
-          // РАНДОМНЫЙ ONE PIECE
-          const q = query(collection(db, 'figures'), where('anime', '==', 'One Piece'), limit(25));
-
-          const relatedSnap = await getDocs(q);
-          let allRelated = relatedSnap.docs
-            .map((doc) => ({ id: doc.id, ...doc.data() }))
-            .filter((item) => item.id !== id);
-
-          for (let i = allRelated.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [allRelated[i], allRelated[j]] = [allRelated[j], allRelated[i]];
+          // --- ЛОГИКА РЕКОМЕНДАЦИЙ (С FALLBACK) ---
+          let finalRelated = [];
+          if (data.anime) {
+            const sameAnimeQuery = query(
+              collection(db, 'figures'),
+              where('anime', '==', data.anime),
+              limit(10),
+            );
+            const sameAnimeSnap = await getDocs(sameAnimeQuery);
+            finalRelated = sameAnimeSnap.docs
+              .map((doc) => ({ id: doc.id, ...doc.data() }))
+              .filter((item) => item.id !== id);
           }
 
-          setRelatedFigures(allRelated.slice(0, 4));
+          if (finalRelated.length < 4) {
+            const randomQuery = query(collection(db, 'figures'), limit(20));
+            const randomSnap = await getDocs(randomQuery);
+            const randomFigures = randomSnap.docs
+              .map((doc) => ({ id: doc.id, ...doc.data() }))
+              .filter((item) => item.id !== id && !finalRelated.some((r) => r.id === item.id));
 
+            const shuffledRandom = randomFigures.sort(() => 0.5 - Math.random());
+            finalRelated = [...finalRelated, ...shuffledRandom].slice(0, 4);
+          } else {
+            finalRelated = finalRelated.sort(() => 0.5 - Math.random()).slice(0, 4);
+          }
+
+          setRelatedFigures(finalRelated);
+
+          // Поиск арта персонажа (Jikan API)
           if (data.name) {
-            const res = await fetch(`https://api.jikan.moe/v4/characters?q=${data.name}&limit=1`);
-            const resData = await res.json();
-            if (resData.data && resData.data.length > 0) {
-              setCharacterData({
-                image: resData.data[0].images.jpg.image_url,
-                name: resData.data[0].name,
-              });
+            try {
+              const res = await fetch(
+                `https://api.jikan.moe/v4/characters?q=${encodeURIComponent(data.name)}&limit=1`,
+              );
+              const resData = await res.json();
+              if (resData.data && resData.data.length > 0) {
+                setCharacterData({
+                  image: resData.data[0].images.jpg.image_url,
+                  name: resData.data[0].name,
+                });
+              }
+            } catch (e) {
+              console.error('API Fetch error', e);
             }
           }
         }
@@ -117,6 +138,11 @@ const FigureDetailsPage = () => {
 
   if (!figure) return null;
 
+  const isPureRelated = relatedFigures.every((f) => f.anime === figure.anime);
+
+  // Определяем, какую картинку пытаться показать в аватаре
+  const avatarUrl = characterData?.image || images[0];
+
   return (
     <div className="min-h-screen bg-[#121212] p-4 md:p-8 text-[#e4e4e4] font-sans selection:bg-blue-500/30 overflow-x-hidden text-left">
       <div className="max-w-6xl mx-auto">
@@ -128,7 +154,7 @@ const FigureDetailsPage = () => {
         </button>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-start">
-          {/* LEFT COLUMN: SLIDER (УМЕНЬШЕННЫЙ) */}
+          {/* LEFT COLUMN: SLIDER */}
           <div className="flex flex-col items-center lg:items-end w-full">
             <div
               className="relative w-full max-w-md aspect-[4/5] z-10"
@@ -204,20 +230,47 @@ const FigureDetailsPage = () => {
 
                 <div className="flex flex-col sm:flex-row gap-8">
                   <div className="shrink-0 flex flex-col items-center">
-                    <div className="w-32 h-44 rounded-xl bg-[#121212] border border-[#333] overflow-hidden relative shadow-inner flex flex-col">
-                      <div className="flex-1 overflow-hidden">
-                        <img
-                          src={characterData?.image || images[0]}
-                          className="w-full h-full object-cover contrast-125 transition-all"
-                          alt="id"
+                    <div className="w-32 h-44 rounded-xl bg-[#121212] border border-[#333] overflow-hidden relative shadow-inner flex flex-col group/id">
+                      {/* БЛИК ПОВЕРХ ВСЕГО */}
+                      <div className="absolute inset-0 z-40 pointer-events-none overflow-hidden">
+                        <motion.div
+                          initial={{ x: '-150%', skewX: -45 }}
+                          animate={{ x: '150%', skewX: -45 }}
+                          transition={{
+                            duration: 3,
+                            repeat: Infinity,
+                            ease: 'easeInOut',
+                            repeatDelay: 3,
+                          }}
+                          className="w-full h-full bg-gradient-to-r from-transparent via-white/15 to-transparent shadow-[0_0_30px_rgba(255,255,255,0.05)]"
                         />
                       </div>
-                      <div className="bg-blue-600 py-2 px-2 border-t border-blue-400/50 text-center">
+
+                      <div className="flex-1 overflow-hidden relative z-10 bg-[#0a0a0a] flex items-center justify-center">
+                        {avatarUrl && !imageError ? (
+                          <img
+                            src={avatarUrl}
+                            className="w-full h-full object-cover contrast-125 transition-all duration-700"
+                            alt="id"
+                            onError={() => setImageError(true)}
+                          />
+                        ) : (
+                          /* СТИЛЬНАЯ ЗАГЛУШКА ПРИ ОТСУТСТВИИ ФОТО */
+                          <div className="flex flex-col items-center justify-center opacity-30 group-hover/id:opacity-50 transition-opacity">
+                            <Cpu size={32} className="text-blue-500 animate-pulse mb-2" />
+                            <span className="text-[7px] font-black uppercase tracking-[0.2em] text-center px-2">
+                              Data Missing
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                      <div className="bg-blue-600 py-2 px-2 border-t border-blue-400/50 text-center relative z-20">
                         <p className="text-[9px] font-black text-white uppercase italic truncate">
                           {characterData?.name || figure.name}
                         </p>
                       </div>
                     </div>
+
                     <div className="flex justify-center opacity-20 mt-3">
                       <Fingerprint size={20} />
                     </div>
@@ -225,7 +278,7 @@ const FigureDetailsPage = () => {
 
                   <div className="flex-1 space-y-6 text-left">
                     <div className="space-y-2">
-                      <p className="text-[9px] font-black text-gray-500 uppercase tracking-[0.3em] leading-none">
+                      <p className="text-[9px] font-black text-gray-500 uppercase tracking-[0.3em] leading-none text-left">
                         Designation
                       </p>
                       <h3 className="text-xl md:text-2xl font-black text-white uppercase italic tracking-tighter border-l-4 border-blue-500 pl-4">
@@ -233,7 +286,7 @@ const FigureDetailsPage = () => {
                       </h3>
                     </div>
                     <div className="grid grid-cols-2 gap-x-6 gap-y-6">
-                      <div className="space-y-1.5">
+                      <div className="space-y-1.5 text-left">
                         <p className="text-[9px] font-black text-gray-500 uppercase tracking-[0.3em] leading-none">
                           Origin
                         </p>
@@ -241,7 +294,7 @@ const FigureDetailsPage = () => {
                           {figure.anime}
                         </p>
                       </div>
-                      <div className="space-y-1.5">
+                      <div className="space-y-1.5 text-left">
                         <p className="text-[9px] font-black text-gray-500 uppercase tracking-[0.3em] leading-none">
                           Market Value
                         </p>
@@ -250,7 +303,7 @@ const FigureDetailsPage = () => {
                           {Number(figure.price).toLocaleString()}
                         </p>
                       </div>
-                      <div className="space-y-1.5">
+                      <div className="space-y-1.5 text-left">
                         <p className="text-[9px] font-black text-gray-500 uppercase tracking-[0.3em] leading-none">
                           Condition
                         </p>
@@ -261,7 +314,7 @@ const FigureDetailsPage = () => {
                           </p>
                         </div>
                       </div>
-                      <div className="space-y-1.5">
+                      <div className="space-y-1.5 text-left">
                         <p className="text-[9px] font-black text-gray-500 uppercase tracking-[0.3em] leading-none">
                           Packaging
                         </p>
@@ -276,6 +329,20 @@ const FigureDetailsPage = () => {
                     </div>
                   </div>
                 </div>
+              </div>
+
+              <div className="h-10 w-full bg-[#121212] flex items-center px-8 justify-between border-t border-[#333]">
+                <div className="flex gap-1.5 h-4 opacity-30">
+                  {[...Array(14)].map((_, i) => (
+                    <div
+                      key={i}
+                      className={`bg-white ${i % 3 === 0 ? 'w-2' : 'w-[1px]'} h-full`}
+                    ></div>
+                  ))}
+                </div>
+                <p className="text-[8px] font-mono text-white/20 uppercase tracking-[0.8em]">
+                  ID-CRYPT-SECURE-VAULT
+                </p>
               </div>
             </div>
 
@@ -304,9 +371,9 @@ const FigureDetailsPage = () => {
                 rel="noopener noreferrer"
                 className="group flex items-center justify-between bg-white text-black p-6 rounded-[1.5rem] hover:bg-blue-600 hover:text-white transition-all shadow-xl active:scale-95"
               >
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-4 text-left">
                   <ExternalLink size={20} />
-                  <span className="font-black uppercase tracking-[0.2em] text-[11px] italic leading-none text-left">
+                  <span className="font-black uppercase tracking-[0.2em] text-[11px] italic leading-none">
                     Launch System Link
                   </span>
                 </div>
@@ -324,11 +391,11 @@ const FigureDetailsPage = () => {
           <div className="mt-24 border-t border-[#333] pt-12 pb-20 text-left">
             <div className="flex items-center justify-between mb-10">
               <div className="space-y-1">
-                <p className="text-[9px] font-black text-blue-500 uppercase tracking-[0.4em] italic leading-none">
+                <p className="text-[9px] font-black text-blue-500 uppercase tracking-[0.4em] italic leading-none text-left">
                   Database Scan
                 </p>
-                <h2 className="text-2xl font-black text-white uppercase italic tracking-tighter">
-                  More from One Piece
+                <h2 className="text-2xl font-black text-white uppercase italic tracking-tighter text-left">
+                  More from {figure.anime}
                 </h2>
               </div>
               <div className="hidden md:block h-px flex-1 bg-gradient-to-r from-blue-500/50 to-transparent ml-10"></div>
@@ -336,11 +403,7 @@ const FigureDetailsPage = () => {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {relatedFigures.map((relFigure) => (
-                <FigureCard
-                  key={relFigure.id}
-                  figure={relFigure}
-                  // Не передаем onEdit и onDelete, чтобы скрыть кнопки
-                />
+                <FigureCard key={relFigure.id} figure={relFigure} />
               ))}
             </div>
           </div>
