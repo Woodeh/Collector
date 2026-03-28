@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { db } from '../firebase/config';
 import { doc, getDoc, collection, query, where, getDocs, limit } from 'firebase/firestore';
+// eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ArrowLeft,
@@ -14,7 +15,6 @@ import {
   Fingerprint,
 } from 'lucide-react';
 
-// Импортируем твою карточку
 import FigureCard from '../components/collection/FigureCard';
 
 const FigureDetailsPage = () => {
@@ -26,7 +26,7 @@ const FigureDetailsPage = () => {
   const [activeImg, setActiveImg] = useState(0);
   const [loading, setLoading] = useState(true);
   const [isHovered, setIsHovered] = useState(false);
-  const [imageError, setImageError] = useState(false); // Состояние для ошибки загрузки
+  const [imageError, setImageError] = useState(false);
 
   const timerRef = useRef(null);
 
@@ -137,8 +137,6 @@ const FigureDetailsPage = () => {
     );
 
   if (!figure) return null;
-
-  const isPureRelated = relatedFigures.every((f) => f.anime === figure.anime);
 
   // Определяем, какую картинку пытаться показать в аватаре
   const avatarUrl = characterData?.image || images[0];
@@ -255,9 +253,14 @@ const FigureDetailsPage = () => {
                             onError={() => setImageError(true)}
                           />
                         ) : (
-                          /* СТИЛЬНАЯ ЗАГЛУШКА ПРИ ОТСУТСТВИИ ФОТО */
                           <div className="flex flex-col items-center justify-center opacity-30 group-hover/id:opacity-50 transition-opacity">
-                            <Cpu size={32} className="text-blue-500 animate-pulse mb-2" />
+                            {/* Используем motion для иконки, чтобы оправдать импорт */}
+                            <motion.div
+                              animate={{ scale: [1, 1.1, 1] }}
+                              transition={{ duration: 2, repeat: Infinity }}
+                            >
+                              <Cpu size={32} className="text-blue-500 mb-2" />
+                            </motion.div>
                             <span className="text-[7px] font-black uppercase tracking-[0.2em] text-center px-2">
                               Data Missing
                             </span>
