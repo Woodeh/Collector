@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { auth, db, storage } from '../firebase/config';
 import { onAuthStateChanged, updateProfile } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
 import { collection, onSnapshot, query, where, doc, updateDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { FileDown, Camera, Loader2 } from 'lucide-react';
+import { FileDown, Camera, Loader2, Award, X } from 'lucide-react';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
@@ -27,6 +28,24 @@ const Profile = () => {
   const [favoriteFigure, setFavoriteFigure] = useState(null);
   const [isSelectOpen, setIsSelectOpen] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [isRankModalOpen, setIsRankModalOpen] = useState(false);
+
+  // Rank Logic based on figure count
+  const getRankInfo = (count) => {
+    if (count >= 50)
+      return {
+        name: 'Legendary Curator',
+        next: 100,
+        color: 'text-purple-500',
+        bg: 'bg-purple-500',
+      };
+    if (count >= 20)
+      return { name: 'Elite Hunter', next: 50, color: 'text-indigo-500', bg: 'bg-indigo-500' };
+    if (count >= 5)
+      return { name: 'Active Collector', next: 20, color: 'text-blue-500', bg: 'bg-blue-500' };
+    return { name: 'Novice', next: 5, color: 'text-gray-500', bg: 'bg-gray-500' };
+  };
+  const rank = getRankInfo(collectionStats.count);
 
   const COLORS = ['#3b82f6', '#ec4899', '#f97316', '#8b5cf6', '#22c55e', '#eab308', '#ef4444'];
 
@@ -278,25 +297,61 @@ const Profile = () => {
                   {user?.displayName || user?.email?.split('@')[0]}
                 </h1>
               </div>
-              <div className="flex items-center justify-center md:justify-start gap-3">
-                <div className="h-px w-8 bg-blue-500/30"></div>
-                <p className="text-gray-500 font-mono text-xs tracking-widest uppercase">
-                  {user?.email}
-                </p>
+              <div className="flex flex-col md:flex-row items-center gap-6">
+                <div className="flex items-center gap-3">
+                  <div className="h-px w-8 bg-blue-500/30"></div>
+                  <p className="text-gray-500 font-mono text-xs tracking-widest uppercase">
+                    {user?.email}
+                  </p>
+                </div>
+                <button
+                  onClick={() => setIsRankModalOpen(true)}
+                  className="flex items-center gap-3 bg-[#1a1a1a] px-4 py-1.5 rounded-full border border-[#333] hover:border-blue-500/50 transition-all cursor-help group/rank"
+                >
+                  <span
+                    className={`text-[9px] font-black uppercase tracking-widest italic transition-colors ${rank.color}`}
+                  >
+                    Rank: {rank.name}
+                  </span>
+                  <div className="w-24 h-1 bg-[#121212] rounded-full overflow-hidden group-hover/rank:bg-blue-900/20 transition-colors">
+                    <div
+                      className={`h-full ${rank.bg} transition-all duration-1000`}
+                      style={{
+                        width: `${Math.min((collectionStats.count / rank.next) * 100, 100)}%`,
+                      }}
+                    ></div>
+                  </div>
+                </button>
               </div>
             </div>
           </div>
 
-          <button
-            onClick={generateReport}
-            className="flex items-center gap-2 bg-[#1a1a1a] border border-[#333] hover:border-blue-500/50 text-gray-500 hover:text-white px-3 py-2 rounded-xl transition-all font-black uppercase text-[9px] tracking-widest italic group cursor-pointer shrink-0"
-          >
-            <FileDown
-              size={14}
-              className="text-blue-500 group-hover:text-white transition-colors"
-            />
-            <span>Generate Report</span>
-          </button>
+          <div className="relative group/tooltip shrink-0">
+            <button
+              onClick={generateReport}
+              className="flex items-center gap-2 bg-[#1a1a1a] border border-[#333] hover:border-blue-500/50 text-gray-500 hover:text-white px-3 py-2 rounded-xl transition-all font-black uppercase text-[9px] tracking-widest italic group cursor-pointer"
+            >
+              <FileDown
+                size={14}
+                className="text-blue-500 group-hover:text-white transition-colors"
+              />
+              <span>Generate Report</span>
+            </button>
+
+            {/* System Tooltip */}
+            <div className="absolute -top-10 left-1/2 -translate-x-1/2 px-3 py-2 bg-[#121212] border border-blue-500/30 rounded-xl opacity-0 group-hover/tooltip:opacity-100 group-hover/tooltip:-top-14 pointer-events-none transition-all duration-300 whitespace-nowrap z-[100] shadow-[0_0_20px_rgba(59,130,246,0.15)]">
+              <div className="flex flex-col items-center">
+                <p className="text-[8px] font-black text-blue-500 uppercase tracking-[0.2em] italic">
+                  Data Export Protocol
+                </p>
+                <p className="text-[7px] text-gray-500 uppercase font-mono mt-0.5">
+                  Format: PDF / Archive_Unit
+                </p>
+              </div>
+              {/* Tooltip Arrow */}
+              <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-[#121212] border-r border-b border-blue-500/30 rotate-45"></div>
+            </div>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 relative z-10 text-left">
@@ -323,6 +378,131 @@ const Profile = () => {
 
         <CollectionStream recentFigures={recentFigures} navigate={navigate} />
       </div>
+
+      {/* Rank Description Modal */}
+      <AnimatePresence>
+        {isRankModalOpen && (
+          <div className="fixed inset-0 z-[150] flex items-center justify-center p-4 bg-black/90 backdrop-blur-md">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="bg-[#1a1a1a] border border-[#333] w-full max-w-lg rounded-[2.5rem] overflow-hidden shadow-2xl relative"
+            >
+              <div className="p-8 border-b border-[#333] bg-[#121212]/50 flex justify-between items-center">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-blue-500/10 rounded-2xl text-blue-500">
+                    <Award size={24} />
+                  </div>
+                  <div className="text-left">
+                    <p className="text-[10px] text-blue-500 font-black uppercase tracking-[0.3em] italic mb-1">
+                      System Protocol
+                    </p>
+                    <h3 className="text-2xl font-black text-white uppercase italic tracking-tighter">
+                      Collector Ranks
+                    </h3>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setIsRankModalOpen(false)}
+                  className="p-2 text-gray-500 hover:text-white transition-colors"
+                >
+                  <X size={24} />
+                </button>
+              </div>
+
+              <div className="p-8 space-y-6 max-h-[60vh] overflow-y-auto custom-scrollbar">
+                {[
+                  {
+                    name: 'Mythic Overlord',
+                    min: 500,
+                    color: 'text-amber-500',
+                    bg: 'bg-amber-500',
+                    desc: 'Absolute dominance over the physical and digital realms. God-tier asset capacity.',
+                  },
+                  {
+                    name: 'Legendary Curator',
+                    min: 250,
+                    color: 'text-rose-500',
+                    bg: 'bg-rose-500',
+                    desc: 'A collection of immense proportions. You define the archive standards.',
+                  },
+                  {
+                    name: 'Master Architect',
+                    min: 100,
+                    color: 'text-purple-500',
+                    bg: 'bg-purple-500',
+                    desc: 'Designating space for triple-digit assets. High-end display protocol active.',
+                  },
+                  {
+                    name: 'Elite Hunter',
+                    min: 50,
+                    color: 'text-indigo-500',
+                    bg: 'bg-indigo-500',
+                    desc: 'High-value asset specialist. Significant market influence.',
+                  },
+                  {
+                    name: 'Veteran Tracker',
+                    min: 25,
+                    color: 'text-cyan-500',
+                    bg: 'bg-cyan-500',
+                    desc: 'Experienced field operative. Extensive knowledge of rarity and procurement.',
+                  },
+                  {
+                    name: 'Active Collector',
+                    min: 10,
+                    color: 'text-blue-500',
+                    bg: 'bg-blue-500',
+                    desc: 'Confirmed field operative. Multiple assets logged.',
+                  },
+                  {
+                    name: 'Apprentice',
+                    min: 5,
+                    color: 'text-emerald-500',
+                    bg: 'bg-emerald-500',
+                    desc: 'Basic database clearance established. Initializing serious acquisition.',
+                  },
+                  {
+                    name: 'Novice',
+                    min: 0,
+                    color: 'text-gray-500',
+                    bg: 'bg-gray-500',
+                    desc: 'Entry level access. Initializing database.',
+                  },
+                ].map((r) => (
+                  <div
+                    key={r.name}
+                    className={`flex items-start gap-5 p-4 rounded-2xl border transition-all ${
+                      collectionStats.count >= r.min
+                        ? 'bg-blue-500/5 border-blue-500/20 shadow-[0_0_20px_rgba(59,130,246,0.05)]'
+                        : 'bg-[#121212] border-[#222] opacity-40'
+                    }`}
+                  >
+                    <div
+                      className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${r.bg} text-white shadow-lg`}
+                    >
+                      <Award size={20} />
+                    </div>
+                    <div className="text-left space-y-1">
+                      <div className="flex items-center gap-3">
+                        <h4 className={`font-black uppercase italic tracking-tight ${r.color}`}>
+                          {r.name}
+                        </h4>
+                        <span className="text-[9px] font-mono text-gray-600 bg-black/40 px-2 py-0.5 rounded-full border border-white/5">
+                          {r.min}+ units
+                        </span>
+                      </div>
+                      <p className="text-[10px] text-gray-500 font-medium leading-relaxed">
+                        {r.desc}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
