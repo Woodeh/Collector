@@ -32,7 +32,7 @@ export default function NextArrival({ nextRelease, navigate }) {
           </div>
           <button
             onClick={() => navigate('/preorders')}
-            className="w-full py-4 bg-orange-600 text-white rounded-2xl font-black uppercase text-[10px] tracking-widest hover:bg-orange-500 transition-all cursor-pointer shadow-lg active:scale-95 text-left"
+            className="w-full py-4 bg-orange-600 text-white rounded-2xl font-black uppercase text-[10px] tracking-widest hover:bg-orange-500 transition-all cursor-pointer shadow-lg active:scale-95 flex items-center justify-center text-center"
           >
             Check Pre-orders
           </button>

@@ -2,8 +2,7 @@ import React, { useEffect, useState, useRef, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { db } from '../firebase/config';
 import { doc, getDoc, collection, query, where, getDocs, limit } from 'firebase/firestore';
-// eslint-disable-next-line no-unused-vars
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion as Motion, AnimatePresence } from 'framer-motion';
 import {
   ArrowLeft,
   Loader2,
@@ -160,7 +159,7 @@ const FigureDetailsPage = () => {
               onMouseLeave={() => setIsHovered(false)}
             >
               <AnimatePresence mode="wait">
-                <motion.div
+                <Motion.div
                   key={`glow-${activeImg}`}
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 0.5 }}
@@ -177,7 +176,7 @@ const FigureDetailsPage = () => {
 
               <div className="relative w-full h-full bg-[#1a1a1a] border border-[#333] rounded-[2.5rem] overflow-hidden shadow-2xl z-10 group/slider">
                 <AnimatePresence mode="wait">
-                  <motion.img
+                  <Motion.img
                     key={activeImg}
                     src={images[activeImg]}
                     initial={{ opacity: 0 }}
@@ -255,12 +254,12 @@ const FigureDetailsPage = () => {
                         ) : (
                           <div className="flex flex-col items-center justify-center opacity-30 group-hover/id:opacity-50 transition-opacity">
                             {/* Используем motion для иконки, чтобы оправдать импорт */}
-                            <motion.div
+                            <Motion.div
                               animate={{ scale: [1, 1.1, 1] }}
                               transition={{ duration: 2, repeat: Infinity }}
                             >
                               <Cpu size={32} className="text-blue-500 mb-2" />
-                            </motion.div>
+                            </Motion.div>
                             <span className="text-[7px] font-black uppercase tracking-[0.2em] text-center px-2">
                               Data Missing
                             </span>
