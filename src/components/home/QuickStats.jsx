@@ -1,59 +1,96 @@
 import React from 'react';
-import { Zap } from 'lucide-react';
+import { ShieldCheck, Coins, Factory, BarChart3 } from 'lucide-react';
 
 export default function QuickStats({ stats }) {
   return (
-    <div className="bg-[#1a1a1a] border border-[#333] p-6 md:p-10 rounded-[2rem] md:rounded-[3rem] shadow-2xl w-full lg:min-w-[360px] lg:w-auto relative overflow-hidden group">
-      <div className="absolute top-4 right-6 md:top-6 md:right-8 p-2 md:p-3 bg-blue-500/10 rounded-xl md:rounded-2xl text-blue-500 animate-pulse">
-        <Zap size={18} fill="currentColor" />
-      </div>
-      <h4 className="text-[9px] md:text-[10px] font-black text-blue-500 uppercase tracking-[0.3em] mb-6 md:mb-10 italic">
-        Portfolio Intelligence
-      </h4>
-      <div className="space-y-8 md:space-y-12">
-        <div>
-          <p className="text-gray-500 text-[8px] md:text-[9px] uppercase font-black tracking-widest mb-1">
-            Total Collection Value
-          </p>
-          <p className="text-4xl md:text-5xl font-black text-white italic tracking-tighter">
-            ${stats.totalValue.toLocaleString()}
-          </p>
+    <div className="relative group w-full lg:w-auto lg:min-w-[380px]">
+      {/* Subtle Site Accent Glow */}
+      <div className="absolute -inset-0.5 bg-blue-500/10 rounded-[2.5rem] blur opacity-40 group-hover:opacity-100 transition duration-700" />
+
+      <div className="relative bg-[#1a1a1a] border border-[#333] p-8 md:p-10 rounded-[2.5rem] overflow-hidden shadow-2xl">
+        {/* Background "Ghost" Icon */}
+        <BarChart3
+          className="absolute -bottom-10 -right-10 text-blue-500/5 rotate-[-15deg]"
+          size={240}
+        />
+
+        {/* Top Header Section */}
+        <div className="flex items-center justify-between mb-12 relative z-10">
+          <div className="flex items-center gap-3">
+            <div className="relative">
+              <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-ping absolute inset-0" />
+              <div className="w-1.5 h-1.5 bg-blue-500 rounded-full relative" />
+            </div>
+            <h4 className="text-[10px] font-black text-blue-500 uppercase tracking-[0.4em] italic">
+              Portfolio Metrics
+            </h4>
+          </div>
+          <div className="text-[7px] font-black text-gray-500 border border-[#333] px-2 py-1 rounded tracking-widest uppercase italic">
+            SYNC.LIVE
+          </div>
         </div>
-        <div className="pt-6 md:pt-10 border-t border-[#333] flex justify-between items-end gap-4 md:gap-6">
-          <div className="space-y-4 md:space-y-6 flex-1">
-            <div>
-              <p className="text-gray-500 text-[8px] md:text-[9px] uppercase font-black tracking-widest mb-1">
-                Dominant Brand
-              </p>
-              <p className="text-lg md:text-xl font-black text-white italic uppercase truncate max-w-[120px] sm:max-w-none">
-                {stats.topBrand}
-              </p>
+
+        <div className="space-y-12 relative z-10">
+          {/* TOTAL WORTH */}
+          <div className="space-y-3">
+            <div className="flex items-center gap-2 opacity-50">
+              <Coins size={12} className="text-blue-500" />
+              <span className="text-[9px] font-black uppercase tracking-[0.2em] text-[#e4e4e4]">
+                Total Assets Value
+              </span>
             </div>
-            <div className="h-1 w-full bg-[#121212] rounded-full overflow-hidden flex">
-              <div className="h-full bg-blue-500 w-[60%]"></div>
-              <div className="h-full bg-blue-500/40 w-[25%]"></div>
-              <div className="h-full bg-blue-500/10 w-[15%]"></div>
+            <div className="flex items-baseline gap-2">
+              <span className="text-3xl font-black text-blue-500 italic tracking-tighter">$</span>
+              <p className="text-5xl md:text-6xl font-black text-white italic tracking-tighter leading-none">
+                {stats.totalValue.toLocaleString()}
+              </p>
             </div>
           </div>
-          <div className="text-right shrink-0 space-y-2">
-            <p className="text-gray-600 text-[8px] md:text-[9px] uppercase font-black tracking-widest mb-1">
-              Collector Rank
-            </p>
-            <p
-              className={`text-[10px] md:text-xs font-black uppercase italic leading-tight ${stats.rank.color}`}
-            >
-              {stats.rank.name}
-            </p>
-            <div className="w-24 h-1 bg-[#121212] rounded-full overflow-hidden ml-auto">
-              <div
-                className={`h-full ${stats.rank.bg} transition-all duration-1000`}
-                style={{ width: `${Math.min((stats.count / stats.rank.next) * 100, 100)}%` }}
-              />
+
+          {/* DOMINANT BRAND */}
+          <div className="pt-10 border-t border-[#333]">
+            <div className="flex items-center justify-between group/brand">
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 opacity-50">
+                  <Factory size={12} className="text-blue-500" />
+                  <span className="text-[9px] font-black uppercase tracking-[0.2em] text-[#e4e4e4]">
+                    Primary Source
+                  </span>
+                </div>
+                <div>
+                  <p className="text-2xl md:text-3xl font-black text-white italic uppercase tracking-tight leading-none truncate max-w-[200px]">
+                    {stats.topBrand}
+                  </p>
+                  <div className="flex items-center gap-1.5 mt-2 text-blue-500/60">
+                    <ShieldCheck size={10} />
+                    <span className="text-[8px] font-bold uppercase tracking-widest italic">
+                      Authenticity Verified
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Decorative Analyzer visual */}
+              <div className="flex gap-1 items-end h-10 opacity-10 group-hover/brand:opacity-30 transition-opacity duration-500">
+                {[0.4, 0.8, 0.5, 1, 0.6, 0.9].map((val, i) => (
+                  <div
+                    key={i}
+                    className="w-1.5 bg-blue-500 rounded-full"
+                    style={{ height: `${val * 100}%` }}
+                  />
+                ))}
+              </div>
             </div>
-            <p className="text-gray-500 text-[9px] md:text-[10px] font-bold mt-1">
-              ({stats.count} Pcs)
-            </p>
           </div>
+        </div>
+
+        {/* Footer System Lines */}
+        <div className="mt-12 flex items-center gap-4 opacity-20">
+          <div className="h-px flex-1 bg-[#333]" />
+          <div className="text-[6px] font-black text-gray-600 uppercase tracking-[1em] whitespace-nowrap italic">
+            SECURE_DATA_LINK
+          </div>
+          <div className="h-px flex-1 bg-[#333]" />
         </div>
       </div>
     </div>

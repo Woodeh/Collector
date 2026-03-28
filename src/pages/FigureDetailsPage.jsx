@@ -230,7 +230,7 @@ const FigureDetailsPage = () => {
                     <div className="w-32 h-44 rounded-xl bg-[#121212] border border-[#333] overflow-hidden relative shadow-inner flex flex-col group/id">
                       {/* БЛИК ПОВЕРХ ВСЕГО */}
                       <div className="absolute inset-0 z-40 pointer-events-none overflow-hidden">
-                        <motion.div
+                        <Motion.div
                           initial={{ x: '-150%', skewX: -45 }}
                           animate={{ x: '150%', skewX: -45 }}
                           transition={{

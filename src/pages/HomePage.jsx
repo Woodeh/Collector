@@ -4,7 +4,19 @@ import { db, auth } from '../firebase/config';
 import { collection, query, orderBy, limit, getDocs, where } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
 import { Link } from 'react-router-dom';
-import { LayoutGrid, Loader2, ChevronRight, Clock, Heart, Shield, Zap, Target } from 'lucide-react';
+import {
+  LayoutGrid,
+  Loader2,
+  ChevronRight,
+  Clock,
+  Heart,
+  Shield,
+  Zap,
+  Target,
+  Plus,
+  Activity,
+  Boxes,
+} from 'lucide-react';
 
 import { HeroSection, QuickStats, SpotlightCard } from '../components/home';
 
@@ -144,6 +156,81 @@ const HomePage = () => {
           <QuickStats stats={stats} />
         </Motion.section>
 
+        {/* RANK PROGRESS & QUICK ACTIONS */}
+        {user && (
+          <Motion.section
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch"
+          >
+            {/* Rank Progression */}
+            <div className="lg:col-span-7 bg-[#1a1a1a] border border-[#333] p-8 rounded-[2.5rem] relative overflow-hidden group">
+              <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
+                <Shield size={120} />
+              </div>
+              <div className="relative z-10 space-y-6">
+                <div className="flex items-center justify-between">
+                  <div className="space-y-1">
+                    <p className="text-[10px] font-black uppercase tracking-[0.3em] text-blue-500 italic">
+                      Clearance Level
+                    </p>
+                    <h3
+                      className={`text-3xl font-black uppercase italic tracking-tighter ${stats.rank?.color}`}
+                    >
+                      {stats.rank?.name}
+                    </h3>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-500 italic">
+                      Next Tier At
+                    </p>
+                    <p className="text-xl font-black text-white italic">{stats.rank?.next} Units</p>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <div className="h-3 w-full bg-[#121212] rounded-full overflow-hidden border border-white/5 p-0.5">
+                    <Motion.div
+                      initial={{ width: 0 }}
+                      whileInView={{
+                        width: `${Math.min((stats.count / stats.rank?.next) * 100, 100)}%`,
+                      }}
+                      transition={{ duration: 1.5, ease: 'circOut' }}
+                      className={`h-full rounded-full ${stats.rank?.bg} shadow-[0_0_15px_rgba(59,130,246,0.3)]`}
+                    />
+                  </div>
+                  <p className="text-[9px] font-bold uppercase tracking-widest text-gray-500 text-center italic">
+                    {stats.rank?.next - stats.count} units remaining until next protocol upgrade
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Access Hub */}
+            <div className="lg:col-span-5 grid grid-cols-2 gap-4">
+              <QuickActionLink to="/add" icon={<Plus size={24} />} label="Add Asset" color="blue" />
+              <QuickActionLink
+                to="/collection"
+                icon={<Boxes size={24} />}
+                label="View Vault"
+                color="gray"
+              />
+              <QuickActionLink
+                to="/community"
+                icon={<Activity size={24} />}
+                label="Network"
+                color="blue"
+              />
+              <QuickActionLink
+                to="/profile"
+                icon={<Shield size={24} />}
+                label="Identity"
+                color="gray"
+              />
+            </div>
+          </Motion.section>
+        )}
+
         {/* SPOTLIGHT SECTION */}
         <Motion.section
           initial={{ opacity: 0 }}
@@ -203,6 +290,11 @@ const HomePage = () => {
                     <div className="absolute top-3 left-3 px-2 py-1 bg-blue-600/20 backdrop-blur-md border border-blue-500/30 rounded-lg">
                       <p className="text-[7px] font-black text-blue-400 uppercase tracking-widest">
                         New Entry
+                      </p>
+                    </div>
+                    <div className="absolute bottom-3 right-3 px-2 py-1 bg-black/60 backdrop-blur-md border border-white/10 rounded-lg">
+                      <p className="text-[9px] font-black text-white italic">
+                        ${Number(figure.price).toLocaleString()}
                       </p>
                     </div>
                   </div>
@@ -287,6 +379,25 @@ const HomePage = () => {
         </Motion.section>
       </div>
     </div>
+  );
+};
+
+const QuickActionLink = ({ to, icon, label, color }) => {
+  const colorClasses =
+    color === 'blue'
+      ? 'text-blue-500 border-blue-500/20 bg-blue-500/5 hover:bg-blue-600 hover:text-white hover:border-blue-500'
+      : 'text-gray-400 border-[#333] bg-[#1a1a1a] hover:bg-white hover:text-black hover:border-white';
+
+  return (
+    <Link
+      to={to}
+      className={`flex flex-col items-center justify-center rounded-[2rem] border transition-all duration-500 group ${colorClasses} shadow-lg`}
+    >
+      <div className="mb-2 transition-transform duration-500 group-hover:scale-110 group-hover:-rotate-6">
+        {icon}
+      </div>
+      <span className="text-[9px] font-black uppercase tracking-[0.2em] italic">{label}</span>
+    </Link>
   );
 };
 
