@@ -35,13 +35,21 @@ export default function QuickStats({ stats }) {
               <div className="h-full bg-blue-500/10 w-[15%]"></div>
             </div>
           </div>
-          <div className="text-right shrink-0">
+          <div className="text-right shrink-0 space-y-2">
             <p className="text-gray-600 text-[8px] md:text-[9px] uppercase font-black tracking-widest mb-1">
               Collector Rank
             </p>
-            <p className="text-[10px] md:text-xs font-black text-gray-400 uppercase italic leading-tight">
-              {stats.rank}
+            <p
+              className={`text-[10px] md:text-xs font-black uppercase italic leading-tight ${stats.rank.color}`}
+            >
+              {stats.rank.name}
             </p>
+            <div className="w-24 h-1 bg-[#121212] rounded-full overflow-hidden ml-auto">
+              <div
+                className={`h-full ${stats.rank.bg} transition-all duration-1000`}
+                style={{ width: `${Math.min((stats.count / stats.rank.next) * 100, 100)}%` }}
+              />
+            </div>
             <p className="text-gray-500 text-[9px] md:text-[10px] font-bold mt-1">
               ({stats.count} Pcs)
             </p>

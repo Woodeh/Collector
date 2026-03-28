@@ -39,17 +39,20 @@ const Profile = () => {
 
   // Rank Logic based on figure count
   const getRankInfo = (count) => {
+    if (count >= 500)
+      return { name: 'Mythic Overlord', next: 1000, color: 'text-amber-500', bg: 'bg-amber-500' };
+    if (count >= 250)
+      return { name: 'Legendary Curator', next: 500, color: 'text-rose-500', bg: 'bg-rose-500' };
+    if (count >= 100)
+      return { name: 'Master Architect', next: 250, color: 'text-purple-500', bg: 'bg-purple-500' };
     if (count >= 50)
-      return {
-        name: 'Legendary Curator',
-        next: 100,
-        color: 'text-purple-500',
-        bg: 'bg-purple-500',
-      };
-    if (count >= 20)
-      return { name: 'Elite Hunter', next: 50, color: 'text-indigo-500', bg: 'bg-indigo-500' };
+      return { name: 'Elite Hunter', next: 100, color: 'text-indigo-500', bg: 'bg-indigo-500' };
+    if (count >= 25)
+      return { name: 'Veteran Tracker', next: 50, color: 'text-cyan-500', bg: 'bg-cyan-500' };
+    if (count >= 10)
+      return { name: 'Active Collector', next: 25, color: 'text-blue-500', bg: 'bg-blue-500' };
     if (count >= 5)
-      return { name: 'Active Collector', next: 20, color: 'text-blue-500', bg: 'bg-blue-500' };
+      return { name: 'Apprentice', next: 10, color: 'text-emerald-500', bg: 'bg-emerald-500' };
     return { name: 'Novice', next: 5, color: 'text-gray-500', bg: 'bg-gray-500' };
   };
   const rank = getRankInfo(collectionStats.count);
