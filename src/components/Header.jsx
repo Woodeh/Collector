@@ -88,7 +88,7 @@ const Header = () => {
         </Link>
 
         {/* ЦЕНТРАЛЬНАЯ ЧАСТЬ: Навигация (Desktop) */}
-        <div className="hidden lg:flex flex-1 ml-12 gap-8 text-[10px] font-black uppercase tracking-[0.2em] italic items-center">
+        <div className="hidden lg:flex flex-1 ml-12 gap-8 text-xs font-black uppercase tracking-[0.2em] italic items-center">
           <NavLink
             to="/"
             className={({ isActive }) =>
@@ -116,7 +116,7 @@ const Header = () => {
           {user ? (
             <>
               {/* Личные ссылки (Desktop) */}
-              <div className="hidden lg:flex gap-8 text-[10px] font-black uppercase tracking-[0.2em] italic items-center border-r border-[#333] pr-8 mr-4">
+              <div className="hidden lg:flex gap-8 text-xs font-black uppercase tracking-[0.2em] italic items-center border-r border-[#333] pr-8 mr-4">
                 <NavLink
                   to="/collection"
                   className={({ isActive }) =>
@@ -152,10 +152,10 @@ const Header = () => {
               {/* ПРОФИЛЬ С ДРОПДАУНОМ (Desktop) */}
               <div className="hidden lg:flex items-center gap-4 relative" ref={profileRef}>
                 <div className="text-right shrink-0">
-                  <p className="text-[8px] text-blue-500 font-black uppercase tracking-[0.2em] italic leading-none mb-1">
+                  <p className="text-[9px] text-blue-500 font-black uppercase tracking-[0.2em] italic leading-none mb-1">
                     Identity
                   </p>
-                  <p className="text-white text-[10px] font-black uppercase italic leading-none truncate max-w-[100px]">
+                  <p className="text-white text-xs font-black uppercase italic leading-none truncate max-w-[100px]">
                     {user.displayName || user.email.split('@')[0]}
                   </p>
                 </div>
@@ -182,9 +182,9 @@ const Header = () => {
                 </div>
 
                 {isProfileOpen && (
-                  <div className="absolute top-full right-0 mt-10 w-64 bg-[#1a1a1a] border border-[#333] rounded-[2rem] shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+                  <div className="absolute top-full right-0 mt-8 w-64 bg-[#1a1a1a]/95 backdrop-blur-xl border border-[#333] rounded-[2rem] shadow-[0_30px_60px_rgba(0,0,0,0.8)] overflow-hidden animate-in fade-in zoom-in-95 slide-in-from-top-4 duration-300 ease-out origin-top-right">
                     <div className="p-6 border-b border-[#333] bg-[#121212]/50 text-left">
-                      <p className="text-[8px] text-blue-500 font-black uppercase tracking-[0.3em] italic mb-1">
+                      <p className="text-[9px] text-blue-500 font-black uppercase tracking-[0.3em] italic mb-1">
                         Collector Identity
                       </p>
                       <p className="text-white font-black italic uppercase text-sm truncate">
@@ -200,7 +200,7 @@ const Header = () => {
                         className="w-full flex items-center gap-4 p-4 rounded-xl text-gray-400 hover:bg-white/5 hover:text-white transition-all group text-left"
                       >
                         <Settings size={18} className="group-hover:text-blue-500" />
-                        <span className="text-[10px] font-black uppercase italic tracking-widest text-left">
+                        <span className="text-[11px] font-black uppercase italic tracking-widest text-left">
                           Profile
                         </span>
                       </button>
@@ -209,7 +209,7 @@ const Header = () => {
                         className="w-full flex items-center gap-4 p-4 rounded-xl text-red-500/70 hover:bg-red-500/10 hover:text-red-500 transition-all group text-left"
                       >
                         <LogOut size={18} />
-                        <span className="text-[10px] font-black uppercase italic tracking-widest text-left">
+                        <span className="text-[11px] font-black uppercase italic tracking-widest text-left">
                           Log Out
                         </span>
                       </button>
@@ -222,7 +222,7 @@ const Header = () => {
             <div className="hidden lg:block">
               <Link
                 to="/login"
-                className="flex items-center gap-3 px-6 py-3 rounded-2xl bg-blue-600 text-white font-black uppercase italic text-[10px] tracking-widest hover:bg-blue-500 shadow-xl shadow-blue-600/20 active:scale-95 transition-all"
+                className="flex items-center gap-3 px-6 py-3 rounded-2xl bg-blue-600 text-white font-black uppercase italic text-[11px] tracking-widest hover:bg-blue-500 shadow-xl shadow-blue-600/20 active:scale-95 transition-all"
               >
                 <LogIn size={16} /> <span>Access System</span>
               </Link>
