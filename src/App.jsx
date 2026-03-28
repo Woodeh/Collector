@@ -10,6 +10,7 @@ import Home from './pages/HomePage';
 import FigureForm from './components/FigureForm';
 import Profile from './pages/ProfilePage';
 import Community from './pages/CommunityPage';
+import Footer from './components/Footer';
 
 function App() {
   return (
@@ -32,6 +33,7 @@ function App() {
           </Routes>
         </main>
       </div>
+      <Footer />
     </Router>
   );
 }

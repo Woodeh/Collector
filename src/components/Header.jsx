@@ -31,6 +31,18 @@ const Header = () => {
     return () => unsubAuth();
   }, []);
 
+  // Блокировка скролла основной страницы при открытом мобильном меню
+  useEffect(() => {
+    if (isMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isMenuOpen]);
+
   // Закрытие дропдауна при клике вне его области
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -113,7 +125,7 @@ const Header = () => {
                     }`
                   }
                 >
-                  <LayoutGrid size={16} /> <span>Vault</span>
+                  <LayoutGrid size={16} /> <span>My collection </span>
                 </NavLink>
                 <NavLink
                   to="/preorders"
@@ -150,7 +162,6 @@ const Header = () => {
                   <User size={20} />
                 </button>
 
-                {/* DROPDOWN MENU - Опущено ниже через mt-10 */}
                 {isProfileOpen && (
                   <div className="absolute top-full right-0 mt-10 w-64 bg-[#1a1a1a] border border-[#333] rounded-[2rem] shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden animate-in fade-in zoom-in-95 duration-200">
                     <div className="p-6 border-b border-[#333] bg-[#121212]/50 text-left">
@@ -211,7 +222,7 @@ const Header = () => {
 
       {/* МОБИЛЬНОЕ ВЫПАДАЮЩЕЕ МЕНЮ */}
       <div
-        className={`lg:hidden fixed inset-0 top-[77px] bg-[#121212]/95 backdrop-blur-2xl transition-all duration-500 z-10 ${
+        className={`lg:hidden fixed inset-0 top-[77px] bg-[#121212]/95 backdrop-blur-2xl transition-all duration-500 z-10 overflow-y-auto ${
           isMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none translate-y-4'
         }`}
       >
