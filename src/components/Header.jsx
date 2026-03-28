@@ -150,17 +150,36 @@ const Header = () => {
               </div>
 
               {/* ПРОФИЛЬ С ДРОПДАУНОМ (Desktop) */}
-              <div className="hidden lg:block relative" ref={profileRef}>
-                <button
-                  onClick={() => setIsProfileOpen(!isProfileOpen)}
-                  className={`w-11 h-11 rounded-2xl bg-[#121212] border flex items-center justify-center transition-all shadow-lg active:scale-95 cursor-pointer ${
-                    isProfileOpen
-                      ? 'border-blue-500 text-white bg-blue-600/10'
-                      : 'border-[#333] text-blue-500 hover:border-blue-500'
-                  }`}
-                >
-                  <User size={20} />
-                </button>
+              <div className="hidden lg:flex items-center gap-4 relative" ref={profileRef}>
+                <div className="text-right shrink-0">
+                  <p className="text-[8px] text-blue-500 font-black uppercase tracking-[0.2em] italic leading-none mb-1">
+                    Identity
+                  </p>
+                  <p className="text-white text-[10px] font-black uppercase italic leading-none truncate max-w-[100px]">
+                    {user.displayName || user.email.split('@')[0]}
+                  </p>
+                </div>
+
+                <div className="relative">
+                  <button
+                    onClick={() => setIsProfileOpen(!isProfileOpen)}
+                    className={`w-11 h-11 rounded-2xl bg-[#121212] border overflow-hidden flex items-center justify-center transition-all shadow-lg active:scale-95 cursor-pointer ${
+                      isProfileOpen
+                        ? 'border-blue-500 ring-2 ring-blue-500/20'
+                        : 'border-[#333] hover:border-blue-500'
+                    }`}
+                  >
+                    {user.photoURL ? (
+                      <img
+                        src={user.photoURL}
+                        alt="Avatar"
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <User size={20} className="text-blue-500" />
+                    )}
+                  </button>
+                </div>
 
                 {isProfileOpen && (
                   <div className="absolute top-full right-0 mt-10 w-64 bg-[#1a1a1a] border border-[#333] rounded-[2rem] shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden animate-in fade-in zoom-in-95 duration-200">
@@ -229,8 +248,12 @@ const Header = () => {
         <div className="flex flex-col p-6 gap-2">
           {user && (
             <div className="flex items-center gap-5 p-6 mb-4 bg-[#1a1a1a] border border-[#333] rounded-[2.5rem]">
-              <div className="w-14 h-14 rounded-2xl bg-blue-600 flex items-center justify-center text-white font-black text-2xl italic shadow-lg shadow-blue-600/20">
-                {user.email[0].toUpperCase()}
+              <div className="w-14 h-14 rounded-2xl bg-blue-600 flex items-center justify-center text-white font-black text-2xl italic shadow-lg shadow-blue-600/20 overflow-hidden">
+                {user.photoURL ? (
+                  <img src={user.photoURL} alt="Avatar" className="w-full h-full object-cover" />
+                ) : (
+                  user.email[0].toUpperCase()
+                )}
               </div>
               <div className="text-left">
                 <p className="text-[9px] text-blue-500 font-black uppercase tracking-[0.3em] italic mb-1">
