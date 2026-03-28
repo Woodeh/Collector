@@ -6,7 +6,6 @@ import { Loader2, Monitor } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import Modal from '../components/Modal';
 
-// Импорт новых компонентов
 import { FigureCard, CollectionHeader, CollectionFilters } from '../components/collection';
 
 const Collection = () => {
@@ -16,8 +15,11 @@ const Collection = () => {
   const [figureToDelete, setFigureToDelete] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [showFilters, setShowFilters] = useState(false);
+
+  // Состояния фильтров
   const [sortBy, setSortBy] = useState('newest');
   const [filterAnime, setFilterAnime] = useState('All');
+  const [filterBrand, setFilterBrand] = useState('All');
 
   const navigate = useNavigate();
 
@@ -42,10 +44,49 @@ const Collection = () => {
     return () => unsubscribeAuth();
   }, [navigate]);
 
+  // Подготовка опций для селектов
   const animeOptions = useMemo(() => {
     const titles = figures.map((f) => f.anime).filter(Boolean);
     return ['All', ...new Set(titles)].sort();
   }, [figures]);
+
+  const brandOptions = useMemo(() => {
+    const brands = figures.map((f) => f.brand).filter(Boolean);
+    return ['All', ...new Set(brands)].sort();
+  }, [figures]);
+
+  const handleResetFilters = () => {
+    setSearchTerm('');
+    setSortBy('newest');
+    setFilterAnime('All');
+    setFilterBrand('All');
+  };
+
+  const processedFigures = useMemo(() => {
+    let result = [...figures];
+
+    if (searchTerm) {
+      result = result.filter(
+        (f) =>
+          f.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          f.anime?.toLowerCase().includes(searchTerm.toLowerCase()),
+      );
+    }
+
+    if (filterAnime !== 'All') result = result.filter((f) => f.anime === filterAnime);
+    if (filterBrand !== 'All') result = result.filter((f) => f.brand === filterBrand);
+
+    result.sort((a, b) => {
+      if (sortBy === 'cheap') return Number(a.price) - Number(b.price);
+      if (sortBy === 'expensive') return Number(b.price) - Number(a.price);
+      if (sortBy === 'az') return (a.name || '').localeCompare(b.name || '');
+      if (sortBy === 'za') return (b.name || '').localeCompare(a.name || '');
+      if (sortBy === 'oldest') return a.createdAt?.seconds - b.createdAt?.seconds;
+      return b.createdAt?.seconds - a.createdAt?.seconds; // newest
+    });
+
+    return result;
+  }, [figures, searchTerm, filterAnime, filterBrand, sortBy]);
 
   const handleConfirmDelete = async () => {
     if (!figureToDelete) return;
@@ -57,36 +98,16 @@ const Collection = () => {
         try {
           await deleteObject(ref(storage, url));
         } catch {
-          console.warn('Image already deleted');
+          console.warn('Image skip');
         }
       }
     } catch (error) {
-      console.error('Delete error:', error);
+      console.error(error);
     } finally {
       setIsModalOpen(false);
       setFigureToDelete(null);
     }
   };
-
-  const processedFigures = useMemo(() => {
-    let result = [...figures];
-    if (searchTerm) {
-      result = result.filter(
-        (f) =>
-          f.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          f.anime?.toLowerCase().includes(searchTerm.toLowerCase()),
-      );
-    }
-    if (filterAnime !== 'All') result = result.filter((f) => f.anime === filterAnime);
-
-    result.sort((a, b) => {
-      if (sortBy === 'cheap') return a.price - b.price;
-      if (sortBy === 'expensive') return b.price - a.price;
-      if (sortBy === 'oldest') return a.createdAt?.seconds - b.createdAt?.seconds;
-      return b.createdAt?.seconds - a.createdAt?.seconds;
-    });
-    return result;
-  }, [figures, searchTerm, filterAnime, sortBy]);
 
   if (loading)
     return (
@@ -102,10 +123,10 @@ const Collection = () => {
         onClose={() => setIsModalOpen(false)}
         onConfirm={handleConfirmDelete}
         title="Delete Figure"
-        message={`Are you sure you want to delete "${figureToDelete?.name}"?`}
+        message={`Delete "${figureToDelete?.name}"?`}
       />
 
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-7xl mx-auto space-y-10">
         <CollectionHeader
           processedCount={processedFigures.length}
           searchTerm={searchTerm}
@@ -121,9 +142,13 @@ const Collection = () => {
           filterAnime={filterAnime}
           setFilterAnime={setFilterAnime}
           animeOptions={animeOptions}
+          filterBrand={filterBrand}
+          setFilterBrand={setFilterBrand}
+          brandOptions={brandOptions}
+          onReset={handleResetFilters}
         />
 
-        <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
           {processedFigures.length > 0 ? (
             processedFigures.map((figure) => (
               <FigureCard
@@ -139,7 +164,7 @@ const Collection = () => {
           ) : (
             <div className="col-span-full py-32 text-center opacity-30">
               <Monitor className="mx-auto mb-4" size={48} />
-              <p className="text-xl font-black uppercase italic tracking-widest">Database empty</p>
+              <p className="text-xl font-black uppercase italic tracking-widest">No units found</p>
             </div>
           )}
         </div>

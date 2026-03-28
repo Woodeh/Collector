@@ -1,11 +1,11 @@
 import React from 'react';
-import { Tag, Trash2, Pencil } from 'lucide-react';
+import { Tag, Trash2, Pencil, User } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
-export default function FigureCard({ figure, onEdit, onDelete }) {
+export default function FigureCard({ figure, onEdit, onDelete, isCommunity = false }) {
   return (
-    <div className="relative group bg-[#1a1a1a] rounded-[2rem] border border-[#333] overflow-hidden hover:border-blue-500/50 transition-all duration-500 flex flex-col shadow-2xl h-full text-left">
-      {/* Обертка кнопок: показываем только если передана хотя бы одна функция */}
+    <div className="relative group bg-[#1a1a1a] rounded-[2rem] border border-[#333] overflow-hidden hover:border-blue-500/50 transition-all duration-500 flex flex-col shadow-2xl h-full text-left font-sans">
+      {/* Edit/Delete Buttons (только для личной коллекции, при ховере) */}
       {(onEdit || onDelete) && (
         <div className="absolute top-4 right-4 z-40 flex gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform -translate-y-2 group-hover:translate-y-0">
           {onEdit && (
@@ -33,7 +33,11 @@ export default function FigureCard({ figure, onEdit, onDelete }) {
         </div>
       )}
 
-      <Link to={`/figure/${figure.id}`} className="flex flex-col h-full cursor-pointer">
+      <Link
+        to={`/figure/${figure.id}`}
+        className="flex flex-col h-full cursor-pointer relative z-10"
+      >
+        {/* IMAGE SECTION */}
         <div className="aspect-[10/12] overflow-hidden bg-[#121212] relative">
           <img
             src={figure.previewImage || figure.image}
@@ -41,10 +45,29 @@ export default function FigureCard({ figure, onEdit, onDelete }) {
             loading="lazy"
             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 brightness-[0.9] group-hover:brightness-100"
           />
+
+          {/* Градиент для читаемости плашки */}
+          <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/80 to-transparent pointer-events-none" />
+
+          {/* AUTHOR BADGE: Показываем только в Community, ПОВЕРХ фото, СНИЗУ */}
+          {isCommunity && (
+            <div className="absolute bottom-4 left-4 z-30">
+              <div className="flex items-center gap-2 bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/10 shadow-xl">
+                <div className="w-4 h-4 rounded-full bg-blue-600 flex items-center justify-center">
+                  <User size={10} className="text-white" />
+                </div>
+                <span className="text-[9px] font-black uppercase text-white tracking-tight italic">
+                  {figure.authorName || 'Anonymous'}
+                </span>
+              </div>
+            </div>
+          )}
         </div>
 
+        {/* INFO SECTION */}
         <div className="p-6 flex-grow flex flex-col justify-between">
           <div className="space-y-4">
+            {/* TOP INFO ROW */}
             <div className="flex justify-between items-center">
               <span className="text-[10px] text-blue-500 font-black uppercase tracking-[0.25em] italic truncate max-w-[80%]">
                 {figure.anime}
@@ -60,6 +83,7 @@ export default function FigureCard({ figure, onEdit, onDelete }) {
               </div>
             </div>
 
+            {/* MAIN TITLE */}
             <div className="relative pl-4 border-l-[3px] border-blue-600 py-1">
               <h3 className="text-xl font-black text-white leading-tight uppercase italic tracking-tighter group-hover:text-blue-400 transition-colors truncate">
                 {figure.name}
@@ -70,6 +94,7 @@ export default function FigureCard({ figure, onEdit, onDelete }) {
             </div>
           </div>
 
+          {/* PRICE BAR */}
           <div className="mt-8 pt-5 border-t border-white/5 flex justify-between items-center">
             <div className="flex items-center gap-2 opacity-40">
               <Tag size={14} className="text-blue-500" />
