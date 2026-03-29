@@ -31,7 +31,7 @@ const Header = () => {
     return () => unsubAuth();
   }, []);
 
-  // Блокировка скролла основной страницы при открытом мобильном меню
+  // Block main scroll when mobile menu is open
   useEffect(() => {
     if (isMenuOpen) {
       document.body.style.overflow = 'hidden';
@@ -43,7 +43,7 @@ const Header = () => {
     };
   }, [isMenuOpen]);
 
-  // Закрытие дропдауна при клике вне его области
+  // Close profile dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (profileRef.current && !profileRef.current.contains(event.target)) {
@@ -60,6 +60,7 @@ const Header = () => {
     try {
       await signOut(auth);
       setIsProfileOpen(false);
+      setIsMenuOpen(false);
       navigate('/login');
     } catch (error) {
       console.error('Logout failed:', error);
@@ -69,7 +70,7 @@ const Header = () => {
   return (
     <header className="sticky top-0 z-[100] font-sans selection:bg-blue-500/30">
       <nav className="bg-[#1a1a1a]/80 backdrop-blur-md border-b border-[#333] p-4 px-6 md:px-8 flex items-center justify-between shadow-xl relative z-20">
-        {/* ЛЕВАЯ ЧАСТЬ: Логотип */}
+        {/* LEFT: Logo */}
         <Link
           to="/"
           onClick={closeMenu}
@@ -87,7 +88,7 @@ const Header = () => {
           </span>
         </Link>
 
-        {/* ЦЕНТРАЛЬНАЯ ЧАСТЬ: Навигация (Desktop) */}
+        {/* CENTER: Navigation (Desktop) */}
         <div className="hidden lg:flex flex-1 ml-12 gap-8 text-xs font-black uppercase tracking-[0.2em] italic items-center">
           <NavLink
             to="/"
@@ -111,11 +112,11 @@ const Header = () => {
           </NavLink>
         </div>
 
-        {/* ПРАВАЯ ЧАСТЬ */}
+        {/* RIGHT: Actions */}
         <div className="flex items-center gap-4">
           {user ? (
             <>
-              {/* Личные ссылки (Desktop) */}
+              {/* Desktop User Links */}
               <div className="hidden lg:flex gap-8 text-xs font-black uppercase tracking-[0.2em] italic items-center border-r border-[#333] pr-8 mr-4">
                 <NavLink
                   to="/collection"
@@ -149,7 +150,7 @@ const Header = () => {
                 </NavLink>
               </div>
 
-              {/* ПРОФИЛЬ С ДРОПДАУНОМ (Desktop) */}
+              {/* Desktop Profile Dropdown */}
               <div className="hidden lg:flex items-center gap-4 relative" ref={profileRef}>
                 <div className="text-right shrink-0">
                   <p className="text-[9px] text-blue-500 font-black uppercase tracking-[0.2em] italic leading-none mb-1">
@@ -200,7 +201,7 @@ const Header = () => {
                         className="w-full flex items-center gap-4 p-4 rounded-xl text-gray-400 hover:bg-white/5 hover:text-white transition-all group text-left"
                       >
                         <Settings size={18} className="group-hover:text-blue-500" />
-                        <span className="text-[11px] font-black uppercase italic tracking-widest text-left">
+                        <span className="text-[11px] font-black uppercase italic tracking-widest">
                           Profile
                         </span>
                       </button>
@@ -209,7 +210,7 @@ const Header = () => {
                         className="w-full flex items-center gap-4 p-4 rounded-xl text-red-500/70 hover:bg-red-500/10 hover:text-red-500 transition-all group text-left"
                       >
                         <LogOut size={18} />
-                        <span className="text-[11px] font-black uppercase italic tracking-widest text-left">
+                        <span className="text-[11px] font-black uppercase italic tracking-widest">
                           Log Out
                         </span>
                       </button>
@@ -229,7 +230,7 @@ const Header = () => {
             </div>
           )}
 
-          {/* МОБИЛЬНАЯ КНОПКА МЕНЮ */}
+          {/* MOBILE MENU TOGGLE */}
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
             className="lg:hidden p-3 text-blue-500 bg-[#121212] border border-[#333] rounded-2xl hover:bg-blue-600/10 transition-all active:scale-90"
@@ -239,7 +240,7 @@ const Header = () => {
         </div>
       </nav>
 
-      {/* МОБИЛЬНОЕ ВЫПАДАЮЩЕЕ МЕНЮ */}
+      {/* MOBILE DROPDOWN MENU */}
       <div
         className={`lg:hidden fixed inset-0 top-[77px] bg-[#121212]/95 backdrop-blur-2xl transition-all duration-500 z-10 overflow-y-auto ${
           isMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none translate-y-4'
@@ -247,8 +248,8 @@ const Header = () => {
       >
         <div className="flex flex-col p-6 gap-2">
           {user && (
-            <div className="flex items-center gap-5 p-6 mb-4 bg-[#1a1a1a] border border-[#333] rounded-[2.5rem]">
-              <div className="w-14 h-14 rounded-2xl bg-blue-600 flex items-center justify-center text-white font-black text-2xl italic shadow-lg shadow-blue-600/20 overflow-hidden">
+            <div className="flex items-center gap-5 p-5 mb-4 bg-[#1a1a1a] border border-[#333] rounded-2xl">
+              <div className="w-12 h-12 rounded-xl bg-blue-600 flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-blue-600/20 overflow-hidden">
                 {user.photoURL ? (
                   <img src={user.photoURL} alt="Avatar" className="w-full h-full object-cover" />
                 ) : (
@@ -256,10 +257,10 @@ const Header = () => {
                 )}
               </div>
               <div className="text-left">
-                <p className="text-[9px] text-blue-500 font-black uppercase tracking-[0.3em] italic mb-1">
-                  Authenticated
+                <p className="text-[10px] text-blue-500 font-bold uppercase tracking-wider mb-0.5">
+                  Account
                 </p>
-                <p className="text-white font-black italic uppercase text-lg tracking-tighter text-left">
+                <p className="text-white font-black italic uppercase text-lg tracking-tighter">
                   {user.displayName || user.email.split('@')[0]}
                 </p>
               </div>
@@ -274,60 +275,69 @@ const Header = () => {
               activeColor="text-blue-500"
               onClick={closeMenu}
             />
-            <MobileNavLink
-              to="/community"
-              icon={<Globe size={20} />}
-              label="Global Catalog"
-              activeColor="text-blue-500"
-              onClick={closeMenu}
-            />
 
             {user ? (
               <>
-                <div className="h-px bg-[#333] my-4 mx-4 opacity-50" />
                 <MobileNavLink
                   to="/collection"
                   icon={<LayoutGrid size={20} />}
-                  label="Personal Vault"
+                  label="My Collection"
                   activeColor="text-blue-500"
                   onClick={closeMenu}
                 />
                 <MobileNavLink
+                  to="/community"
+                  icon={<Globe size={20} />}
+                  label="Catalog"
+                  activeColor="text-blue-500"
+                  onClick={closeMenu}
+                />
+                <MobileNavLink
+                  to="/profile"
+                  icon={<User size={20} />}
+                  label="Profile Settings"
+                  activeColor="text-blue-500"
+                  onClick={closeMenu}
+                />
+                <div className="h-px bg-[#333] my-4 mx-4 opacity-50" />
+                <MobileNavLink
                   to="/preorders"
                   icon={<Clock size={20} />}
-                  label="Incoming Units"
+                  label="Pre-Orders"
                   activeColor="text-orange-500"
                   onClick={closeMenu}
                 />
                 <MobileNavLink
                   to="/wishlist"
                   icon={<Heart size={20} />}
-                  label="Target List"
+                  label="Wishlist"
                   activeColor="text-pink-500"
-                  onClick={closeMenu}
-                />
-                <MobileNavLink
-                  to="/profile"
-                  icon={<User size={20} />}
-                  label="Terminal Settings"
-                  activeColor="text-blue-500"
                   onClick={closeMenu}
                 />
                 <button
                   onClick={handleLogout}
-                  className="flex items-center gap-4 p-5 rounded-[1.5rem] text-red-500 font-black uppercase italic tracking-widest text-xs mt-4 bg-red-500/5 border border-red-500/10"
+                  className="flex items-center gap-4 p-5 rounded-2xl text-red-500 font-bold uppercase tracking-widest text-xs mt-4 bg-red-500/5 border border-red-500/10"
                 >
                   <LogOut size={20} /> Log Out
                 </button>
               </>
             ) : (
-              <Link
-                to="/login"
-                onClick={closeMenu}
-                className="flex items-center gap-4 p-6 rounded-[2rem] bg-blue-600 text-white font-black uppercase italic tracking-[0.2em] text-sm mt-4 shadow-xl shadow-blue-600/20"
-              >
-                <LogIn size={20} /> Initialize Access
-              </Link>
+              <>
+                <MobileNavLink
+                  to="/community"
+                  icon={<Globe size={20} />}
+                  label="Catalog"
+                  activeColor="text-blue-500"
+                  onClick={closeMenu}
+                />
+                <Link
+                  to="/login"
+                  onClick={closeMenu}
+                  className="flex items-center gap-4 p-5 rounded-2xl bg-blue-600 text-white font-bold uppercase tracking-widest text-sm mt-4 shadow-xl shadow-blue-600/20"
+                >
+                  <LogIn size={20} /> Sign In
+                </Link>
+              </>
             )}
           </div>
         </div>
@@ -341,7 +351,7 @@ const MobileNavLink = ({ to, icon, label, activeColor, onClick }) => (
     to={to}
     onClick={onClick}
     className={({ isActive }) =>
-      `flex items-center gap-5 p-5 rounded-[1.8rem] transition-all border
+      `flex items-center gap-5 p-5 rounded-2xl transition-all border
       ${
         isActive
           ? `bg-[#1a1a1a] border-[#333] ${activeColor}`
@@ -350,7 +360,7 @@ const MobileNavLink = ({ to, icon, label, activeColor, onClick }) => (
     }
   >
     <div className="shrink-0">{icon}</div>
-    <span className="font-black uppercase italic tracking-[0.1em] text-sm">{label}</span>
+    <span className="font-bold uppercase tracking-wide text-sm">{label}</span>
   </NavLink>
 );
 
