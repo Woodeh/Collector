@@ -1,5 +1,5 @@
 import React from 'react';
-import { Info, Tag } from 'lucide-react';
+import { Info, Tag, DollarSign, ChevronDown } from 'lucide-react';
 import CharacterSearch from './CharacterSearch';
 import AnimeSearch from './AnimeSearch';
 import CustomSelect from './Select';
@@ -32,26 +32,36 @@ const BasicInfoSection = ({
       />
 
       <div className="flex gap-2">
-        <div className="relative flex-1">
+        <div className="relative flex-1 group">
+          <DollarSign
+            className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600 group-focus-within:text-blue-500 transition-colors"
+            size={18}
+          />
           <input
             name="price"
             type="number"
             placeholder={`Price *`}
-            className="w-full bg-[#121212] border border-[#333] p-4 rounded-xl outline-none focus:border-blue-500 font-bold text-white text-sm"
+            className="w-full bg-[#121212] border border-[#333] h-[58px] pl-12 rounded-2xl outline-none focus:border-blue-500 font-bold text-white text-sm transition-all placeholder:text-gray-700 placeholder:italic"
             onChange={handleChange}
             value={formData.price}
             required
           />
         </div>
-        <select
-          value={currency}
-          onChange={(e) => setCurrency(e.target.value)}
-          className="bg-[#121212] border border-[#333] px-3 rounded-xl text-white font-black text-xs appearance-none outline-none cursor-pointer"
-        >
-          <option value="USD">$</option>
-          <option value="KZT">₸</option>
-          <option value="CNY">¥</option>
-        </select>
+        <div className="relative w-28 group">
+          <select
+            value={currency}
+            onChange={(e) => setCurrency(e.target.value)}
+            className="w-full h-[58px] bg-[#121212] border border-[#333] px-4 rounded-2xl text-white font-bold text-sm appearance-none outline-none cursor-pointer hover:bg-[#181818] transition-all focus:border-blue-500 pr-10"
+          >
+            <option value="USD">USD</option>
+            <option value="KZT">KZT</option>
+            <option value="CNY">CNY</option>
+          </select>
+          <ChevronDown
+            size={16}
+            className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-600 group-focus-within:text-blue-500 pointer-events-none transition-colors"
+          />
+        </div>
       </div>
 
       <CustomSelect

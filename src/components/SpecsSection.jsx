@@ -10,10 +10,10 @@ const SpecsSection = ({ formData, handleCustomChange, conditionOptions, shopOpti
         <ShieldCheck size={14} /> Spec & Condition
       </h3>
       <div className="grid grid-cols-2 gap-3 sm:gap-4">
-        <div className="relative">
+        <div className="relative group">
           <Calendar
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-600 z-10 hidden sm:block"
-            size={16}
+            className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600 z-10 group-focus-within:text-blue-500 transition-colors"
+            size={18}
           />
           <DatePicker
             selected={formData.purchaseDate ? new Date(formData.purchaseDate) : null}
@@ -22,7 +22,8 @@ const SpecsSection = ({ formData, handleCustomChange, conditionOptions, shopOpti
             }
             dateFormat="yyyy-MM-dd"
             placeholderText="Date"
-            className="w-full bg-[#121212] border border-[#333] p-4 sm:pl-10 rounded-xl text-white font-bold text-xs"
+            wrapperClassName="w-full"
+            className="w-full bg-[#121212] border border-[#333] h-[58px] pl-12 rounded-2xl text-white font-bold text-sm outline-none focus:border-blue-500 transition-all placeholder:text-gray-700 placeholder:font-medium placeholder:italic"
           />
         </div>
         <CustomSelect

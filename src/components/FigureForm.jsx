@@ -214,11 +214,11 @@ const FigureForm = ({ mode = 'add' }) => {
 
   // ФИКС ЦВЕТОВ И ШРИФТОВ
   const inputBaseClass = `
-    w-full bg-[#121212] border border-[#333] p-4 pl-12 rounded-xl 
+    w-full bg-[#121212] border border-[#333] h-[58px] pl-12 rounded-2xl 
     font-bold text-white text-sm 
     focus:border-blue-500 focus:bg-[#121212] focus:text-white
     outline-none transition-all 
-    placeholder:text-gray-700 placeholder:font-normal placeholder:italic
+    placeholder:text-gray-700 placeholder:font-medium placeholder:italic
   `
     .replace(/\s+/g, ' ')
     .trim();

@@ -31,14 +31,16 @@ const CustomSelect = ({ label, options, value, onChange, icon: Icon }) => {
         onClick={() => setIsOpen(!isOpen)}
         className={`w-full bg-[#121212] border ${
           isOpen ? 'border-blue-500 shadow-[0_0_20px_rgba(59,130,246,0.1)]' : 'border-[#333]'
-        } p-4 rounded-2xl flex items-center justify-between transition-all duration-300 hover:bg-[#181818]`}
+        } h-[58px] px-4 rounded-2xl flex items-center justify-between transition-all duration-300 hover:bg-[#181818]`}
       >
         <div className="flex items-center gap-3 min-w-0">
           {Icon && <Icon size={18} className={isOpen ? 'text-blue-500' : 'text-gray-500'} />}
           <span
-            className={`truncate ${!selectedOption ? 'text-gray-500' : 'text-white font-medium'}`}
+            className={`truncate text-sm font-bold ${
+              !selectedOption ? 'text-gray-700 italic' : 'text-white'
+            }`}
           >
-            {selectedOption ? selectedOption.label : 'Выберите...'}
+            {selectedOption ? selectedOption.label : 'Select Option'}
           </span>
         </div>
         <ChevronDown
@@ -65,7 +67,7 @@ const CustomSelect = ({ label, options, value, onChange, icon: Icon }) => {
                   value === option.value ? 'bg-blue-600/5 text-blue-500' : 'text-gray-400'
                 }`}
               >
-                <span className="font-medium">{option.label}</span>
+                <span className="font-bold text-sm">{option.label}</span>
                 {value === option.value && (
                   <div className="w-1.5 h-1.5 rounded-full bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.5)]" />
                 )}

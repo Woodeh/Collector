@@ -63,7 +63,7 @@ const CharacterSearch = ({ value, onChange }) => {
         <input
           type="text"
           placeholder="Character Name (e.g. Zero Two) *"
-          className="w-full bg-[#121212] border border-[#333] p-4.5 pl-12 rounded-2xl outline-none focus:border-blue-500 font-bold text-white placeholder:text-gray-700 transition-all"
+          className="w-full bg-[#121212] border border-[#333] h-[58px] pl-12 rounded-2xl outline-none focus:border-blue-500 font-bold text-white text-sm placeholder:text-gray-700 transition-all"
           value={query}
           onChange={(e) => {
             setQuery(e.target.value);
@@ -97,7 +97,7 @@ const CharacterSearch = ({ value, onChange }) => {
                 />
               </div>
               <div>
-                <p className="text-sm font-black text-white group-hover:text-blue-400 transition-colors leading-none mb-1">
+                <p className="text-sm font-bold text-white group-hover:text-blue-400 transition-colors leading-none mb-1">
                   {char.name}
                 </p>
                 <p className="text-[9px] text-gray-500 uppercase font-bold tracking-widest">

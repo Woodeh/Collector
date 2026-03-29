@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, Loader2, X } from 'lucide-react';
+import { Search, Loader2, X, Bookmark } from 'lucide-react';
 
 const AnimeSearch = ({ value, onChange }) => {
   const [query, setQuery] = useState(value || '');
@@ -54,11 +54,15 @@ const AnimeSearch = ({ value, onChange }) => {
 
   return (
     <div className="relative w-full" ref={wrapperRef} style={{ zIndex: isOpen ? 100 : 10 }}>
-      <div className="relative">
+      <div className="relative group">
+        <Bookmark
+          className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600 group-focus-within:text-blue-500 transition-colors"
+          size={18}
+        />
         <input
           type="text"
-          placeholder="Start typing the name of the anime..."
-          className="w-full bg-[#121212] border border-[#333] p-4 rounded-xl outline-none focus:border-blue-500 transition-all text-white"
+          placeholder="Origin Series *"
+          className="w-full bg-[#121212] border border-[#333] h-[58px] pl-12 rounded-2xl outline-none focus:border-blue-500 transition-all text-white font-bold text-sm placeholder:text-gray-700 placeholder:italic"
           value={query}
           onChange={(e) => {
             setQuery(e.target.value);
