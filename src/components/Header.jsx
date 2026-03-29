@@ -12,17 +12,22 @@ import {
   X,
   LogOut,
   Settings,
+  Scan,
+  Loader2,
 } from 'lucide-react';
-import { auth } from '../firebase/config';
+import { auth, storage } from '../firebase/config';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import faceLogo from '../assets/face.png';
 
 const Header = () => {
   const [user, setUser] = useState(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [isScanning, setIsScanning] = useState(false);
   const navigate = useNavigate();
   const profileRef = useRef(null);
+  const fileInputRef = useRef(null);
 
   useEffect(() => {
     const unsubAuth = onAuthStateChanged(auth, (currentUser) => {
@@ -55,6 +60,30 @@ const Header = () => {
   }, []);
 
   const closeMenu = () => setIsMenuOpen(false);
+
+  const handleScanClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsScanning(true);
+    try {
+      // Временная загрузка в Storage для получения URL (Google Lens требует URL)
+      const storageRef = ref(storage, `temp_scans/${Date.now()}_scan.jpg`);
+      await uploadBytes(storageRef, file);
+      const downloadURL = await getDownloadURL(storageRef);
+
+      const lensUrl = `https://lens.google.com/uploadbyurl?url=${encodeURIComponent(downloadURL)}`;
+      window.open(lensUrl, '_blank');
+    } catch (error) {
+      console.error('Scan failed:', error);
+    } finally {
+      setIsScanning(false);
+    }
+  };
 
   const handleLogout = async () => {
     try {
@@ -114,6 +143,29 @@ const Header = () => {
 
         {/* RIGHT: Actions */}
         <div className="flex items-center gap-4">
+          {/* SCANNER BUTTON */}
+          <div className="relative">
+            <input
+              type="file"
+              accept="image/*"
+              capture="environment"
+              className="hidden"
+              ref={fileInputRef}
+              onChange={handleFileChange}
+            />
+            <button
+              onClick={handleScanClick}
+              disabled={isScanning}
+              className="flex items-center gap-2 px-3 py-2 md:px-4 md:py-2 rounded-xl bg-blue-500/10 border border-blue-500/30 text-blue-500 hover:bg-blue-500 hover:text-white transition-all active:scale-95 disabled:opacity-50 group cursor-pointer"
+              title="AI Market Scan"
+            >
+              {isScanning ? <Loader2 size={18} className="animate-spin" /> : <Scan size={18} />}
+              <span className="hidden sm:block text-[10px] font-black uppercase tracking-widest italic">
+                Scan
+              </span>
+            </button>
+          </div>
+
           {user ? (
             <>
               {/* Desktop User Links */}

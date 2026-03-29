@@ -11,6 +11,7 @@ import {
   ChevronRight,
   ChevronLeft,
   Cpu,
+  SearchCode,
   Fingerprint,
 } from 'lucide-react';
 
@@ -126,6 +127,13 @@ const FigureDetailsPage = () => {
   const prevSlide = (e) => {
     e.stopPropagation();
     setActiveImg((prev) => (prev - 1 + images.length) % images.length);
+  };
+
+  const handleMarketScan = () => {
+    const currentImgUrl = images[activeImg];
+    // Используем Google Lens, так как он лучше всего находит товары на eBay и в китайских магазинах
+    const lensUrl = `https://lens.google.com/uploadbyurl?url=${encodeURIComponent(currentImgUrl)}`;
+    window.open(lensUrl, '_blank');
   };
 
   if (loading)
@@ -374,25 +382,48 @@ const FigureDetailsPage = () => {
             </div>
 
             {/* EXTERNAL LINK */}
-            {figure.auctionUrl && (
-              <a
-                href={figure.auctionUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="group flex items-center justify-between bg-white text-black p-6 rounded-[1.5rem] hover:bg-blue-600 hover:text-white transition-all shadow-xl active:scale-95"
+            <div className="flex flex-col gap-4">
+              <button
+                onClick={handleMarketScan}
+                className="group flex items-center justify-between bg-blue-600/10 border border-blue-500/30 text-blue-500 p-6 rounded-[1.5rem] hover:bg-blue-600 hover:text-white transition-all shadow-xl active:scale-95 cursor-pointer"
               >
                 <div className="flex items-center gap-4 text-left">
-                  <ExternalLink size={20} />
-                  <span className="font-black uppercase tracking-[0.2em] text-[11px] italic leading-none">
-                    Launch System Link
-                  </span>
+                  <SearchCode size={20} />
+                  <div className="flex flex-col">
+                    <span className="font-black uppercase tracking-[0.2em] text-[11px] italic leading-none">
+                      Global Market Scan
+                    </span>
+                    <span className="text-[8px] uppercase tracking-[0.1em] opacity-60 mt-1">
+                      Identify on Taobao / eBay / Proxy
+                    </span>
+                  </div>
                 </div>
                 <ChevronRight
                   size={20}
                   className="group-hover:translate-x-2 transition-transform"
                 />
-              </a>
-            )}
+              </button>
+
+              {figure.auctionUrl && (
+                <a
+                  href={figure.auctionUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group flex items-center justify-between bg-white text-black p-6 rounded-[1.5rem] hover:bg-blue-600 hover:text-white transition-all shadow-xl active:scale-95"
+                >
+                  <div className="flex items-center gap-4 text-left">
+                    <ExternalLink size={20} />
+                    <span className="font-black uppercase tracking-[0.2em] text-[11px] italic leading-none">
+                      Launch System Link
+                    </span>
+                  </div>
+                  <ChevronRight
+                    size={20}
+                    className="group-hover:translate-x-2 transition-transform"
+                  />
+                </a>
+              )}
+            </div>
           </div>
         </div>
 
