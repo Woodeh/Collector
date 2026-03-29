@@ -38,7 +38,8 @@ const Collection = () => {
         });
         return () => unsubscribeSnap();
       } else {
-        navigate('/login');
+        // Если не залогинен — отправляем на главную (к Landing Page)
+        navigate('/');
       }
     });
     return () => unsubscribeAuth();

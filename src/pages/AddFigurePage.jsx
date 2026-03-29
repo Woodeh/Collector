@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { db, storage } from '../firebase/config';
+import { db, storage, auth } from '../firebase/config';
+import { onAuthStateChanged } from 'firebase/auth';
 import { collection, addDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import {
@@ -21,6 +22,14 @@ const AddFigurePage = () => {
   const [files, setFiles] = useState([]);
   const [loading, setLoading] = useState(false);
   const [showEpicSuccess, setShowEpicSuccess] = useState(null);
+
+  // Запрещаем гостям добавлять фигурки
+  useEffect(() => {
+    const unsub = onAuthStateChanged(auth, (user) => {
+      if (!user) navigate('/');
+    });
+    return () => unsub();
+  }, [navigate]);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -47,6 +56,7 @@ const AddFigurePage = () => {
 
       await addDoc(collection(db, 'figures'), {
         ...formData,
+        userId: auth.currentUser.uid, // Добавляем ID пользователя, иначе фигурка будет "ничьей"
         previewImage: url,
         createdAt: new Date(),
       });

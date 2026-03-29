@@ -10,6 +10,7 @@ import RankSection from '../components/home/RankSection';
 import QuickActions from '../components/home/QuickActions';
 import RecentFigures from '../components/home/RecentFigures';
 import HomeWidgets from '../components/home/HomeWidgets';
+import LandingPage from './LandingPage';
 
 const HomePage = () => {
   const [recentFigures, setRecentFigures] = useState([]);
@@ -132,6 +133,8 @@ const HomePage = () => {
         <Loader2 className="animate-spin text-blue-500" size={40} />
       </div>
     );
+
+  if (!user) return <LandingPage />;
 
   return (
     <div className="min-h-screen bg-[#121212] text-[#e4e4e4] font-sans pb-20 selection:bg-blue-500/30">

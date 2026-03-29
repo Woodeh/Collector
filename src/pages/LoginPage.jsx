@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { auth } from '../firebase/config';
 import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   updateProfile,
+  onAuthStateChanged,
 } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
 import { LogIn, Lock, Mail, UserPlus, Loader2 } from 'lucide-react';
@@ -15,6 +16,14 @@ const LoginPage = () => {
   const [name, setName] = useState(''); // Для регистрации
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+
+  // Если пользователь уже вошел, ему нечего делать на странице логина
+  useEffect(() => {
+    const unsub = onAuthStateChanged(auth, (user) => {
+      if (user) navigate('/');
+    });
+    return () => unsub();
+  }, [navigate]);
 
   const handleAuth = async (e) => {
     e.preventDefault();

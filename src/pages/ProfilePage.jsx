@@ -62,6 +62,10 @@ const Profile = () => {
   useEffect(() => {
     const unsubAuth = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
+      if (!currentUser && !auth.currentUser) {
+        // Редирект на лендинг для гостей
+        navigate('/');
+      }
       if (currentUser) {
         const qFigures = query(collection(db, 'figures'), where('userId', '==', currentUser.uid));
         const unsubFigures = onSnapshot(qFigures, (snap) => {
