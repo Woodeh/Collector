@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 import { auth, storage } from '../firebase/config';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 import faceLogo from '../assets/face.png';
 
 const Header = () => {
@@ -78,6 +78,16 @@ const Header = () => {
 
       const lensUrl = `https://lens.google.com/uploadbyurl?url=${encodeURIComponent(downloadURL)}`;
       window.open(lensUrl, '_blank');
+
+      // Удаляем временный файл через 10 минут
+      setTimeout(async () => {
+        try {
+          await deleteObject(storageRef);
+          console.log('Cleanup: Temporary scan removed');
+        } catch (cleanupError) {
+          console.warn('Cleanup failed (already deleted or network error):', cleanupError);
+        }
+      }, 600000); // 10 минут
     } catch (error) {
       console.error('Scan failed:', error);
     } finally {
@@ -144,27 +154,29 @@ const Header = () => {
         {/* RIGHT: Actions */}
         <div className="flex items-center gap-4">
           {/* SCANNER BUTTON */}
-          <div className="relative">
-            <input
-              type="file"
-              accept="image/*"
-              capture="environment"
-              className="hidden"
-              ref={fileInputRef}
-              onChange={handleFileChange}
-            />
-            <button
-              onClick={handleScanClick}
-              disabled={isScanning}
-              className="flex items-center gap-2 px-3 py-2 md:px-4 md:py-2 rounded-xl bg-blue-500/10 border border-blue-500/30 text-blue-500 hover:bg-blue-500 hover:text-white transition-all active:scale-95 disabled:opacity-50 group cursor-pointer"
-              title="AI Market Scan"
-            >
-              {isScanning ? <Loader2 size={18} className="animate-spin" /> : <Scan size={18} />}
-              <span className="hidden sm:block text-[10px] font-black uppercase tracking-widest italic">
-                Scan
-              </span>
-            </button>
-          </div>
+          {user && (
+            <div className="relative">
+              <input
+                type="file"
+                accept="image/*"
+                capture="environment"
+                className="hidden"
+                ref={fileInputRef}
+                onChange={handleFileChange}
+              />
+              <button
+                onClick={handleScanClick}
+                disabled={isScanning}
+                className="flex items-center gap-2 px-3 py-2 md:px-4 md:py-2 rounded-xl bg-blue-500/10 border border-blue-500/30 text-blue-500 hover:bg-blue-500 hover:text-white transition-all active:scale-95 disabled:opacity-50 group cursor-pointer"
+                title="AI Market Scan"
+              >
+                {isScanning ? <Loader2 size={18} className="animate-spin" /> : <Scan size={18} />}
+                <span className="hidden sm:block text-[10px] font-black uppercase tracking-widest italic">
+                  Scan
+                </span>
+              </button>
+            </div>
+          )}
 
           {user ? (
             <>
