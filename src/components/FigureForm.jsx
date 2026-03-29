@@ -266,7 +266,7 @@ const FigureForm = ({ mode = 'add' }) => {
 
       <form
         onSubmit={handleSubmit}
-        className="bg-[#1a1a1a] p-5 sm:p-10 rounded-[2rem] sm:rounded-[3rem] border border-[#333] space-y-8 shadow-2xl"
+        className="bg-gradient-to-b from-[#1c1c1c] to-[#161616] p-5 sm:p-10 rounded-[2rem] sm:rounded-[3rem] border border-[#262626] space-y-8"
       >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 sm:gap-10">
           <BasicInfoSection
