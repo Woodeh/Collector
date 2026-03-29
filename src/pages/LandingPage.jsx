@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion as Motion } from 'framer-motion';
 import { db } from '../firebase/config';
-import { collection, query, limit, getDocs } from 'firebase/firestore';
+import { collection, query, orderBy, limit, getDocs } from 'firebase/firestore';
 import {
   Zap,
   ShieldCheck,
@@ -16,6 +16,37 @@ import {
 } from 'lucide-react';
 import FigureCard from '../components/collection/FigureCard';
 
+const generatePlaceholders = () => [
+  {
+    id: 'p1',
+    name: 'Eva Unit-01',
+    anime: 'Evangelion',
+    price: 180,
+    previewImage: 'https://images.unsplash.com/photo-1559535332-db9971090158?q=80&w=800',
+  },
+  {
+    id: 'p2',
+    name: 'Cyberpunk Edgerunner',
+    anime: 'Night City',
+    price: 120,
+    previewImage: 'https://images.unsplash.com/photo-1608889175123-8ee362201f81?q=80&w=800',
+  },
+  {
+    id: 'p3',
+    name: 'Ghost in the Shell',
+    anime: 'Section 9',
+    price: 250,
+    previewImage: 'https://images.unsplash.com/photo-1612036782180-6f0b6cd846fe?q=80&w=800',
+  },
+  {
+    id: 'p4',
+    name: 'Prototype Asset',
+    anime: 'Vault Dev',
+    price: 300,
+    previewImage: 'https://images.unsplash.com/photo-1560439514-4e9643e39404?q=80&w=800',
+  },
+];
+
 const LandingPage = () => {
   const navigate = useNavigate();
   const [communityFigures, setCommunityFigures] = useState([]);
@@ -25,9 +56,10 @@ const LandingPage = () => {
     const fetchTeaser = async () => {
       try {
         setLoading(true);
-        // Упрощаем запрос: убираем orderBy, так как он может требовать индекса в Firebase,
-        // который не всегда настроен на старте.
-        const q = query(collection(db, 'figures'), limit(15));
+        // Для "Live Database Scan" и "real-time additions" логично показывать последние добавленные.
+        // Убедитесь, что у вас есть индекс для 'createdAt' в Firebase Console,
+        // иначе этот запрос может не работать или быть неэффективным.
+        const q = query(collection(db, 'figures'), orderBy('createdAt', 'desc'), limit(15));
         const snap = await getDocs(q);
         const data = snap.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
 
@@ -46,37 +78,6 @@ const LandingPage = () => {
     };
     fetchTeaser();
   }, []);
-
-  const generatePlaceholders = () => [
-    {
-      id: 'p1',
-      name: 'Eva Unit-01',
-      anime: 'Evangelion',
-      price: 180,
-      previewImage: 'https://images.unsplash.com/photo-1559535332-db9971090158?q=80&w=800',
-    },
-    {
-      id: 'p2',
-      name: 'Cyberpunk Edgerunner',
-      anime: 'Night City',
-      price: 120,
-      previewImage: 'https://images.unsplash.com/photo-1608889175123-8ee362201f81?q=80&w=800',
-    },
-    {
-      id: 'p3',
-      name: 'Ghost in the Shell',
-      anime: 'Section 9',
-      price: 250,
-      previewImage: 'https://images.unsplash.com/photo-1612036782180-6f0b6cd846fe?q=80&w=800',
-    },
-    {
-      id: 'p4',
-      name: 'Prototype Asset',
-      anime: 'Vault Dev',
-      price: 300,
-      previewImage: 'https://images.unsplash.com/photo-1560439514-4e9643e39404?q=80&w=800',
-    },
-  ];
 
   const features = [
     {

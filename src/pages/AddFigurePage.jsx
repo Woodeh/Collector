@@ -57,6 +57,7 @@ const AddFigurePage = () => {
       await addDoc(collection(db, 'figures'), {
         ...formData,
         userId: auth.currentUser.uid, // Добавляем ID пользователя, иначе фигурка будет "ничьей"
+        authorName: auth.currentUser.displayName || auth.currentUser.email.split('@')[0],
         previewImage: url,
         createdAt: new Date(),
       });

@@ -328,6 +328,14 @@ const FigureDetailsPage = () => {
                           {figure.hasBox === 'Yes' ? 'Box: Intact' : 'Loose / No Box'}
                         </p>
                       </div>
+                      <div className="space-y-1.5 text-left">
+                        <p className="text-[9px] font-black text-gray-500 uppercase tracking-[0.3em] leading-none">
+                          Owner
+                        </p>
+                        <p className="text-[12px] font-black text-blue-500 uppercase italic">
+                          {figure.authorName || 'System Archive'}
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </div>

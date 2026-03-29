@@ -192,7 +192,7 @@ const Profile = () => {
 
     doc.setFontSize(8);
     doc.text(`GENERATED: ${timestamp}`, 140, 22);
-    doc.text(`OPERATOR: ${userName.toUpperCase()}`, 140, 28);
+    doc.text(`OWNER: ${userName.toUpperCase()}`, 140, 28);
 
     // Inventory Table Construction
     const tableData = allFigures
