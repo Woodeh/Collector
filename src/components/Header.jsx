@@ -109,6 +109,16 @@ const Header = () => {
   return (
     <header className="sticky top-0 z-[100] font-sans selection:bg-blue-500/30">
       <nav className="bg-[#1a1a1a]/80 backdrop-blur-md border-b border-[#333] p-4 px-6 md:px-8 flex items-center justify-between shadow-xl relative z-20">
+        {/* Hidden Input for Camera Access */}
+        <input
+          type="file"
+          accept="image/*"
+          capture="environment"
+          className="hidden"
+          ref={fileInputRef}
+          onChange={handleFileChange}
+        />
+
         {/* LEFT: Logo */}
         <Link
           to="/"
@@ -149,35 +159,23 @@ const Header = () => {
           >
             <Globe size={16} /> <span>Catalog</span>
           </NavLink>
+
+          {user && (
+            <button
+              onClick={handleScanClick}
+              disabled={isScanning}
+              className={`flex items-center gap-2 transition-colors cursor-pointer text-xs font-black uppercase tracking-[0.2em] italic ${
+                isScanning ? 'text-blue-500' : 'text-gray-500 hover:text-white'
+              }`}
+            >
+              {isScanning ? <Loader2 size={16} className="animate-spin" /> : <Scan size={16} />}
+              <span>Scan</span>
+            </button>
+          )}
         </div>
 
         {/* RIGHT: Actions */}
         <div className="flex items-center gap-4">
-          {/* SCANNER BUTTON */}
-          {user && (
-            <div className="relative">
-              <input
-                type="file"
-                accept="image/*"
-                capture="environment"
-                className="hidden"
-                ref={fileInputRef}
-                onChange={handleFileChange}
-              />
-              <button
-                onClick={handleScanClick}
-                disabled={isScanning}
-                className="flex items-center gap-2 px-3 py-2 md:px-4 md:py-2 rounded-xl bg-blue-500/10 border border-blue-500/30 text-blue-500 hover:bg-blue-500 hover:text-white transition-all active:scale-95 disabled:opacity-50 group cursor-pointer"
-                title="AI Market Scan"
-              >
-                {isScanning ? <Loader2 size={18} className="animate-spin" /> : <Scan size={18} />}
-                <span className="hidden sm:block text-[10px] font-black uppercase tracking-widest italic">
-                  Scan
-                </span>
-              </button>
-            </div>
-          )}
-
           {user ? (
             <>
               {/* Desktop User Links */}
@@ -342,6 +340,31 @@ const Header = () => {
 
             {user ? (
               <>
+                {/* Mobile Scan Action */}
+                <button
+                  onClick={() => {
+                    closeMenu();
+                    handleScanClick();
+                  }}
+                  disabled={isScanning}
+                  className={`flex items-center gap-5 p-5 rounded-2xl transition-all border mb-2 ${
+                    isScanning
+                      ? 'bg-blue-500/10 border-blue-500/20 text-blue-500'
+                      : 'text-gray-500 border-transparent hover:bg-[#1a1a1a] active:scale-95'
+                  }`}
+                >
+                  <div className="shrink-0">
+                    {isScanning ? (
+                      <Loader2 size={20} className="animate-spin" />
+                    ) : (
+                      <Scan size={20} />
+                    )}
+                  </div>
+                  <span className="font-bold uppercase tracking-wide text-sm">
+                    {isScanning ? 'Processing...' : 'Scan'}
+                  </span>
+                </button>
+
                 <MobileNavLink
                   to="/collection"
                   icon={<LayoutGrid size={20} />}
