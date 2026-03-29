@@ -173,7 +173,7 @@ const FigureDetailsPage = () => {
                   animate={{ opacity: 0.5 }}
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.8 }}
-                  className="absolute inset-[-20px] z-0 blur-[60px] rounded-full opacity-50 pointer-events-none"
+                  className="absolute inset-0 z-0 blur-[60px] rounded-full opacity-50 pointer-events-none scale-110"
                   style={{
                     background: `url(${images[activeImg]})`,
                     backgroundSize: 'cover',

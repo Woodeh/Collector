@@ -137,7 +137,7 @@ const HomePage = () => {
   if (!user) return <LandingPage />;
 
   return (
-    <div className="min-h-screen bg-[#121212] text-[#e4e4e4] font-sans pb-20 selection:bg-blue-500/30">
+    <div className="min-h-screen bg-[#121212] text-[#e4e4e4] font-sans pb-20 selection:bg-blue-500/30 overflow-x-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 md:py-16 space-y-24 md:space-y-32 relative">
         {/* HERO & STATS SECTION */}
         <Motion.section

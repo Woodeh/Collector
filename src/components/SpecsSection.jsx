@@ -23,7 +23,7 @@ const SpecsSection = ({ formData, handleCustomChange, conditionOptions, shopOpti
             dateFormat="yyyy-MM-dd"
             placeholderText="Date"
             wrapperClassName="w-full"
-            className="w-full bg-[#121212] border border-[#333] h-[58px] pl-12 rounded-2xl text-white font-bold text-sm outline-none focus:border-blue-500 transition-all placeholder:text-gray-700 placeholder:font-medium placeholder:italic"
+            className="w-full bg-[#121212] border border-[#333] h-[58px] pl-12 rounded-2xl text-white font-bold text-base outline-none focus:border-blue-500 transition-all placeholder:text-gray-700 placeholder:font-medium placeholder:italic"
           />
         </div>
         <CustomSelect

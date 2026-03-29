@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 /* Основные стили страницы */
-body {
-  @apply bg-[#121212] text-[#e4e4e4] antialiased;
+html, body {
+  @apply bg-[#121212] text-[#e4e4e4] antialiased overflow-x-hidden;
 }
 
 /* Стилизация скроллбара (для Chrome, Edge, Safari) */

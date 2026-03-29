@@ -77,7 +77,7 @@ const AddFigurePage = () => {
 
   // Базовый класс для инпутов, чтобы соблюсти единообразие
   const inputClass =
-    'w-full bg-[#121212] border border-[#333] p-4 pl-12 rounded-2xl text-white font-bold text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20 outline-none transition-all placeholder:text-gray-700 placeholder:italic placeholder:font-normal';
+    'w-full bg-[#121212] border border-[#333] p-4 pl-12 rounded-2xl text-white font-bold text-base focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20 outline-none transition-all placeholder:text-gray-700 placeholder:italic placeholder:font-normal';
   const labelClass =
     'text-[10px] font-black uppercase tracking-[0.2em] text-blue-500 italic mb-2 block ml-1';
 
@@ -87,7 +87,7 @@ const AddFigurePage = () => {
       {showEpicSuccess && (
         <div className="fixed inset-0 z-[999] flex items-center justify-center bg-black/95 backdrop-blur-xl animate-in fade-in duration-500">
           <div className="relative p-[1px] bg-gradient-to-b from-blue-500 to-transparent rounded-[3.5rem]">
-            <div className="bg-[#121212] p-10 rounded-[3.4rem] text-center max-w-sm border border-white/5 shadow-[0_0_50px_rgba(59,130,246,0.2)]">
+            <div className="bg-[#121212] p-6 sm:p-10 rounded-[3.4rem] text-center max-w-sm border border-white/5 shadow-[0_0_50px_rgba(59,130,246,0.2)]">
               <div className="w-20 h-20 bg-blue-500/10 rounded-full flex items-center justify-center mx-auto mb-6 border border-blue-500/20">
                 <CheckCircle2 size={40} className="text-blue-500 animate-pulse" />
               </div>

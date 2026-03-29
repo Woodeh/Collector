@@ -118,7 +118,7 @@ const Collection = () => {
     );
 
   return (
-    <div className="min-h-screen bg-[#121212] p-4 md:p-8 text-[#e4e4e4] pb-24 font-sans text-left">
+    <div className="min-h-screen bg-[#121212] p-4 md:p-8 text-[#e4e4e4] pb-24 font-sans text-left overflow-x-hidden">
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}

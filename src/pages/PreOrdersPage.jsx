@@ -152,7 +152,7 @@ const PreOrdersPage = () => {
     );
 
   return (
-    <div className="min-h-screen bg-[#121212] p-6 text-[#e4e4e4]">
+    <div className="min-h-screen bg-[#121212] p-6 text-[#e4e4e4] overflow-x-hidden">
       <div className="max-w-7xl mx-auto">
         <PreOrderHeader onAddClick={() => setShowForm(true)} />
 

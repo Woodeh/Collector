@@ -72,7 +72,7 @@ const LoginPage = () => {
               <input
                 type="text"
                 placeholder="Name"
-                className="w-full bg-[#121212] border border-[#333] rounded-2xl py-4 px-5 outline-none focus:border-blue-500 transition-all font-bold text-white placeholder:text-gray-800"
+                className="w-full bg-[#121212] border border-[#333] rounded-2xl py-4 px-5 outline-none focus:border-blue-500 transition-all font-bold text-white text-base placeholder:text-gray-800"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required={!isLogin}
@@ -90,7 +90,7 @@ const LoginPage = () => {
               <input
                 type="email"
                 placeholder="email@example.com"
-                className="w-full bg-[#121212] border border-[#333] rounded-2xl py-4 pl-12 pr-5 outline-none focus:border-blue-500 transition-all font-bold text-white placeholder:text-gray-800"
+                className="w-full bg-[#121212] border border-[#333] rounded-2xl py-4 pl-12 pr-5 outline-none focus:border-blue-500 transition-all font-bold text-white text-base placeholder:text-gray-800"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -108,7 +108,7 @@ const LoginPage = () => {
               <input
                 type="password"
                 placeholder="••••••••"
-                className="w-full bg-[#121212] border border-[#333] rounded-2xl py-4 pl-12 pr-5 outline-none focus:border-blue-500 transition-all font-bold text-white placeholder:text-gray-800"
+                className="w-full bg-[#121212] border border-[#333] rounded-2xl py-4 pl-12 pr-5 outline-none focus:border-blue-500 transition-all font-bold text-white text-base placeholder:text-gray-800"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required

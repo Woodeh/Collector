@@ -168,7 +168,7 @@ const WishlistPage = () => {
     );
 
   return (
-    <div className="min-h-screen bg-[#121212] p-4 md:p-10 text-[#e4e4e4] font-sans">
+    <div className="min-h-screen bg-[#121212] p-4 md:p-10 text-[#e4e4e4] font-sans overflow-x-hidden">
       <div className="max-w-7xl mx-auto text-left">
         <div className="flex justify-between items-center mb-8 border-b border-[#333] pb-6">
           <div className="flex items-center gap-4">

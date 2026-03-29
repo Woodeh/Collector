@@ -90,7 +90,7 @@ const Community = () => {
     );
 
   return (
-    <div className="min-h-screen bg-[#121212] p-4 md:p-8 text-[#e4e4e4] pb-20 text-left selection:bg-blue-500/30">
+    <div className="min-h-screen bg-[#121212] p-4 md:p-8 text-[#e4e4e4] pb-20 text-left selection:bg-blue-500/30 overflow-x-hidden">
       <div className="max-w-7xl mx-auto space-y-10">
         {/* Header Section */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 border-b border-[#333] pb-10">
@@ -120,7 +120,7 @@ const Community = () => {
               <input
                 type="text"
                 placeholder="Search database..."
-                className="w-full bg-[#1a1a1a] border border-[#333] py-4 pl-12 pr-4 rounded-2xl outline-none focus:border-blue-500 transition-all font-bold text-sm"
+                className="w-full bg-[#1a1a1a] border border-[#333] py-4 pl-12 pr-4 rounded-2xl outline-none focus:border-blue-500 transition-all font-bold text-base"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />

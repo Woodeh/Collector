@@ -41,7 +41,7 @@ const BasicInfoSection = ({
             name="price"
             type="number"
             placeholder={`Price *`}
-            className="w-full bg-[#121212] border border-[#333] h-[58px] pl-12 rounded-2xl outline-none focus:border-blue-500 font-bold text-white text-sm transition-all placeholder:text-gray-700 placeholder:italic"
+            className="w-full bg-[#121212] border border-[#333] h-[58px] pl-12 rounded-2xl outline-none focus:border-blue-500 font-bold text-white text-base transition-all placeholder:text-gray-700 placeholder:italic"
             onChange={handleChange}
             value={formData.price}
             required
@@ -51,7 +51,7 @@ const BasicInfoSection = ({
           <select
             value={currency}
             onChange={(e) => setCurrency(e.target.value)}
-            className="w-full h-[58px] bg-[#121212] border border-[#333] px-4 rounded-2xl text-white font-bold text-sm appearance-none outline-none cursor-pointer hover:bg-[#181818] transition-all focus:border-blue-500 pr-10"
+            className="w-full h-[58px] bg-[#121212] border border-[#333] px-4 rounded-2xl text-white font-bold text-base appearance-none outline-none cursor-pointer hover:bg-[#181818] transition-all focus:border-blue-500 pr-10"
           >
             <option value="USD">USD</option>
             <option value="KZT">KZT</option>

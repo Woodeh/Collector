@@ -42,7 +42,7 @@ export default function CollectionHeader({
           <input
             type="text"
             placeholder="Search database..."
-            className="w-full bg-[#1a1a1a] border border-[#333] py-4 pl-12 pr-12 rounded-2xl outline-none focus:border-blue-500 transition-all font-bold text-sm text-white placeholder:text-gray-700"
+            className="w-full bg-[#1a1a1a] border border-[#333] py-4 pl-12 pr-12 rounded-2xl outline-none focus:border-blue-500 transition-all font-bold text-base text-white placeholder:text-gray-700"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />

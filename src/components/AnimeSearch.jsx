@@ -7,6 +7,8 @@ const AnimeSearch = ({ value, onChange }) => {
   const [loading, setLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const wrapperRef = useRef(null);
+  const inputRef = useRef(null);
+  const lastSelectedRef = useRef('');
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -20,7 +22,7 @@ const AnimeSearch = ({ value, onChange }) => {
 
   useEffect(() => {
     const searchAnime = async () => {
-      if (query.length < 3) {
+      if (query.length < 3 || query === lastSelectedRef.current) {
         setResults([]);
         return;
       }
@@ -47,9 +49,12 @@ const AnimeSearch = ({ value, onChange }) => {
   }, [query]);
 
   const handleSelect = (anime) => {
+    lastSelectedRef.current = anime.title;
     setQuery(anime.title);
     onChange(anime.title);
     setIsOpen(false);
+    setResults([]);
+    inputRef.current?.blur();
   };
 
   return (
@@ -60,14 +65,16 @@ const AnimeSearch = ({ value, onChange }) => {
           size={18}
         />
         <input
+          ref={inputRef}
           type="text"
           placeholder="Origin Series *"
-          className="w-full bg-[#121212] border border-[#333] h-[58px] pl-12 rounded-2xl outline-none focus:border-blue-500 transition-all text-white font-bold text-sm placeholder:text-gray-700 placeholder:italic"
+          className="w-full bg-[#121212] border border-[#333] h-[58px] pl-12 rounded-2xl outline-none focus:border-blue-500 transition-all text-white font-bold text-base placeholder:text-gray-700 placeholder:italic"
           value={query}
           onChange={(e) => {
+            lastSelectedRef.current = '';
             setQuery(e.target.value);
             onChange(e.target.value);
-            setIsOpen(true);
+            if (e.target.value.length >= 3) setIsOpen(true);
           }}
           onFocus={() => setIsOpen(true)}
         />

@@ -7,6 +7,8 @@ const CharacterSearch = ({ value, onChange }) => {
   const [loading, setLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const wrapperRef = useRef(null);
+  const inputRef = useRef(null);
+  const lastSelectedRef = useRef('');
 
   // Закрытие списка при клике вне компонента
   useEffect(() => {
@@ -21,7 +23,7 @@ const CharacterSearch = ({ value, onChange }) => {
 
   useEffect(() => {
     const searchCharacters = async () => {
-      if (query.length < 3) {
+      if (query.length < 3 || query === lastSelectedRef.current) {
         setResults([]);
         return;
       }
@@ -29,11 +31,12 @@ const CharacterSearch = ({ value, onChange }) => {
       setLoading(true);
       try {
         const res = await fetch(
-          `https://api.jikan.moe/v4/characters?q=${query}&limit=5&order_by=favorites&sort=desc`,
+          `https://api.jikan.moe/v4/characters?q=${encodeURIComponent(
+            query,
+          )}&limit=5&order_by=favorites&sort=desc`,
         );
         const data = await res.json();
         setResults(data.data || []);
-        setIsOpen(true);
       } catch (err) {
         console.error('Search error:', err);
       } finally {
@@ -46,13 +49,16 @@ const CharacterSearch = ({ value, onChange }) => {
   }, [query]);
 
   const handleSelect = (char) => {
+    lastSelectedRef.current = char.name;
     setQuery(char.name);
     onChange(char.name);
     setIsOpen(false);
+    setResults([]);
+    inputRef.current?.blur(); // Снимаем фокус, чтобы предотвратить повторное открытие на мобилках
   };
 
   return (
-    <div className="relative w-full" ref={wrapperRef}>
+    <div className="relative w-full" ref={wrapperRef} style={{ zIndex: isOpen ? 100 : 10 }}>
       <div className="relative">
         <User
           className={`absolute left-4 top-1/2 -translate-y-1/2 transition-colors ${
@@ -61,13 +67,16 @@ const CharacterSearch = ({ value, onChange }) => {
           size={18}
         />
         <input
+          ref={inputRef}
           type="text"
           placeholder="Character Name (e.g. Zero Two) *"
-          className="w-full bg-[#121212] border border-[#333] h-[58px] pl-12 rounded-2xl outline-none focus:border-blue-500 font-bold text-white text-sm placeholder:text-gray-700 transition-all"
+          className="w-full bg-[#121212] border border-[#333] h-[58px] pl-12 rounded-2xl outline-none focus:border-blue-500 font-bold text-white text-base placeholder:text-gray-700 transition-all"
           value={query}
           onChange={(e) => {
+            lastSelectedRef.current = '';
             setQuery(e.target.value);
             onChange(e.target.value);
+            if (e.target.value.length >= 3) setIsOpen(true);
           }}
           onFocus={() => query.length >= 3 && setIsOpen(true)}
           required
