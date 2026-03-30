@@ -39,6 +39,7 @@ const FigureDetailsPage = () => {
   const [characterData, setCharacterData] = useState(null);
   const [relatedFigures, setRelatedFigures] = useState([]);
   const [activeImg, setActiveImg] = useState(0);
+  const [direction, setDirection] = useState(0);
   const [loading, setLoading] = useState(true);
   const [isHovered, setIsHovered] = useState(false);
   const [imageError, setImageError] = useState(false);
@@ -47,6 +48,22 @@ const FigureDetailsPage = () => {
   const [currentUser, setCurrentUser] = useState(null);
 
   const timerRef = useRef(null);
+
+  // Анимационные варианты для слайда
+  const slideVariants = {
+    enter: (direction) => ({
+      x: direction > 0 ? '100%' : direction < 0 ? '-100%' : 0,
+      opacity: 0,
+    }),
+    center: {
+      x: 0,
+      opacity: 1,
+    },
+    exit: (direction) => ({
+      x: direction < 0 ? '100%' : direction > 0 ? '-100%' : 0,
+      opacity: 0,
+    }),
+  };
 
   useEffect(() => {
     const unsub = auth.onAuthStateChanged((user) => {
@@ -139,24 +156,30 @@ const FigureDetailsPage = () => {
   useEffect(() => {
     if (images.length > 1 && !isHovered) {
       timerRef.current = setInterval(() => {
+        setDirection(1);
         setActiveImg((prev) => (prev + 1) % images.length);
       }, 5000);
     }
     return () => clearInterval(timerRef.current);
-  }, [images, isHovered]);
+  }, [images, isHovered, images.length]);
 
   const handleManualSelect = (idx) => {
     if (timerRef.current) clearInterval(timerRef.current);
-    setActiveImg(idx);
+    if (idx !== activeImg) {
+      setDirection(idx > activeImg ? 1 : -1);
+      setActiveImg(idx);
+    }
   };
 
   const nextSlide = (e) => {
-    e.stopPropagation();
+    if (e && e.stopPropagation) e.stopPropagation();
+    setDirection(1);
     setActiveImg((prev) => (prev + 1) % images.length);
   };
 
   const prevSlide = (e) => {
-    e.stopPropagation();
+    if (e && e.stopPropagation) e.stopPropagation();
+    setDirection(-1);
     setActiveImg((prev) => (prev - 1 + images.length) % images.length);
   };
 
@@ -281,15 +304,24 @@ const FigureDetailsPage = () => {
               </AnimatePresence>
 
               <div className="relative w-full h-full bg-[#1a1a1a] border border-[#333] rounded-[2.5rem] overflow-hidden shadow-2xl z-10 group/slider">
-                <AnimatePresence mode="wait">
+                <AnimatePresence custom={direction} initial={false}>
                   <Motion.img
                     key={activeImg}
                     src={images[activeImg]}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.6, ease: 'easeInOut' }}
-                    className="w-full h-full object-cover"
+                    custom={direction}
+                    variants={slideVariants}
+                    drag="x"
+                    dragConstraints={{ left: 0, right: 0 }}
+                    dragElastic={0.2}
+                    onDragEnd={(e, info) => {
+                      if (info.offset.x > 50) prevSlide(e);
+                      else if (info.offset.x < -50) nextSlide(e);
+                    }}
+                    initial="enter"
+                    animate="center"
+                    exit="exit"
+                    transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
+                    className="absolute inset-0 w-full h-full object-cover"
                     alt="Display"
                   />
                 </AnimatePresence>
@@ -463,7 +495,7 @@ const FigureDetailsPage = () => {
             </div>
 
             {/* МИНИАТЮРЫ */}
-            <div className="flex flex-wrap gap-4 justify-start">
+            <div className="hidden sm:flex flex-wrap gap-4 justify-start">
               {images.map((img, idx) => (
                 <button
                   key={idx}
