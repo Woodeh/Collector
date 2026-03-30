@@ -54,10 +54,16 @@ const LandingPage = () => {
 
   // Параллакс логика
   const { scrollYProgress } = useScroll();
-  // Сетка будет двигаться медленнее скролла (создает эффект глубины)
-  const backgroundY = useTransform(scrollYProgress, [0, 1], ['0%', '20%']);
-  // Большое сияние будет двигаться чуть быстрее в другую сторону
-  const glowY = useTransform(scrollYProgress, [0, 1], ['0%', '-10%']);
+
+  // Фоновые слои: сетка и "плавающий" текст для экстремальной глубины
+  const backgroundY = useTransform(scrollYProgress, [0, 1], ['0%', '35%']);
+  const floatingTextY = useTransform(scrollYProgress, [0, 1], ['0%', '60%']);
+
+  // Параллакс для контента Hero: заголовок, описание и кнопки улетают с разной скоростью
+  const titleY = useTransform(scrollYProgress, [0, 0.5], [0, 150]);
+  const descY = useTransform(scrollYProgress, [0, 0.5], [0, 100]);
+  const opacityHero = useTransform(scrollYProgress, [0, 0.4], [1, 0]);
+  const glowY = useTransform(scrollYProgress, [0, 1], ['0%', '-15%']);
 
   useEffect(() => {
     const fetchTeaser = async () => {
@@ -124,6 +130,16 @@ const LandingPage = () => {
           />
         </Motion.div>
 
+        {/* Декоративный "зафокусный" текст на фоне */}
+        <Motion.div
+          style={{ y: floatingTextY, opacity: 0.03 }}
+          className="absolute inset-0 flex items-center justify-center select-none pointer-events-none"
+        >
+          <div className="text-[15vw] font-black uppercase italic leading-none -rotate-12 translate-x-1/4">
+            Secure Archive System 01
+          </div>
+        </Motion.div>
+
         {/* Динамическое пятно света */}
         <Motion.div
           style={{ y: glowY }}
@@ -141,6 +157,7 @@ const LandingPage = () => {
           <Motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
+            style={{ y: titleY, opacity: opacityHero }}
             className="space-y-4"
           >
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-[#1a1a1a] border border-[#333] rounded-full mb-4 mx-auto">
@@ -153,16 +170,19 @@ const LandingPage = () => {
               The Ultimate <br />
               <span className="text-blue-600">Collector's</span> Vault.
             </h1>
-            <p className="max-w-2xl mx-auto text-gray-500 text-sm md:text-base font-bold uppercase tracking-widest italic">
-              Archiving the world's finest figures. Secure, analytical, and community-driven.
-            </p>
           </Motion.div>
+
+          <Motion.p
+            style={{ y: descY, opacity: opacityHero }}
+            className="max-w-2xl mx-auto text-gray-500 text-sm md:text-base font-bold uppercase tracking-widest italic"
+          >
+            Archiving the world's finest figures. Secure, analytical, and community-driven.
+          </Motion.p>
 
           <Motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 0.3 }}
-            className="flex flex-col sm:flex-row items-center justify-center gap-4"
+            className="flex flex-col sm:flex-row items-center justify-center gap-4 relative z-20"
           >
             <button
               onClick={() => navigate('/login')}

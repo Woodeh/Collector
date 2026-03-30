@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { motion as Motion } from 'framer-motion';
+import { motion as Motion, useScroll, useTransform } from 'framer-motion';
 import { db, auth } from '../firebase/config';
 import { collection, query, orderBy, limit, getDocs, where } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
@@ -18,6 +18,19 @@ const HomePage = () => {
   const [stats, setStats] = useState({ totalValue: 0, count: 0, topBrand: 'None', rank: 'Novice' });
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
+
+  // Параллакс логика
+  const { scrollYProgress } = useScroll();
+
+  // Фоновые слои
+  const backgroundY = useTransform(scrollYProgress, [0, 1], ['0%', '15%']);
+  const glowY = useTransform(scrollYProgress, [0, 1], ['0%', '-20%']);
+  const purpleGlowY = useTransform(scrollYProgress, [0, 1], ['0%', '30%']);
+  const floatingTextX = useTransform(scrollYProgress, [0, 1], ['10%', '-10%']);
+
+  // Смещение контента для эффекта левитации
+  const heroOffset = useTransform(scrollYProgress, [0, 0.5], [0, -40]);
+  const statsOffset = useTransform(scrollYProgress, [0, 0.5], [0, 40]);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -137,24 +150,62 @@ const HomePage = () => {
   if (!user) return <LandingPage />;
 
   return (
-    <div className="min-h-screen bg-[#121212] text-[#e4e4e4] font-sans pb-20 selection:bg-blue-500/30 overflow-x-hidden">
+    <div className="min-h-screen bg-[#121212] text-[#e4e4e4] font-sans pb-20 selection:bg-blue-500/30 overflow-x-hidden relative">
+      {/* PARALLAX BACKGROUND SYSTEM */}
+      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+        {/* Сетка */}
+        <Motion.div style={{ y: backgroundY }} className="absolute inset-0 opacity-[0.15]">
+          <div
+            className="absolute inset-0"
+            style={{
+              backgroundImage: 'radial-gradient(#3b82f6 1px, transparent 1px)',
+              backgroundSize: '40px 40px',
+            }}
+          />
+        </Motion.div>
+
+        {/* Хайповый фоновый текст */}
+        <Motion.div
+          style={{ x: floatingTextX, opacity: 0.02 }}
+          className="absolute top-1/4 left-0 text-[20vw] font-black uppercase italic whitespace-nowrap select-none"
+        >
+          Active Session 0x{user.uid.slice(0, 4)}
+        </Motion.div>
+
+        {/* Динамические свечения */}
+        <Motion.div
+          style={{ y: glowY }}
+          className="absolute top-[-10%] right-[-5%] w-[50%] h-[60%] bg-blue-600/10 blur-[120px] rounded-full"
+        />
+        <Motion.div
+          style={{ y: purpleGlowY }}
+          className="absolute bottom-[-10%] left-[-5%] w-[40%] h-[50%] bg-purple-600/5 blur-[100px] rounded-full"
+        />
+      </div>
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 md:py-16 space-y-24 md:space-y-32 relative">
         {/* HERO & STATS SECTION */}
         <Motion.section
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="flex flex-col lg:flex-row justify-between items-center lg:items-start gap-12"
+          className="flex flex-col lg:flex-row justify-between items-center lg:items-start gap-12 relative z-10"
         >
-          <HeroSection user={user} />
-          <QuickStats stats={stats} />
+          <Motion.div style={{ y: heroOffset }} className="w-full lg:w-auto">
+            <HeroSection user={user} />
+          </Motion.div>
+
+          <Motion.div style={{ y: statsOffset }} className="w-full lg:w-auto">
+            <QuickStats stats={stats} />
+          </Motion.div>
         </Motion.section>
 
         {/* RANK PROGRESS & QUICK ACTIONS */}
         {user && (
           <Motion.section
             initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
+            whileInView={{ opacity: 1, y: -20 }}
+            transition={{ duration: 0.8, ease: 'easeOut' }}
             viewport={{ once: true }}
             className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch"
           >
