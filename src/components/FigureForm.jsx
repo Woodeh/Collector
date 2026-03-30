@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { db, storage, auth } from '../firebase/config';
 import { collection, addDoc, doc, getDoc, updateDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { PlusCircle, Loader2, Link as LinkIcon, Edit3, Zap, FileText } from 'lucide-react';
+import { PlusCircle, Loader2, Link as LinkIcon, Edit3, Zap, FileText, Camera } from 'lucide-react';
 import { useParams, useNavigate } from 'react-router-dom';
 
 import SuccessModal from './SuccessModal';
@@ -28,9 +28,12 @@ const FigureForm = ({ mode = 'add' }) => {
   const [currency, setCurrency] = useState('USD');
   const [mediaItems, setMediaItems] = useState([]);
   const [previewId, setPreviewId] = useState(null);
+  const [charArtFile, setCharArtFile] = useState(null);
 
   const [formData, setFormData] = useState({
     name: '',
+    characterId: null,
+    characterImage: '',
     fullDisplayName: '',
     anime: '',
     brand: '',
@@ -169,6 +172,18 @@ const FigureForm = ({ mode = 'add' }) => {
     if (mediaItems.length === 0) return alert('Please upload photo');
     setLoading(true);
     try {
+      let characterImageUrl = formData.characterImage;
+
+      // Если выбран локальный файл для арта персонажа, загружаем его первым
+      if (charArtFile) {
+        const charArtRef = ref(
+          storage,
+          `character_arts/${Date.now()}_${auth.currentUser.uid}.webp`,
+        );
+        await uploadBytes(charArtRef, charArtFile, { contentType: 'image/webp' });
+        characterImageUrl = await getDownloadURL(charArtRef);
+      }
+
       const finalUrls = [];
       for (const item of mediaItems) {
         if (item.type === 'existing') {
@@ -185,6 +200,7 @@ const FigureForm = ({ mode = 'add' }) => {
       const priceInUSD = parseFloat((Number(formData.price) * EXCHANGE_RATES[currency]).toFixed(2));
       const finalData = {
         ...formData,
+        characterImage: characterImageUrl,
         userId: auth.currentUser.uid,
         images: finalUrls,
         previewImage: previewUrl,
@@ -276,6 +292,7 @@ const FigureForm = ({ mode = 'add' }) => {
             currency={currency}
             setCurrency={setCurrency}
             handleChange={handleChange}
+            onCharArtFileChange={setCharArtFile}
           />
           <SpecsSection
             formData={formData}

@@ -94,17 +94,27 @@ const FigureDetailsPage = () => {
 
           setRelatedFigures(finalRelated);
 
-          // Поиск арта персонажа (Jikan API)
-          if (data.name) {
+          // Если изображение персонажа уже есть в базе (кэшировано), используем его
+          if (data.characterImage) {
+            setCharacterData({
+              image: data.characterImage,
+              name: data.name,
+            });
+          }
+          // Если изображения нет (старые записи), пробуем подтянуть через API
+          else if (data.characterId || data.name) {
             try {
-              const res = await fetch(
-                `https://api.jikan.moe/v4/characters?q=${encodeURIComponent(data.name)}&limit=1`,
-              );
+              const endpoint = data.characterId
+                ? `https://api.jikan.moe/v4/characters/${data.characterId}`
+                : `https://api.jikan.moe/v4/characters?q=${encodeURIComponent(data.name)}&limit=1`;
+
+              const res = await fetch(endpoint);
               const resData = await res.json();
-              if (resData.data && resData.data.length > 0) {
+              const char = data.characterId ? resData.data : resData.data?.[0];
+              if (char) {
                 setCharacterData({
-                  image: resData.data[0].images.jpg.image_url,
-                  name: resData.data[0].name,
+                  image: char.images.jpg.image_url,
+                  name: char.name,
                 });
               }
             } catch (e) {

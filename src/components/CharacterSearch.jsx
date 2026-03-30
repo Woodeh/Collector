@@ -51,7 +51,11 @@ const CharacterSearch = ({ value, onChange }) => {
   const handleSelect = (char) => {
     lastSelectedRef.current = char.name;
     setQuery(char.name);
-    onChange(char.name);
+    onChange({
+      name: char.name,
+      mal_id: char.mal_id,
+      image: char.images?.jpg?.image_url,
+    });
     setIsOpen(false);
     setResults([]);
     inputRef.current?.blur(); // Снимаем фокус, чтобы предотвратить повторное открытие на мобилках

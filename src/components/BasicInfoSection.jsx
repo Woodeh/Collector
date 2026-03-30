@@ -1,5 +1,5 @@
 import React from 'react';
-import { Info, Tag, DollarSign, ChevronDown } from 'lucide-react';
+import { Info, Tag, DollarSign, ChevronDown, Camera, X } from 'lucide-react';
 import CharacterSearch from './CharacterSearch';
 import AnimeSearch from './AnimeSearch';
 import CustomSelect from './Select';
@@ -11,14 +11,80 @@ const BasicInfoSection = ({
   currency,
   setCurrency,
   handleChange,
+  onCharArtFileChange,
 }) => {
+  const handleCharFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      onCharArtFileChange(file);
+      // Создаем временный URL для превью в форме
+      handleCustomChange('characterImage', URL.createObjectURL(file));
+    }
+  };
+
   return (
     <div className="space-y-5 sm:space-y-6">
       <h3 className="text-blue-500 font-black text-[10px] sm:text-[11px] uppercase tracking-[0.25em] flex items-center gap-2 italic">
         <Info size={14} /> Basic Information
       </h3>
 
-      <CharacterSearch value={formData.name} onChange={(val) => handleCustomChange('name', val)} />
+      <div className="space-y-3">
+        <CharacterSearch
+          value={formData.name}
+          onChange={(selection) => {
+            if (typeof selection === 'object') {
+              handleCustomChange('name', selection.name);
+              handleCustomChange('characterId', selection.mal_id);
+              handleCustomChange('characterImage', selection.image);
+              onCharArtFileChange(null); // Сбрасываем файл, если выбрали из API
+            } else {
+              handleCustomChange('name', selection);
+              handleCustomChange('characterId', null);
+              // Не сбрасываем картинку сразу, чтобы не удалять превью при печати
+            }
+          }}
+        />
+
+        {/* Блок ручной загрузки арта */}
+        <div className="flex items-center gap-3 px-1">
+          <label className="cursor-pointer group flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-[#1a1a1a] border border-[#333] flex items-center justify-center group-hover:border-blue-500 transition-colors">
+              <Camera size={14} className="text-gray-500 group-hover:text-blue-500" />
+            </div>
+            <span className="text-[10px] font-black uppercase tracking-widest text-gray-500 group-hover:text-gray-300 transition-colors">
+              {formData.characterImage ? 'Change Character Art' : 'Upload Manual Art'}
+            </span>
+            <input
+              type="file"
+              className="hidden"
+              accept="image/*"
+              onChange={handleCharFileChange}
+            />
+          </label>
+
+          {formData.characterImage && (
+            <div className="flex items-center gap-2 animate-in fade-in zoom-in duration-300">
+              <div className="w-8 h-8 rounded-lg overflow-hidden border border-blue-500/50 shadow-[0_0_10px_rgba(59,130,246,0.2)]">
+                <img
+                  src={formData.characterImage}
+                  className="w-full h-full object-cover"
+                  alt="preview"
+                />
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  handleCustomChange('characterImage', '');
+                  onCharArtFileChange(null);
+                }}
+                className="text-gray-600 hover:text-red-500 transition-colors"
+              >
+                <X size={14} />
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
 
       <div className="relative z-[60]">
         <AnimeSearch value={formData.anime} onChange={(val) => handleCustomChange('anime', val)} />
