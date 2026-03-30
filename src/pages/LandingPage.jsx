@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion as Motion } from 'framer-motion';
+import { motion as Motion, useScroll, useTransform } from 'framer-motion';
 import { db } from '../firebase/config';
 import { collection, query, orderBy, limit, getDocs } from 'firebase/firestore';
 import {
@@ -51,6 +51,13 @@ const LandingPage = () => {
   const navigate = useNavigate();
   const [communityFigures, setCommunityFigures] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  // Параллакс логика
+  const { scrollYProgress } = useScroll();
+  // Сетка будет двигаться медленнее скролла (создает эффект глубины)
+  const backgroundY = useTransform(scrollYProgress, [0, 1], ['0%', '20%']);
+  // Большое сияние будет двигаться чуть быстрее в другую сторону
+  const glowY = useTransform(scrollYProgress, [0, 1], ['0%', '-10%']);
 
   useEffect(() => {
     const fetchTeaser = async () => {
@@ -104,11 +111,33 @@ const LandingPage = () => {
 
   return (
     <div className="min-h-screen bg-[#121212] text-[#e4e4e4] font-sans selection:bg-blue-500/30 overflow-x-hidden text-left">
-      {/* HERO SECTION */}
-      <section className="relative pt-20 pb-32 px-4 overflow-hidden">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-4xl h-96 bg-blue-600/10 blur-[120px] rounded-full -z-10" />
+      {/* PARALLAX BACKGROUND LAYERS */}
+      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+        {/* Слой с сеткой (Grid) */}
+        <Motion.div style={{ y: backgroundY }} className="absolute inset-0 opacity-[0.15]">
+          <div
+            className="absolute inset-0"
+            style={{
+              backgroundImage: 'radial-gradient(#3b82f6 1px, transparent 1px)',
+              backgroundSize: '40px 40px',
+            }}
+          />
+        </Motion.div>
 
-        <div className="max-w-7xl mx-auto text-center space-y-8">
+        {/* Динамическое пятно света */}
+        <Motion.div
+          style={{ y: glowY }}
+          className="absolute -top-[10%] -left-[10%] w-[60%] h-[60%] bg-blue-600/10 blur-[150px] rounded-full"
+        />
+        <Motion.div
+          style={{ y: glowY }}
+          className="absolute top-[40%] -right-[10%] w-[50%] h-[50%] bg-purple-600/5 blur-[150px] rounded-full"
+        />
+      </div>
+
+      {/* HERO SECTION */}
+      <section className="relative pt-20 pb-32 px-4 z-10">
+        <div className="max-w-7xl mx-auto text-center space-y-8 relative">
           <Motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
@@ -155,7 +184,10 @@ const LandingPage = () => {
       </section>
 
       {/* COMMUNITY TEASER */}
-      <section id="community-scan" className="py-24 px-4 bg-[#0d0d0d] border-y border-[#333]">
+      <section
+        id="community-scan"
+        className="relative py-24 px-4 bg-[#0d0d0d]/80 backdrop-blur-sm border-y border-[#333] z-10"
+      >
         <div className="max-w-7xl mx-auto space-y-12">
           <div className="flex flex-col md:flex-row justify-between items-end gap-6 text-left">
             <div className="space-y-2">
@@ -222,12 +254,16 @@ const LandingPage = () => {
       </section>
 
       {/* FEATURES SECTION */}
-      <section className="py-32 px-4">
+      <section className="relative py-32 px-4 z-10">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {features.map((f, i) => (
               <Motion.div
                 key={i}
+                initial={{ opacity: 0, y: 40 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: '-100px' }}
+                transition={{ duration: 0.6, delay: i * 0.15, ease: 'easeOut' }}
                 whileHover={{ y: -10 }}
                 className="p-8 bg-[#1a1a1a] border border-[#333] rounded-[2.5rem] space-y-6 hover:border-blue-500/50 transition-all group text-left"
               >
@@ -247,7 +283,7 @@ const LandingPage = () => {
       </section>
 
       {/* FINAL CALL TO ACTION */}
-      <section className="pb-32 px-4">
+      <section className="relative pb-32 px-4 z-10">
         <div className="max-w-4xl mx-auto bg-gradient-to-br from-blue-600 to-blue-800 p-[1px] rounded-[3.5rem] shadow-[0_20px_60px_rgba(37,99,235,0.4)]">
           <div className="bg-[#121212] rounded-[3.4rem] p-12 md:p-20 text-center space-y-8 relative overflow-hidden">
             <div className="absolute inset-0 bg-blue-600/5 -z-10" />
