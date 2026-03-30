@@ -1,34 +1,79 @@
-import React from 'react';
-import { Tag, Trash2, Pencil, User } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { Tag, Trash2, Pencil, User, MoreVertical } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export default function FigureCard({ figure, onEdit, onDelete, isCommunity = false }) {
+  const [showMenu, setShowMenu] = useState(false);
+  const menuRef = useRef(null);
+
+  // Закрываем меню при клике вне компонента
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setShowMenu(false);
+      }
+    };
+    if (showMenu) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showMenu]);
+
   return (
     <div className="relative group bg-[#1a1a1a] rounded-[2rem] border border-[#333] overflow-hidden hover:border-blue-500/50 transition-all duration-500 flex flex-col shadow-2xl h-full text-left font-sans">
-      {/* Edit/Delete Buttons (только для личной коллекции, при ховере) */}
+      {/* Action Menu (Три точки) */}
       {(onEdit || onDelete) && (
-        <div className="absolute top-4 right-4 z-40 flex gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform -translate-y-2 group-hover:translate-y-0">
-          {onEdit && (
-            <button
-              onClick={(e) => {
-                e.preventDefault();
-                onEdit();
-              }}
-              className="bg-black/60 hover:bg-blue-600 text-white p-2.5 rounded-xl backdrop-blur-md border border-white/10 transition-all shadow-lg cursor-pointer"
-            >
-              <Pencil size={14} />
-            </button>
-          )}
-          {onDelete && (
-            <button
-              onClick={(e) => {
-                e.preventDefault();
-                onDelete();
-              }}
-              className="bg-black/60 hover:bg-red-600 text-white p-2.5 rounded-xl backdrop-blur-md border border-white/10 transition-all shadow-lg cursor-pointer"
-            >
-              <Trash2 size={14} />
-            </button>
+        <div
+          className="absolute top-4 right-4 z-50 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-all duration-300 transform translate-y-0 md:-translate-y-2 md:group-hover:translate-y-0"
+          ref={menuRef}
+        >
+          <button
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation(); // Чтобы не сработал переход по ссылке карточки
+              setShowMenu(!showMenu);
+            }}
+            className={`p-2 rounded-xl backdrop-blur-md border transition-all shadow-lg cursor-pointer ${
+              showMenu
+                ? 'bg-blue-600 border-blue-400 text-white'
+                : 'bg-black/60 border-white/10 text-gray-400 hover:text-white'
+            }`}
+          >
+            <MoreVertical size={18} />
+          </button>
+
+          {/* Выпадающий список */}
+          {showMenu && (
+            <div className="absolute right-0 mt-2 w-32 bg-[#1a1a1a] border border-[#333] rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.5)] overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+              {onEdit && (
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    onEdit();
+                    setShowMenu(false);
+                  }}
+                  className="w-full flex items-center gap-3 px-4 py-3 text-[11px] font-black uppercase italic tracking-widest text-gray-400 hover:bg-blue-600/10 hover:text-blue-500 transition-all border-b border-[#333]/50 last:border-0"
+                >
+                  <Pencil size={14} />
+                  <span>Edit</span>
+                </button>
+              )}
+              {onDelete && (
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    onDelete();
+                    setShowMenu(false);
+                  }}
+                  className="w-full flex items-center gap-3 px-4 py-3 text-[11px] font-black uppercase italic tracking-widest text-red-500/70 hover:bg-red-500/10 hover:text-red-500 transition-all"
+                >
+                  <Trash2 size={14} />
+                  <span>Delete</span>
+                </button>
+              )}
+            </div>
           )}
         </div>
       )}
@@ -103,7 +148,7 @@ export default function FigureCard({ figure, onEdit, onDelete, isCommunity = fal
               </span>
             </div>
             <div className="text-3xl font-black text-white italic tracking-tighter flex items-center gap-1">
-              {Number(figure.price).toLocaleString()}
+              {Math.round(Number(figure.price) || 0).toLocaleString()}
               <span className="text-blue-500 not-italic text-xl ml-1">$</span>
             </div>
           </div>

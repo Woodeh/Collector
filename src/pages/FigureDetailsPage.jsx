@@ -1,7 +1,17 @@
 import React, { useEffect, useState, useRef, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { db } from '../firebase/config';
-import { doc, getDoc, collection, query, where, getDocs, limit } from 'firebase/firestore';
+import { db, auth, storage } from '../firebase/config';
+import {
+  doc,
+  getDoc,
+  collection,
+  query,
+  where,
+  getDocs,
+  limit,
+  deleteDoc,
+} from 'firebase/firestore';
+import { ref, deleteObject } from 'firebase/storage';
 import { motion as Motion, AnimatePresence } from 'framer-motion';
 import {
   ArrowLeft,
@@ -13,9 +23,14 @@ import {
   Cpu,
   SearchCode,
   Fingerprint,
+  Share2,
+  Trash2,
+  Pencil,
 } from 'lucide-react';
 
 import FigureCard from '../components/collection/FigureCard';
+import Modal from '../components/Modal';
+import ShareModal from '../components/modals/ShareModal';
 
 const FigureDetailsPage = () => {
   const { id } = useParams();
@@ -27,12 +42,22 @@ const FigureDetailsPage = () => {
   const [loading, setLoading] = useState(true);
   const [isHovered, setIsHovered] = useState(false);
   const [imageError, setImageError] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
 
   const timerRef = useRef(null);
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [id]);
+
+  useEffect(() => {
+    const unsub = auth.onAuthStateChanged((user) => {
+      setCurrentUser(user);
+    });
+    return () => unsub();
+  }, []);
 
   useEffect(() => {
     const fetchFigureAndArt = async () => {
@@ -136,6 +161,31 @@ const FigureDetailsPage = () => {
     window.open(lensUrl, '_blank');
   };
 
+  const handleConfirmDelete = async () => {
+    try {
+      setLoading(true);
+      // 1. Удаляем документ из базы
+      await deleteDoc(doc(db, 'figures', id));
+
+      // 2. Удаляем изображения из хранилища
+      const imageUrls = figure.images || (figure.previewImage ? [figure.previewImage] : []);
+      for (const url of imageUrls) {
+        if (url?.includes('firebasestorage.googleapis.com')) {
+          try {
+            await deleteObject(ref(storage, url));
+          } catch (e) {
+            console.warn('Image cleanup skipped or failed:', e);
+          }
+        }
+      }
+      navigate('/collection');
+    } catch (error) {
+      console.error('Delete error:', error);
+      alert('Error during deletion protocol.');
+      setLoading(false);
+    }
+  };
+
   if (loading)
     return (
       <div className="h-screen flex items-center justify-center bg-[#121212]">
@@ -151,12 +201,38 @@ const FigureDetailsPage = () => {
   return (
     <div className="min-h-screen bg-[#121212] p-4 md:p-8 text-[#e4e4e4] font-sans selection:bg-blue-500/30 overflow-x-hidden text-left">
       <div className="max-w-6xl mx-auto">
-        <button
-          onClick={() => navigate(-1)}
-          className="flex items-center gap-2 text-gray-600 hover:text-white mb-8 group font-black uppercase text-[10px] tracking-[0.2em] italic transition-all"
-        >
-          <ArrowLeft size={16} /> Back to Vault
-        </button>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+          <button
+            onClick={() => navigate(-1)}
+            className="flex items-center gap-2 text-gray-600 hover:text-white group font-black uppercase text-[10px] tracking-[0.2em] italic transition-all"
+          >
+            <ArrowLeft size={16} /> Back to Vault
+          </button>
+
+          {currentUser?.uid === figure?.userId && (
+            <div className="flex flex-wrap items-center gap-3">
+              <button
+                onClick={() => setIsShareModalOpen(true)}
+                className="flex items-center gap-2 px-4 py-2 bg-blue-600/10 border border-blue-500/30 text-blue-500 hover:bg-blue-600 hover:text-white rounded-xl font-black uppercase text-[10px] tracking-widest italic transition-all cursor-pointer shadow-lg shadow-blue-500/10"
+              >
+                <Share2 size={14} /> Share
+              </button>
+
+              <button
+                onClick={() => navigate(`/edit/${id}`)}
+                className="flex items-center gap-2 px-4 py-2 bg-[#1a1a1a] border border-[#333] hover:border-blue-500/50 text-gray-400 hover:text-blue-500 rounded-xl font-black uppercase text-[10px] tracking-widest italic transition-all cursor-pointer"
+              >
+                <Pencil size={14} /> Edit Unit
+              </button>
+              <button
+                onClick={() => setIsDeleteModalOpen(true)}
+                className="flex items-center gap-2 px-4 py-2 bg-[#1a1a1a] border border-[#333] hover:border-red-500/50 text-gray-400 hover:text-red-500 rounded-xl font-black uppercase text-[10px] tracking-widest italic transition-all cursor-pointer"
+              >
+                <Trash2 size={14} /> Delete
+              </button>
+            </div>
+          )}
+        </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-start">
           {/* LEFT COLUMN: SLIDER */}
@@ -310,7 +386,7 @@ const FigureDetailsPage = () => {
                         </p>
                         <p className="text-2xl font-black text-white italic tracking-tighter leading-none">
                           <span className="text-blue-500 mr-0.5">$</span>
-                          {Number(figure.price).toLocaleString()}
+                          {Math.round(Number(figure.price) || 0).toLocaleString()}
                         </p>
                       </div>
                       <div className="space-y-1.5 text-left">
@@ -450,6 +526,20 @@ const FigureDetailsPage = () => {
           </div>
         )}
       </div>
+
+      <Modal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onConfirm={handleConfirmDelete}
+        title="Initialize Deletion"
+        message={`Confirm permanent removal of "${figure.name}" from the secure vault? This action cannot be undone.`}
+      />
+
+      <ShareModal
+        isOpen={isShareModalOpen}
+        onClose={() => setIsShareModalOpen(false)}
+        figure={figure}
+      />
     </div>
   );
 };
