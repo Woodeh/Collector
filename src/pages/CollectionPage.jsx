@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useMemo } from 'react';
+import { motion as Motion } from 'framer-motion';
 import { db, storage, auth } from '../firebase/config';
 import { collection, query, orderBy, onSnapshot, doc, deleteDoc, where } from 'firebase/firestore';
 import { ref, deleteObject } from 'firebase/storage';
@@ -118,7 +119,12 @@ const Collection = () => {
     );
 
   return (
-    <div className="min-h-screen bg-[#121212] p-4 md:p-8 text-[#e4e4e4] pb-24 font-sans text-left overflow-x-hidden">
+    <Motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, ease: 'easeOut' }}
+      className="min-h-screen bg-[#121212] p-4 md:p-8 text-[#e4e4e4] pb-24 font-sans text-left overflow-x-hidden"
+    >
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
@@ -170,7 +176,7 @@ const Collection = () => {
           )}
         </div>
       </div>
-    </div>
+    </Motion.div>
   );
 };
 

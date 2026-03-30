@@ -10,12 +10,14 @@ import Home from './pages/HomePage';
 import FigureForm from './components/FigureForm';
 import Profile from './pages/ProfilePage';
 import Community from './pages/CommunityPage';
+import ScrollToTop from './pages/ScrollToTop';
 import Footer from './components/Footer';
 
 function App() {
   return (
     <Router>
-      <div className="min-h-screen flex flex-col bg-[#121212] text-[#e4e4e4]">
+      <ScrollToTop />
+      <div className="min-h-screen flex flex-col bg-[#0d0d0f] text-[#e4e4e4]">
         <Header />
 
         <main className="w-full">

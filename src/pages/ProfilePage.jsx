@@ -222,7 +222,12 @@ const Profile = () => {
   if (!user) return null;
 
   return (
-    <div className="min-h-screen bg-[#121212] p-4 md:p-12 pb-32 text-left font-sans relative overflow-hidden">
+    <Motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, ease: 'easeOut' }}
+      className="min-h-screen bg-[#121212] p-4 md:p-12 pb-32 text-left font-sans relative overflow-hidden"
+    >
       <ProfileBackground />
 
       <GrailModal
@@ -284,7 +289,7 @@ const Profile = () => {
         onClose={() => setIsRankModalOpen(false)}
         count={collectionStats.count}
       />
-    </div>
+    </Motion.div>
   );
 };
 

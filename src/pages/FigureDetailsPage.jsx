@@ -49,10 +49,6 @@ const FigureDetailsPage = () => {
   const timerRef = useRef(null);
 
   useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [id]);
-
-  useEffect(() => {
     const unsub = auth.onAuthStateChanged((user) => {
       setCurrentUser(user);
     });
@@ -199,7 +195,12 @@ const FigureDetailsPage = () => {
   const avatarUrl = characterData?.image || images[0];
 
   return (
-    <div className="min-h-screen bg-[#121212] p-4 md:p-8 text-[#e4e4e4] font-sans selection:bg-blue-500/30 overflow-x-hidden text-left">
+    <Motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, ease: 'easeOut' }}
+      className="min-h-screen bg-[#121212] p-4 md:p-8 text-[#e4e4e4] font-sans selection:bg-blue-500/30 overflow-x-hidden text-left"
+    >
       <div className="max-w-6xl mx-auto">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
           <button
@@ -540,7 +541,7 @@ const FigureDetailsPage = () => {
         onClose={() => setIsShareModalOpen(false)}
         figure={figure}
       />
-    </div>
+    </Motion.div>
   );
 };
 

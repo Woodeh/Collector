@@ -24,8 +24,6 @@ const HomePage = () => {
 
   // Фоновые слои
   const backgroundY = useTransform(scrollYProgress, [0, 1], ['0%', '15%']);
-  const glowY = useTransform(scrollYProgress, [0, 1], ['0%', '-20%']);
-  const purpleGlowY = useTransform(scrollYProgress, [0, 1], ['0%', '30%']);
   const floatingTextX = useTransform(scrollYProgress, [0, 1], ['10%', '-10%']);
 
   // Смещение контента для эффекта левитации
@@ -150,7 +148,12 @@ const HomePage = () => {
   if (!user) return <LandingPage />;
 
   return (
-    <div className="min-h-screen bg-[#121212] text-[#e4e4e4] font-sans pb-20 selection:bg-blue-500/30 overflow-x-hidden relative">
+    <Motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, ease: 'easeOut' }}
+      className="min-h-screen bg-[#121212] text-[#e4e4e4] font-sans pb-20 selection:bg-blue-500/30 overflow-x-hidden relative"
+    >
       {/* PARALLAX BACKGROUND SYSTEM */}
       <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
         {/* Сетка */}
@@ -169,17 +172,19 @@ const HomePage = () => {
           style={{ x: floatingTextX, opacity: 0.02 }}
           className="absolute top-1/4 left-0 text-[20vw] font-black uppercase italic whitespace-nowrap select-none"
         >
-          Active Session 0x{user.uid.slice(0, 4)}
+          Collection 0x{user.uid.slice(0, 0.5)}
         </Motion.div>
 
-        {/* Динамические свечения */}
-        <Motion.div
-          style={{ y: glowY }}
-          className="absolute top-[-10%] right-[-5%] w-[50%] h-[60%] bg-blue-600/10 blur-[120px] rounded-full"
-        />
-        <Motion.div
-          style={{ y: purpleGlowY }}
-          className="absolute bottom-[-10%] left-[-5%] w-[40%] h-[50%] bg-purple-600/5 blur-[100px] rounded-full"
+        {/* Очень мягкий общий виньеточный градиент вместо пятен */}
+        <div className="absolute inset-0 bg-gradient-to-b from-blue-500/5 via-transparent to-purple-500/5" />
+
+        {/* Grain/Noise Overlay to fix banding */}
+        <div
+          className="absolute inset-0 opacity-[0.012] pointer-events-none"
+          style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 250 250' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.5' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
+            mixBlendMode: 'overlay',
+          }}
         />
       </div>
 
@@ -233,7 +238,7 @@ const HomePage = () => {
         <RecentFigures recentFigures={recentFigures} />
         <HomeWidgets widgetStats={widgetStats} />
       </div>
-    </div>
+    </Motion.div>
   );
 };
 

@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useMemo } from 'react';
+import { motion as Motion } from 'framer-motion';
 import { db } from '../firebase/config';
 import { collection, query, orderBy, onSnapshot } from 'firebase/firestore';
 import { Users, Search, SlidersHorizontal } from 'lucide-react';
@@ -90,7 +91,12 @@ const Community = () => {
     );
 
   return (
-    <div className="min-h-screen bg-[#121212] p-4 md:p-8 text-[#e4e4e4] pb-20 text-left selection:bg-blue-500/30 overflow-x-hidden">
+    <Motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, ease: 'easeOut' }}
+      className="min-h-screen bg-[#121212] p-4 md:p-8 text-[#e4e4e4] pb-20 text-left selection:bg-blue-500/30 overflow-x-hidden"
+    >
       <div className="max-w-7xl mx-auto space-y-10">
         {/* Header Section */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 border-b border-[#333] pb-10">
@@ -167,7 +173,7 @@ const Community = () => {
           </div>
         )}
       </div>
-    </div>
+    </Motion.div>
   );
 };
 
