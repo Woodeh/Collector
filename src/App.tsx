@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { FC } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Header from './components/Header';
 import Collection from './pages/CollectionPage';
@@ -13,7 +13,7 @@ import Community from './pages/CommunityPage';
 import ScrollToTop from './pages/ScrollToTop';
 import Footer from './components/Footer';
 
-function App() {
+const App: FC = () => {
   return (
     <Router>
       <ScrollToTop />
@@ -38,6 +38,6 @@ function App() {
       <Footer />
     </Router>
   );
-}
+};
 
 export default App;

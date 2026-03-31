@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, FC, ChangeEvent } from 'react';
 import { motion as Motion } from 'framer-motion';
 import { auth, db, storage } from '../firebase/config';
-import { onAuthStateChanged, updateProfile } from 'firebase/auth';
+import { onAuthStateChanged, updateProfile, type User } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
 import { collection, onSnapshot, query, where, doc, updateDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
@@ -21,24 +21,46 @@ import {
   ProfileBackground,
 } from '../components/profile/index';
 
-const Profile = () => {
+interface Figure {
+  id: string;
+  name: string;
+  anime?: string;
+  brand?: string;
+  price: number | string;
+  conditionGrade?: string;
+  createdAt?: { seconds: number };
+  isFavorite?: boolean;
+  userId?: string;
+}
+
+interface Stats {
+  totalValue: number;
+  count: number;
+}
+
+interface ChartData {
+  name: string;
+  value: number;
+}
+
+const Profile: FC = () => {
   const navigate = useNavigate();
-  const [user, setUser] = useState(null);
-  const [allFigures, setAllFigures] = useState([]);
-  const [recentFigures, setRecentFigures] = useState([]);
-  const [collectionStats, setCollectionStats] = useState({ totalValue: 0, count: 0 });
-  const [preorderStats, setPreorderStats] = useState({ totalValue: 0, count: 0 });
-  const [wishlistStats, setWishlistStats] = useState({ totalValue: 0, count: 0 });
-  const [nextRelease, setNextRelease] = useState(null);
-  const [brandData, setBrandData] = useState([]);
-  const [animeData, setAnimeData] = useState([]);
-  const [favoriteFigure, setFavoriteFigure] = useState(null);
+  const [user, setUser] = useState<User | null>(null);
+  const [allFigures, setAllFigures] = useState<Figure[]>([]);
+  const [recentFigures, setRecentFigures] = useState<Figure[]>([]);
+  const [collectionStats, setCollectionStats] = useState<Stats>({ totalValue: 0, count: 0 });
+  const [preorderStats, setPreorderStats] = useState<Stats>({ totalValue: 0, count: 0 });
+  const [wishlistStats, setWishlistStats] = useState<Stats>({ totalValue: 0, count: 0 });
+  const [nextRelease, setNextRelease] = useState<any>(null);
+  const [brandData, setBrandData] = useState<ChartData[]>([]);
+  const [animeData, setAnimeData] = useState<ChartData[]>([]);
+  const [favoriteFigure, setFavoriteFigure] = useState<Figure | null>(null);
   const [isSelectOpen, setIsSelectOpen] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [isRankModalOpen, setIsRankModalOpen] = useState(false);
 
   // Rank Logic based on figure count
-  const getRankInfo = (count) => {
+  const getRankInfo = (count: number) => {
     if (count >= 500)
       return { name: 'Mythic Overlord', next: 1000, color: 'text-amber-500', bg: 'bg-amber-500' };
     if (count >= 250)
@@ -69,17 +91,17 @@ const Profile = () => {
       if (currentUser) {
         const qFigures = query(collection(db, 'figures'), where('userId', '==', currentUser.uid));
         const unsubFigures = onSnapshot(qFigures, (snap) => {
-          const figuresList = [];
+          const figuresList: Figure[] = [];
           let totalValue = 0,
             count = 0;
-          const brandsMap = {};
-          const animeMap = {};
+          const brandsMap: Record<string, number> = {};
+          const animeMap: Record<string, number> = {};
 
-          snap.docs.forEach((doc) => {
-            const data = { id: doc.id, ...doc.data() };
+          snap.docs.forEach((document) => {
+            const data = { id: document.id, ...document.data() } as Figure;
             figuresList.push(data);
             if (data.conditionGrade?.toLowerCase().trim() !== 'pre-order') {
-              totalValue += Number(data.price) || 0;
+              totalValue += typeof data.price === 'string' ? parseFloat(data.price) || 0 : data.price;
               count++;
               brandsMap[data.brand || 'Other'] = (brandsMap[data.brand || 'Other'] || 0) + 1;
               animeMap[data.anime || 'Original'] = (animeMap[data.anime || 'Original'] || 0) + 1;
@@ -89,7 +111,7 @@ const Profile = () => {
           setAllFigures(figuresList);
           setRecentFigures(
             [...figuresList]
-              .sort((a, b) => b.createdAt?.seconds - a.createdAt?.seconds)
+              .sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0))
               .slice(0, 10),
           );
           setAnimeData(
@@ -106,7 +128,7 @@ const Profile = () => {
           setCollectionStats({ totalValue, count });
 
           const manualFav = figuresList.find((f) => f.isFavorite === true);
-          setFavoriteFigure(manualFav || [...figuresList].sort((a, b) => b.price - a.price)[0]);
+          setFavoriteFigure(manualFav || [...figuresList].sort((a, b) => Number(b.price) - Number(a.price))[0]);
         });
 
         const qPreorders = query(
@@ -115,11 +137,11 @@ const Profile = () => {
         );
         const unsubPreorders = onSnapshot(qPreorders, (snap) => {
           let totalPreValue = 0;
-          const items = snap.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-          items.forEach((i) => (totalPreValue += Number(i.totalPrice) || 0));
+          const items = snap.docs.map((document) => ({ id: document.id, ...document.data() }));
+          items.forEach((i: any) => (totalPreValue += Number(i.totalPrice) || 0));
           if (items.length > 0)
             setNextRelease(
-              [...items].sort((a, b) => new Date(a.paymentDate) - new Date(b.paymentDate))[0],
+              [...items].sort((a: any, b: any) => new Date(a.paymentDate).getTime() - new Date(b.paymentDate).getTime())[0],
             );
           setPreorderStats({ totalValue: totalPreValue, count: snap.size });
         });
@@ -141,8 +163,8 @@ const Profile = () => {
     return () => unsubAuth();
   }, []);
 
-  const handleAvatarChange = async (e) => {
-    const file = e.target.files[0];
+  const handleAvatarChange = async (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
     if (!file || !user) return;
 
     setIsUploading(true);
@@ -150,7 +172,7 @@ const Profile = () => {
       const storageRef = ref(storage, `avatars/${user.uid}`);
       await uploadBytes(storageRef, file);
       const photoURL = await getDownloadURL(storageRef);
-      await updateProfile(auth.currentUser, { photoURL });
+      if (auth.currentUser) await updateProfile(auth.currentUser, { photoURL });
       window.location.reload();
     } catch (error) {
       console.error('Avatar upload failed:', error);
@@ -160,7 +182,7 @@ const Profile = () => {
     }
   };
 
-  const handleSelectFavorite = async (figureId) => {
+  const handleSelectFavorite = async (figureId: string) => {
     try {
       const currentFav = allFigures.find((f) => f.isFavorite === true);
       if (currentFav) await updateDoc(doc(db, 'figures', currentFav.id), { isFavorite: false });
@@ -174,25 +196,25 @@ const Profile = () => {
   const generateReport = () => {
     if (allFigures.length === 0) return alert('No data available in the vault.');
 
-    const doc = new jsPDF();
+    const pdfDoc = new jsPDF();
     const timestamp = new Date().toLocaleString();
     const userName = user?.displayName || user?.email?.split('@')[0] || 'Collector';
 
     // High-tech Header Styling
-    doc.setFillColor(18, 18, 18);
-    doc.rect(0, 0, 210, 40, 'F');
+    pdfDoc.setFillColor(18, 18, 18);
+    pdfDoc.rect(0, 0, 210, 40, 'F');
 
-    doc.setTextColor(59, 130, 246); // Blue-500
-    doc.setFontSize(22);
-    doc.text('FIGURE.COLLECTOR', 15, 22);
+    pdfDoc.setTextColor(59, 130, 246); // Blue-500
+    pdfDoc.setFontSize(22);
+    pdfDoc.text('FIGURE.COLLECTOR', 15, 22);
 
-    doc.setTextColor(150, 150, 150);
-    doc.setFontSize(9);
-    doc.text('SYSTEM GENERATED ASSET LOG // SECURE ARCHIVE', 15, 30);
+    pdfDoc.setTextColor(150, 150, 150);
+    pdfDoc.setFontSize(9);
+    pdfDoc.text('SYSTEM GENERATED ASSET LOG // SECURE ARCHIVE', 15, 30);
 
-    doc.setFontSize(8);
-    doc.text(`GENERATED: ${timestamp}`, 140, 22);
-    doc.text(`OWNER: ${userName.toUpperCase()}`, 140, 28);
+    pdfDoc.setFontSize(8);
+    pdfDoc.text(`GENERATED: ${timestamp}`, 140, 22);
+    pdfDoc.text(`OWNER: ${userName.toUpperCase()}`, 140, 28);
 
     // Inventory Table Construction
     const tableData = allFigures
@@ -206,7 +228,7 @@ const Profile = () => {
         f.conditionGrade || 'Standard',
       ]);
 
-    autoTable(doc, {
+    autoTable(pdfDoc, {
       startY: 50,
       head: [['DESIGNATION', 'ORIGIN', 'MANUFACTURER', 'EST. VALUE', 'STATUS']],
       body: tableData,
@@ -216,7 +238,7 @@ const Profile = () => {
       margin: { left: 15, right: 15 },
     });
 
-    doc.save(`Collection_Report_${userName}_${new Date().toISOString().split('T')[0]}.pdf`);
+    pdfDoc.save(`Collection_Report_${userName}_${new Date().toISOString().split('T')[0]}.pdf`);
   };
 
   if (!user) return null;

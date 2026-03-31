@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, FormEvent } from 'react';
 import { auth } from '../firebase/config';
 import {
   signInWithEmailAndPassword,
@@ -6,40 +6,42 @@ import {
   updateProfile,
   onAuthStateChanged,
 } from 'firebase/auth';
+// Import User as a type to prevent Vite "module does not provide export" error
+import type { User } from 'firebase/auth'; 
 import { useNavigate } from 'react-router-dom';
 import { LogIn, Lock, Mail, UserPlus, Loader2 } from 'lucide-react';
 
-const LoginPage = () => {
-  const [isLogin, setIsLogin] = useState(true); // Состояние: вход или регистрация
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [name, setName] = useState(''); // Для регистрации
-  const [loading, setLoading] = useState(false);
+const LoginPage: React.FC = () => {
+  const [isLogin, setIsLogin] = useState<boolean>(true);
+  const [email, setEmail] = useState<string>('');
+  const [password, setPassword] = useState<string>('');
+  const [name, setName] = useState<string>('');
+  const [loading, setLoading] = useState<boolean>(false);
   const navigate = useNavigate();
 
-  // Если пользователь уже вошел, ему нечего делать на странице логина
   useEffect(() => {
-    const unsub = onAuthStateChanged(auth, (user) => {
+    const unsub = onAuthStateChanged(auth, (user: User | null) => {
       if (user) navigate('/');
     });
     return () => unsub();
   }, [navigate]);
 
-  const handleAuth = async (e) => {
+  const handleAuth = async (e: FormEvent) => {
     e.preventDefault();
     setLoading(true);
     try {
       if (isLogin) {
-        // ВХОД
+        // LOGIN
         await signInWithEmailAndPassword(auth, email, password);
       } else {
-        // РЕГИСТРАЦИЯ
+        // REGISTRATION
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        // Добавляем имя пользователя в профиль Firebase
-        await updateProfile(userCredential.user, { displayName: name });
+        if (userCredential.user) {
+          await updateProfile(userCredential.user, { displayName: name });
+        }
       }
-      navigate('/'); // После успеха кидаем на главную (Dashboard)
-    } catch (error) {
+      navigate('/');
+    } catch (error: any) {
       alert('Error: ' + error.message);
     } finally {
       setLoading(false);
@@ -49,7 +51,7 @@ const LoginPage = () => {
   return (
     <div className="min-h-[80vh] flex items-center justify-center p-4">
       <div className="w-full max-w-[400px] bg-[#1a1a1a] rounded-[2.5rem] border border-[#333] p-8 md:p-10 shadow-2xl">
-        {/* Заголовок */}
+        {/* Header */}
         <div className="text-center mb-8 space-y-2">
           <div className="inline-flex p-3 bg-blue-500/10 rounded-2xl text-blue-500 mb-2">
             {isLogin ? <LogIn size={24} /> : <UserPlus size={24} />}
@@ -63,7 +65,7 @@ const LoginPage = () => {
         </div>
 
         <form onSubmit={handleAuth} className="space-y-4">
-          {/* Поле ИМЯ (только для регистрации) */}
+          {/* Name Field (Sign Up only) */}
           {!isLogin && (
             <div className="space-y-1">
               <label className="block text-[10px] font-black uppercase tracking-widest text-gray-500 ml-4">
@@ -80,7 +82,7 @@ const LoginPage = () => {
             </div>
           )}
 
-          {/* Поле EMAIL */}
+          {/* Email Field */}
           <div className="space-y-1">
             <label className="block text-[10px] font-black uppercase tracking-widest text-gray-500 ml-4">
               Email
@@ -98,7 +100,7 @@ const LoginPage = () => {
             </div>
           </div>
 
-          {/* Поле ПАРОЛЬ */}
+          {/* Password Field */}
           <div className="space-y-1">
             <label className="block text-[10px] font-black uppercase tracking-widest text-gray-500 ml-4">
               Password
@@ -116,7 +118,7 @@ const LoginPage = () => {
             </div>
           </div>
 
-          {/* Кнопка действия */}
+          {/* Action Button */}
           <button
             type="submit"
             disabled={loading}
@@ -132,7 +134,7 @@ const LoginPage = () => {
           </button>
         </form>
 
-        {/* Переключатель режимов */}
+        {/* Toggle Mode */}
         <div className="mt-8 text-center">
           <button
             onClick={() => setIsLogin(!isLogin)}

@@ -10,8 +10,11 @@ import {
   getDocs,
   limit,
   deleteDoc,
+  type DocumentData,
 } from 'firebase/firestore';
 import { ref, deleteObject } from 'firebase/storage';
+import { onAuthStateChanged } from 'firebase/auth';
+import type { User } from 'firebase/auth';
 import { motion as Motion } from 'framer-motion';
 import { Loader2 } from 'lucide-react';
 
@@ -25,25 +28,44 @@ import DetailsThumbnails from '../components/details/DetailsThumbnails';
 import DetailsActionButtons from '../components/details/DetailsActionButtons';
 import DetailsRelated from '../components/details/DetailsRelated';
 
-const FigureDetailsPage = () => {
-  const { id } = useParams();
-  const navigate = useNavigate();
-  const [figure, setFigure] = useState(null);
-  const [characterData, setCharacterData] = useState(null);
-  const [relatedFigures, setRelatedFigures] = useState([]);
-  const [activeImg, setActiveImg] = useState(0);
-  const [direction, setDirection] = useState(0);
-  const [loading, setLoading] = useState(true);
-  const [isHovered, setIsHovered] = useState(false);
-  const [imageError, setImageError] = useState(false);
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
-  const [currentUser, setCurrentUser] = useState(null);
+interface Figure extends DocumentData {
+  id?: string;
+  name: string;
+  anime?: string;
+  brand?: string;
+  price?: string | number;
+  previewImage?: string;
+  image?: string;
+  images?: string[];
+  characterId?: string;
+  characterImage?: string;
+  auctionUrl?: string;
+}
 
-  const timerRef = useRef(null);
+interface CharacterData {
+  image: string;
+  name: string;
+}
+
+const FigureDetailsPage: React.FC = () => {
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const [figure, setFigure] = useState<Figure | null>(null);
+  const [characterData, setCharacterData] = useState<CharacterData | null>(null);
+  const [relatedFigures, setRelatedFigures] = useState<Figure[]>([]);
+  const [activeImg, setActiveImg] = useState<number>(0);
+  const [direction, setDirection] = useState<number>(0);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [isHovered, setIsHovered] = useState<boolean>(false);
+  const [imageError, setImageError] = useState<boolean>(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false);
+  const [isShareModalOpen, setIsShareModalOpen] = useState<boolean>(false);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
-    const unsub = auth.onAuthStateChanged((user) => {
+    const unsub = onAuthStateChanged(auth, (user) => {
       setCurrentUser(user);
     });
     return () => unsub();
@@ -51,16 +73,17 @@ const FigureDetailsPage = () => {
 
   useEffect(() => {
     const fetchFigureAndArt = async () => {
+      if (!id) return;
       setLoading(true);
-      setImageError(false); // Сброс ошибки при смене ID
+      setImageError(false); 
       try {
         const docSnap = await getDoc(doc(db, 'figures', id));
         if (docSnap.exists()) {
-          const data = docSnap.data();
+          const data = docSnap.data() as Figure;
           setFigure(data);
 
-          // --- ЛОГИКА РЕКОМЕНДАЦИЙ (С FALLBACK) ---
-          let finalRelated = [];
+          // --- RECOMMENDATION LOGIC ---
+          let finalRelated: Figure[] = [];
           if (data.anime) {
             const sameAnimeQuery = query(
               collection(db, 'figures'),
@@ -69,7 +92,7 @@ const FigureDetailsPage = () => {
             );
             const sameAnimeSnap = await getDocs(sameAnimeQuery);
             finalRelated = sameAnimeSnap.docs
-              .map((doc) => ({ id: doc.id, ...doc.data() }))
+              .map((doc) => ({ id: doc.id, ...doc.data() } as Figure))
               .filter((item) => item.id !== id);
           }
 
@@ -77,7 +100,7 @@ const FigureDetailsPage = () => {
             const randomQuery = query(collection(db, 'figures'), limit(20));
             const randomSnap = await getDocs(randomQuery);
             const randomFigures = randomSnap.docs
-              .map((doc) => ({ id: doc.id, ...doc.data() }))
+              .map((doc) => ({ id: doc.id, ...doc.data() } as Figure))
               .filter((item) => item.id !== id && !finalRelated.some((r) => r.id === item.id));
 
             const shuffledRandom = randomFigures.sort(() => 0.5 - Math.random());
@@ -88,15 +111,12 @@ const FigureDetailsPage = () => {
 
           setRelatedFigures(finalRelated);
 
-          // Если изображение персонажа уже есть в базе (кэшировано), используем его
           if (data.characterImage) {
             setCharacterData({
               image: data.characterImage,
               name: data.name,
             });
-          }
-          // Если изображения нет (старые записи), пробуем подтянуть через API
-          else if (data.characterId || data.name) {
+          } else if (data.characterId || data.name) {
             try {
               const endpoint = data.characterId
                 ? `https://api.jikan.moe/v4/characters/${data.characterId}`
@@ -127,7 +147,9 @@ const FigureDetailsPage = () => {
 
   const images = useMemo(() => {
     if (!figure) return [];
-    return figure.images?.length > 0 ? figure.images : [figure.previewImage || figure.image];
+    return figure.images && figure.images.length > 0
+      ? figure.images
+      : [figure.previewImage || figure.image || ''];
   }, [figure]);
 
   useEffect(() => {
@@ -137,10 +159,12 @@ const FigureDetailsPage = () => {
         setActiveImg((prev) => (prev + 1) % images.length);
       }, 5000);
     }
-    return () => clearInterval(timerRef.current);
-  }, [images, isHovered, images.length]);
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, [images, isHovered]);
 
-  const handleManualSelect = (idx) => {
+  const handleManualSelect = (idx: number) => {
     if (timerRef.current) clearInterval(timerRef.current);
     if (idx !== activeImg) {
       setDirection(idx > activeImg ? 1 : -1);
@@ -148,13 +172,13 @@ const FigureDetailsPage = () => {
     }
   };
 
-  const nextSlide = (e) => {
+  const nextSlide = (e?: React.MouseEvent) => {
     if (e && e.stopPropagation) e.stopPropagation();
     setDirection(1);
     setActiveImg((prev) => (prev + 1) % images.length);
   };
 
-  const prevSlide = (e) => {
+  const prevSlide = (e?: React.MouseEvent) => {
     if (e && e.stopPropagation) e.stopPropagation();
     setDirection(-1);
     setActiveImg((prev) => (prev - 1 + images.length) % images.length);
@@ -162,21 +186,19 @@ const FigureDetailsPage = () => {
 
   const handleMarketScan = () => {
     const currentImgUrl = images[activeImg];
-    // Используем Google Lens, так как он лучше всего находит товары на eBay и в китайских магазинах
     const lensUrl = `https://lens.google.com/uploadbyurl?url=${encodeURIComponent(currentImgUrl)}`;
     window.open(lensUrl, '_blank');
   };
 
   const handleConfirmDelete = async () => {
+    if (!id || !figure) return;
     try {
       setLoading(true);
-      // 1. Удаляем документ из базы
       await deleteDoc(doc(db, 'figures', id));
 
-      // 2. Удаляем изображения из хранилища
       const imageUrls = figure.images || (figure.previewImage ? [figure.previewImage] : []);
       for (const url of imageUrls) {
-        if (url?.includes('firebasestorage.googleapis.com')) {
+        if (url && url.includes('firebasestorage.googleapis.com')) {
           try {
             await deleteObject(ref(storage, url));
           } catch (e) {
@@ -208,22 +230,11 @@ const FigureDetailsPage = () => {
       transition={{ duration: 0.5, ease: 'easeOut' }}
       className="min-h-screen bg-[#121212] p-4 md:p-8 text-[#e4e4e4] font-sans selection:bg-blue-500/30 overflow-x-hidden text-left"
     >
-      {/* Background System */}
-      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
-        <div
-          className="absolute inset-0 opacity-[0.012] pointer-events-none"
-          style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 250 250' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.5' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
-            mixBlendMode: 'overlay',
-          }}
-        />
-      </div>
-
       <div className="max-w-6xl mx-auto">
         <DetailsHeader
           currentUser={currentUser}
           figure={figure}
-          id={id}
+          id={id || ''}
           onShare={() => setIsShareModalOpen(true)}
           onDelete={() => setIsDeleteModalOpen(true)}
         />
@@ -238,18 +249,20 @@ const FigureDetailsPage = () => {
             setIsHovered={setIsHovered}
           />
 
-          {/* RIGHT COLUMN */}
           <div className="flex flex-col gap-8">
             <DetailsIdCard
               figure={figure}
               characterData={characterData}
               images={images}
-              activeImg={activeImg}
               imageError={imageError}
               setImageError={setImageError}
             />
 
-            <DetailsThumbnails images={images} handleManualSelect={handleManualSelect} />
+            <DetailsThumbnails 
+              images={images} 
+              handleManualSelect={handleManualSelect} 
+              activeImg={activeImg} 
+            />
 
             <DetailsActionButtons
               handleMarketScan={handleMarketScan}
@@ -258,7 +271,7 @@ const FigureDetailsPage = () => {
           </div>
         </div>
 
-        <DetailsRelated relatedFigures={relatedFigures} anime={figure.anime} />
+        <DetailsRelated relatedFigures={relatedFigures} anime={figure.anime || ''} />
       </div>
 
       <Modal
