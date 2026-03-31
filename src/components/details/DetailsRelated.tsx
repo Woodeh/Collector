@@ -1,7 +1,23 @@
-import React from 'react';
+import React, { FC } from 'react';
 import FigureCard from '../collection/FigureCard';
 
-const DetailsRelated = ({ relatedFigures, anime }) => {
+// Интерфейс для данных фигурки (должен совпадать с тем, что принимает FigureCard)
+interface RelatedFigure {
+  id: string;
+  name: string;
+  anime: string;
+  price: string | number;
+  previewImage?: string;
+  image?: string;
+  // Добавьте другие поля, если они используются в FigureCard
+}
+
+interface DetailsRelatedProps {
+  relatedFigures: RelatedFigure[] | null | undefined;
+  anime: string;
+}
+
+const DetailsRelated: FC<DetailsRelatedProps> = ({ relatedFigures, anime }) => {
   if (!relatedFigures || relatedFigures.length === 0) return null;
 
   return (
@@ -20,7 +36,12 @@ const DetailsRelated = ({ relatedFigures, anime }) => {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {relatedFigures.map((relFigure) => (
-          <FigureCard key={relFigure.id} figure={relFigure} />
+          <FigureCard
+            key={relFigure.id}
+            figure={relFigure}
+            onEdit={() => {}}
+            onDelete={() => {}}
+          />
         ))}
       </div>
     </div>

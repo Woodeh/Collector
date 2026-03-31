@@ -1,9 +1,19 @@
-import React from 'react';
+import React, { FC } from 'react';
 import { motion as Motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { Clock, Target, ChevronRight } from 'lucide-react';
 
-const HomeWidgets = ({ widgetStats }) => {
+// Интерфейс для статистики, передаваемой в пропсы
+interface WidgetStats {
+  preorders: number | string;
+  wishlist: number | string;
+}
+
+interface HomeWidgetsProps {
+  widgetStats: WidgetStats;
+}
+
+const HomeWidgets: FC<HomeWidgetsProps> = ({ widgetStats }) => {
   return (
     <Motion.section
       initial={{ opacity: 0, y: 20 }}

@@ -1,17 +1,25 @@
-import React from 'react';
+import React, { FC, ChangeEvent } from 'react';
 import { LayoutGrid, Search, X, SlidersHorizontal, Plus } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
-export default function CollectionHeader({
+interface CollectionHeaderProps {
+  processedCount: number;
+  searchTerm: string;
+  setSearchTerm: (term: string) => void;
+  showFilters: boolean;
+  setShowFilters: (show: boolean) => void;
+}
+
+const CollectionHeader: FC<CollectionHeaderProps> = ({
   processedCount,
   searchTerm,
   setSearchTerm,
   showFilters,
   setShowFilters,
-}) {
+}) => {
   return (
     <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 border-b border-[#333] pb-10 text-left">
-      {/* LEFT SECTION: Полностью копируем структуру Community */}
+      {/* LEFT SECTION: Registry Info */}
       <div className="space-y-2">
         <div className="flex items-center gap-3 text-blue-500 mb-2">
           <LayoutGrid size={20} />
@@ -44,10 +52,11 @@ export default function CollectionHeader({
             placeholder="Search database..."
             className="w-full bg-[#1a1a1a] border border-[#333] py-4 pl-12 pr-12 rounded-2xl outline-none focus:border-blue-500 transition-all font-bold text-base text-white placeholder:text-gray-700"
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={(e: ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
           />
           {searchTerm && (
             <button
+              type="button"
               onClick={() => setSearchTerm('')}
               className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white cursor-pointer transition-colors"
             >
@@ -58,6 +67,7 @@ export default function CollectionHeader({
 
         {/* Filter Toggle Button */}
         <button
+          type="button"
           onClick={() => setShowFilters(!showFilters)}
           className={`p-4 rounded-2xl border transition-all duration-300 cursor-pointer ${
             showFilters
@@ -79,4 +89,6 @@ export default function CollectionHeader({
       </div>
     </div>
   );
-}
+};
+
+export default CollectionHeader;

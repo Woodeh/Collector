@@ -1,15 +1,40 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, FC, MouseEvent } from 'react';
 import { Tag, Trash2, Pencil, User, MoreVertical } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
-export default function FigureCard({ figure, onEdit, onDelete, isCommunity = false }) {
-  const [showMenu, setShowMenu] = useState(false);
-  const menuRef = useRef(null);
+// Интерфейс для данных фигурки
+interface Figure {
+  id: string;
+  name: string;
+  anime: string;
+  brand?: string;
+  price: string | number;
+  previewImage?: string;
+  image?: string;
+  gender?: 'Male' | 'Female' | string;
+  authorName?: string;
+}
+
+interface FigureCardProps {
+  figure: Figure;
+  onEdit?: () => void;
+  onDelete?: () => void;
+  isCommunity?: boolean;
+}
+
+const FigureCard: FC<FigureCardProps> = ({ 
+  figure, 
+  onEdit, 
+  onDelete, 
+  isCommunity = false 
+}) => {
+  const [showMenu, setShowMenu] = useState<boolean>(false);
+  const menuRef = useRef<HTMLDivElement>(null);
 
   // Закрываем меню при клике вне компонента
   useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (menuRef.current && !menuRef.current.contains(event.target)) {
+    const handleClickOutside = (event: MouseEvent | any) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
         setShowMenu(false);
       }
     };
@@ -18,6 +43,12 @@ export default function FigureCard({ figure, onEdit, onDelete, isCommunity = fal
     }
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [showMenu]);
+
+  const handleMenuToggle = (e: MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setShowMenu(!showMenu);
+  };
 
   return (
     <div className="relative group bg-[#1a1a1a] rounded-[2rem] border border-[#333] overflow-hidden hover:border-blue-500/50 transition-all duration-500 flex flex-col shadow-2xl h-full text-left font-sans">
@@ -28,11 +59,8 @@ export default function FigureCard({ figure, onEdit, onDelete, isCommunity = fal
           ref={menuRef}
         >
           <button
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation(); // Чтобы не сработал переход по ссылке карточки
-              setShowMenu(!showMenu);
-            }}
+            type="button"
+            onClick={handleMenuToggle}
             className={`p-2 rounded-xl backdrop-blur-md border transition-all shadow-lg cursor-pointer ${
               showMenu
                 ? 'bg-blue-600 border-blue-400 text-white'
@@ -47,13 +75,14 @@ export default function FigureCard({ figure, onEdit, onDelete, isCommunity = fal
             <div className="absolute right-0 mt-2 w-32 bg-[#1a1a1a] border border-[#333] rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.5)] overflow-hidden animate-in fade-in zoom-in-95 duration-200">
               {onEdit && (
                 <button
+                  type="button"
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
                     onEdit();
                     setShowMenu(false);
                   }}
-                  className="w-full flex items-center gap-3 px-4 py-3 text-[11px] font-black uppercase italic tracking-widest text-gray-400 hover:bg-blue-600/10 hover:text-blue-500 transition-all border-b border-[#333]/50 last:border-0"
+                  className="w-full flex items-center gap-3 px-4 py-3 text-[11px] font-black uppercase italic tracking-widest text-gray-400 hover:bg-blue-600/10 hover:text-blue-500 transition-all border-b border-[#333]/50 last:border-0 cursor-pointer"
                 >
                   <Pencil size={14} />
                   <span>Edit</span>
@@ -61,13 +90,14 @@ export default function FigureCard({ figure, onEdit, onDelete, isCommunity = fal
               )}
               {onDelete && (
                 <button
+                  type="button"
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
                     onDelete();
                     setShowMenu(false);
                   }}
-                  className="w-full flex items-center gap-3 px-4 py-3 text-[11px] font-black uppercase italic tracking-widest text-red-500/70 hover:bg-red-500/10 hover:text-red-500 transition-all"
+                  className="w-full flex items-center gap-3 px-4 py-3 text-[11px] font-black uppercase italic tracking-widest text-red-500/70 hover:bg-red-500/10 hover:text-red-500 transition-all cursor-pointer"
                 >
                   <Trash2 size={14} />
                   <span>Delete</span>
@@ -94,7 +124,7 @@ export default function FigureCard({ figure, onEdit, onDelete, isCommunity = fal
           {/* Градиент для читаемости плашки */}
           <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/80 to-transparent pointer-events-none" />
 
-          {/* AUTHOR BADGE: Показываем только в Community, ПОВЕРХ фото, СНИЗУ */}
+          {/* AUTHOR BADGE: Показываем только в Community */}
           {isCommunity && (
             <div className="absolute bottom-4 left-4 z-30">
               <div className="flex items-center gap-2 bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/10 shadow-xl">
@@ -156,4 +186,6 @@ export default function FigureCard({ figure, onEdit, onDelete, isCommunity = fal
       </Link>
     </div>
   );
-}
+};
+
+export default FigureCard;

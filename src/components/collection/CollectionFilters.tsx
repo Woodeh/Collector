@@ -1,19 +1,41 @@
-import React from 'react';
+import React, { FC, ChangeEvent } from 'react';
 import { ChevronDown, RotateCcw, Filter, SortAsc } from 'lucide-react';
 
-export default function CollectionFilters({
+interface CollectionFiltersProps {
+  showFilters: boolean;
+  sortBy: string;
+  setSortBy: (val: string) => void;
+  filterAnime: string;
+  setFilterAnime: (val: string) => void;
+  animeOptions?: string[];
+  filterBrand: string;
+  setFilterBrand: (val: string) => void;
+  brandOptions?: string[];
+  onReset: () => void;
+}
+
+const CollectionFilters: FC<CollectionFiltersProps> = ({
   showFilters,
   sortBy,
   setSortBy,
   filterAnime,
   setFilterAnime,
-  animeOptions = [], // Защита от undefined
+  animeOptions = [],
   filterBrand,
   setFilterBrand,
-  brandOptions = [], // Защита от undefined
+  brandOptions = [],
   onReset,
-}) {
+}) => {
   if (!showFilters) return null;
+
+  const sortOptions = [
+    { id: 'newest', label: 'Latest' },
+    { id: 'oldest', label: 'Archive' },
+    { id: 'cheap', label: 'Price: Low' },
+    { id: 'expensive', label: 'Price: High' },
+    { id: 'az', label: 'A-Z Name' },
+    { id: 'za', label: 'Z-A Name' },
+  ];
 
   return (
     <div className="mb-10 p-8 bg-[#1a1a1a] border border-[#333] rounded-[2.5rem] animate-in fade-in zoom-in duration-300 shadow-2xl relative overflow-hidden text-left">
@@ -24,7 +46,7 @@ export default function CollectionFilters({
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-10 relative z-10">
         {/* 1. SORT PROTOCOL */}
-        <div className="space-y-5">
+        <div className="space-y-5 text-left">
           <div className="flex items-center gap-2">
             <SortAsc size={14} className="text-blue-500" />
             <label className="text-[10px] font-black uppercase tracking-[0.2em] text-blue-500 italic">
@@ -32,14 +54,7 @@ export default function CollectionFilters({
             </label>
           </div>
           <div className="grid grid-cols-2 gap-2">
-            {[
-              { id: 'newest', label: 'Latest' },
-              { id: 'oldest', label: 'Archive' },
-              { id: 'cheap', label: 'Price: Low' },
-              { id: 'expensive', label: 'Price: High' },
-              { id: 'az', label: 'A-Z Name' },
-              { id: 'za', label: 'Z-A Name' },
-            ].map((opt) => (
+            {sortOptions.map((opt) => (
               <button
                 key={opt.id}
                 type="button"
@@ -57,14 +72,14 @@ export default function CollectionFilters({
         </div>
 
         {/* 2. SOURCE ORIGIN */}
-        <div className="space-y-5">
+        <div className="space-y-5 text-left">
           <label className="text-[10px] font-black uppercase tracking-[0.2em] text-blue-500 italic block">
             Source Origin
           </label>
           <div className="relative group">
             <select
               value={filterAnime}
-              onChange={(e) => setFilterAnime(e.target.value)}
+              onChange={(e: ChangeEvent<HTMLSelectElement>) => setFilterAnime(e.target.value)}
               className="w-full bg-[#121212] border border-[#333] p-4 rounded-2xl outline-none focus:border-blue-500 transition-all font-bold text-[11px] text-white appearance-none cursor-pointer group-hover:border-gray-600"
             >
               {animeOptions.map((title) => (
@@ -83,14 +98,14 @@ export default function CollectionFilters({
         </div>
 
         {/* 3. MANUFACTURER */}
-        <div className="space-y-5">
+        <div className="space-y-5 text-left">
           <label className="text-[10px] font-black uppercase tracking-[0.2em] text-blue-500 italic block">
             Manufacturer
           </label>
           <div className="relative group">
             <select
               value={filterBrand}
-              onChange={(e) => setFilterBrand(e.target.value)}
+              onChange={(e: ChangeEvent<HTMLSelectElement>) => setFilterBrand(e.target.value)}
               className="w-full bg-[#121212] border border-[#333] p-4 rounded-2xl outline-none focus:border-blue-500 transition-all font-bold text-[11px] text-white appearance-none cursor-pointer group-hover:border-gray-600"
             >
               {brandOptions.map((brand) => (
@@ -120,4 +135,6 @@ export default function CollectionFilters({
       </div>
     </div>
   );
-}
+};
+
+export default CollectionFilters;

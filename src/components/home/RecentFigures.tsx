@@ -1,9 +1,23 @@
-import React from 'react';
+import React, { FC } from 'react';
 import { motion as Motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { Zap, ChevronRight, LayoutGrid } from 'lucide-react';
 
-const RecentFigures = ({ recentFigures }) => {
+// Интерфейс для данных фигурки
+interface Figure {
+  id: string;
+  name: string;
+  anime: string;
+  price: string | number;
+  previewImage?: string;
+  image?: string;
+}
+
+interface RecentFiguresProps {
+  recentFigures: Figure[];
+}
+
+const RecentFigures: FC<RecentFiguresProps> = ({ recentFigures }) => {
   return (
     <Motion.section
       initial={{ opacity: 0 }}
@@ -35,7 +49,7 @@ const RecentFigures = ({ recentFigures }) => {
           >
             <Link
               to={`/figure/${figure.id}`}
-              className="group block bg-[#1a1a1a] rounded-[1.8rem] border border-[#333] overflow-hidden hover:border-blue-500/50 hover:shadow-[0_20px_40px_rgba(0,0,0,0.4)] transition-all duration-500 h-full"
+              className="group block bg-[#1a1a1a] rounded-[1.8rem] border border-[#333] overflow-hidden hover:border-blue-500/50 hover:shadow-[0_20px_40px_rgba(0,0,0,0.4)] transition-all duration-500 h-full text-left"
             >
               <div className="aspect-[4/5] overflow-hidden bg-[#121212] relative">
                 <img
@@ -66,6 +80,7 @@ const RecentFigures = ({ recentFigures }) => {
             </Link>
           </Motion.div>
         ))}
+
         {recentFigures.length === 0 && (
           <div className="col-span-full py-20 text-center border-2 border-dashed border-[#333] rounded-[2.5rem] opacity-20">
             <LayoutGrid size={48} className="mx-auto mb-4" />

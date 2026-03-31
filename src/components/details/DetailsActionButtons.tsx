@@ -1,10 +1,16 @@
-import React from 'react';
+import React, { FC, MouseEvent } from 'react';
 import { SearchCode, ChevronRight, ExternalLink } from 'lucide-react';
 
-const DetailsActionButtons = ({ handleMarketScan, auctionUrl }) => {
+interface DetailsActionButtonsProps {
+  handleMarketScan: (e: MouseEvent<HTMLButtonElement>) => void;
+  auctionUrl?: string | null;
+}
+
+const DetailsActionButtons: FC<DetailsActionButtonsProps> = ({ handleMarketScan, auctionUrl }) => {
   return (
     <div className="flex flex-col gap-4">
       <button
+        type="button"
         onClick={handleMarketScan}
         className="group flex items-center justify-between bg-blue-600/10 border border-blue-500/30 text-blue-500 p-6 rounded-[1.5rem] hover:bg-blue-600 hover:text-white transition-all shadow-xl active:scale-95 cursor-pointer"
       >

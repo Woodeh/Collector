@@ -1,8 +1,38 @@
-import React from 'react';
+import React, { FC } from 'react';
 import { motion as Motion } from 'framer-motion';
 import { Cpu, Fingerprint, ShieldCheck } from 'lucide-react';
 
-const DetailsIdCard = ({ figure, characterData, images, imageError, setImageError }) => {
+// Интерфейсы для типизации данных
+interface FigureData {
+  name: string;
+  fullDisplayName?: string;
+  anime: string;
+  price: string | number;
+  conditionGrade: string;
+  hasBox: string | boolean;
+  authorName?: string;
+}
+
+interface CharacterData {
+  name?: string;
+  image?: string;
+}
+
+interface DetailsIdCardProps {
+  figure: FigureData;
+  characterData?: CharacterData | null;
+  images: string[];
+  imageError: boolean;
+  setImageError: (error: boolean) => void;
+}
+
+const DetailsIdCard: FC<DetailsIdCardProps> = ({
+  figure,
+  characterData,
+  images,
+  imageError,
+  setImageError,
+}) => {
   const avatarUrl = characterData?.image || images[0];
 
   return (
@@ -24,6 +54,7 @@ const DetailsIdCard = ({ figure, characterData, images, imageError, setImageErro
         <div className="flex flex-col sm:flex-row gap-8">
           <div className="shrink-0 flex flex-col items-center">
             <div className="w-32 h-44 rounded-xl bg-[#121212] border border-[#333] overflow-hidden relative shadow-inner flex flex-col group/id">
+              {/* Анимированный блик */}
               <div className="absolute inset-0 z-40 pointer-events-none overflow-hidden">
                 <Motion.div
                   initial={{ x: '-150%', skewX: -45 }}
@@ -110,10 +141,14 @@ const DetailsIdCard = ({ figure, characterData, images, imageError, setImageErro
                 </p>
                 <p
                   className={`text-[12px] font-black uppercase italic ${
-                    figure.hasBox === 'Yes' ? 'text-white' : 'text-red-500'
+                    figure.hasBox === 'Yes' || figure.hasBox === true
+                      ? 'text-white'
+                      : 'text-red-500'
                   }`}
                 >
-                  {figure.hasBox === 'Yes' ? 'Box: Intact' : 'Loose / No Box'}
+                  {figure.hasBox === 'Yes' || figure.hasBox === true
+                    ? 'Box: Intact'
+                    : 'Loose / No Box'}
                 </p>
               </div>
               <div className="space-y-1.5 text-left">

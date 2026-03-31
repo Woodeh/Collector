@@ -1,8 +1,24 @@
-import React from 'react';
+import React, { FC } from 'react';
 import { Link } from 'react-router-dom';
 import { Box, Target, ChevronRight, Fingerprint, ShieldCheck } from 'lucide-react';
 
-export default function SpotlightCard({ spotlight }) {
+// Интерфейс для данных объекта Spotlight
+interface SpotlightFigure {
+  id: string;
+  name: string;
+  anime: string;
+  price: string | number;
+  brand: string;
+  previewImage?: string;
+  image?: string;
+  category?: string;
+}
+
+interface SpotlightCardProps {
+  spotlight: SpotlightFigure | null | undefined;
+}
+
+const SpotlightCard: FC<SpotlightCardProps> = ({ spotlight }) => {
   if (!spotlight) return null;
 
   return (
@@ -109,4 +125,6 @@ export default function SpotlightCard({ spotlight }) {
       </div>
     </div>
   );
-}
+};
+
+export default SpotlightCard;

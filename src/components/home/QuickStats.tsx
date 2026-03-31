@@ -1,7 +1,17 @@
-import React from 'react';
+import React, { FC } from 'react';
 import { ShieldCheck, Coins, Factory, BarChart3 } from 'lucide-react';
 
-export default function QuickStats({ stats }) {
+// Интерфейс для данных статистики
+interface Stats {
+  totalValue: number;
+  topBrand: string;
+}
+
+interface QuickStatsProps {
+  stats: Stats;
+}
+
+const QuickStats: FC<QuickStatsProps> = ({ stats }) => {
   return (
     <div className="relative group w-full lg:w-auto lg:min-w-[380px]">
       {/* Subtle Site Accent Glow */}
@@ -95,4 +105,6 @@ export default function QuickStats({ stats }) {
       </div>
     </div>
   );
-}
+};
+
+export default QuickStats;

@@ -1,9 +1,21 @@
-import React from 'react';
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
+import React, { FC } from 'react';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, TooltipProps } from 'recharts';
 import { Layers } from 'lucide-react';
 
-const CustomTooltip = ({ active, payload }) => {
-  if (active && payload && payload.length) {
+// Типизация для данных бренда
+interface BrandDataItem {
+  name: string;
+  value: number;
+}
+
+// Типизация для общей статистики
+interface CollectionStats {
+  count: number;
+}
+
+// Пропсы для CustomTooltip (используем встроенный тип Recharts)
+const CustomTooltip = ({ active, payload }: any) => {
+  if (active && payload && payload.length > 0) {
     return (
       <div className="bg-[#1a1a1a] p-3 rounded-xl border border-[#333] shadow-2xl text-left backdrop-blur-md">
         <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1 leading-none italic">
@@ -18,7 +30,16 @@ const CustomTooltip = ({ active, payload }) => {
   return null;
 };
 
-const BrandsSplit = ({ brandData, collectionStats, COLORS }) => {
+interface BrandsSplitProps {
+  brandData: BrandDataItem[];
+  collectionStats: CollectionStats;
+  COLORS: string[];
+}
+
+const BrandsSplit: FC<BrandsSplitProps> = ({ brandData, collectionStats, COLORS }) => {
+  // Ограничиваем данные топ-5 брендами для визуальной чистоты
+  const topBrands = brandData.slice(0, 5);
+
   return (
     <div className="bg-[#1a1a1a] border border-[#333] p-8 rounded-[3rem] shadow-2xl min-h-[400px] flex flex-col text-left">
       <div className="flex items-center justify-between mb-8 text-left">
@@ -27,12 +48,14 @@ const BrandsSplit = ({ brandData, collectionStats, COLORS }) => {
         </h4>
         <Layers size={14} className="text-gray-700" />
       </div>
+
       <div className="flex flex-col gap-6 text-left">
+        {/* Секция с кольцевым графиком */}
         <div className="h-40 w-full relative text-left">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie
-                data={brandData.slice(0, 5)}
+                data={topBrands}
                 cx="50%"
                 cy="50%"
                 innerRadius={50}
@@ -42,13 +65,15 @@ const BrandsSplit = ({ brandData, collectionStats, COLORS }) => {
                 stroke="none"
                 cornerRadius={4}
               >
-                {brandData.map((_, i) => (
-                  <Cell key={i} fill={COLORS[i % COLORS.length]} />
+                {topBrands.map((brand, i) => (
+                  <Cell key={`cell-${brand.name}-${i}`} fill={COLORS[i % COLORS.length] || '#3b82f6'} />
                 ))}
               </Pie>
               <Tooltip content={<CustomTooltip />} />
             </PieChart>
           </ResponsiveContainer>
+
+          {/* Центральный текст внутри графика */}
           <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
             <p className="text-[18px] font-black text-white italic leading-none">
               {collectionStats.count}
@@ -56,13 +81,15 @@ const BrandsSplit = ({ brandData, collectionStats, COLORS }) => {
             <p className="text-[7px] text-gray-600 font-black uppercase tracking-widest">Units</p>
           </div>
         </div>
+
+        {/* Список брендов с прогресс-барами */}
         <div className="space-y-4 text-left">
-          {brandData.slice(0, 5).map((brand, i) => (
-            <div key={i} className="space-y-1.5 text-left">
+          {topBrands.map((brand, i) => (
+            <div key={`brand-list-${i}`} className="space-y-1.5 text-left">
               <div className="flex justify-between items-end">
                 <div className="flex items-center gap-2 text-left">
                   <div
-                    className="w-1 h-1 rounded-full"
+                    className="w-1.5 h-1.5 rounded-full"
                     style={{ backgroundColor: COLORS[i % COLORS.length] }}
                   />
                   <p className="text-[10px] font-black text-white uppercase italic truncate max-w-[120px] text-left">
@@ -73,11 +100,15 @@ const BrandsSplit = ({ brandData, collectionStats, COLORS }) => {
                   {brand.value} Units
                 </p>
               </div>
+
+              {/* Линия прогресса */}
               <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden text-left">
                 <div
                   className="h-full transition-all duration-1000 ease-out text-left"
                   style={{
-                    width: `${(brand.value / collectionStats.count) * 100}%`,
+                    width: `${
+                      collectionStats.count > 0 ? (brand.value / collectionStats.count) * 100 : 0
+                    }%`,
                     backgroundColor: COLORS[i % COLORS.length],
                   }}
                 />

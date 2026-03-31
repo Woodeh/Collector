@@ -1,6 +1,16 @@
-import React from 'react';
+import React, { FC } from 'react';
 
-const DetailsThumbnails = ({ images, activeImg, handleManualSelect }) => {
+interface DetailsThumbnailsProps {
+  images: string[];
+  activeImg: number;
+  handleManualSelect: (index: number) => void;
+}
+
+const DetailsThumbnails: FC<DetailsThumbnailsProps> = ({
+  images,
+  activeImg,
+  handleManualSelect,
+}) => {
   if (!images || images.length <= 1) return null;
 
   return (
@@ -8,14 +18,15 @@ const DetailsThumbnails = ({ images, activeImg, handleManualSelect }) => {
       {images.map((img, idx) => (
         <button
           key={idx}
+          type="button"
           onClick={() => handleManualSelect(idx)}
-          className={`w-20 aspect-[4/5] rounded-xl border-2 overflow-hidden transition-all duration-300 ${
+          className={`w-20 aspect-[4/5] rounded-xl border-2 overflow-hidden transition-all duration-300 cursor-pointer ${
             activeImg === idx
               ? 'border-blue-500 shadow-[0_0_20px_rgba(59,130,246,0.4)] scale-105'
               : 'border-[#333] opacity-40 hover:opacity-100 hover:scale-105'
           }`}
         >
-          <img src={img} className="w-full h-full object-cover" alt="thumb" />
+          <img src={img} className="w-full h-full object-cover" alt={`Thumbnail ${idx + 1}`} />
         </button>
       ))}
     </div>
