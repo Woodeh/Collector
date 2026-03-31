@@ -1,30 +1,51 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { motion as Motion } from 'framer-motion';
 import { db } from '../firebase/config';
-import { collection, query, orderBy, onSnapshot } from 'firebase/firestore';
+import { 
+  collection, 
+  query, 
+  orderBy, 
+  onSnapshot, 
+  type QuerySnapshot, 
+  type DocumentData, 
+  type QueryDocumentSnapshot 
+} from 'firebase/firestore';
 import { Users, Search, SlidersHorizontal } from 'lucide-react';
-import FigureCard from '../components/collection/FigureCard';
-import CollectionFilters from '../components/collection/CollectionFilters';
+import { FigureCard, CollectionFilters } from '../components/collection';
 
-const Community = () => {
-  const [figures, setFigures] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
+interface Figure {
+  id: string;
+  name?: string;
+  anime?: string;
+  brand?: string;
+  price?: number | string;
+  createdAt?: {
+    seconds: number;
+  };
+  [key: string]: any;
+}
+
+type SortOption = 'newest' | 'oldest' | 'cheap' | 'expensive' | 'az' | 'za';
+
+const Community: React.FC = () => {
+  const [figures, setFigures] = useState<Figure[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [searchTerm, setSearchTerm] = useState<string>('');
 
   // Состояния для фильтров
-  const [showFilters, setShowFilters] = useState(false);
-  const [sortBy, setSortBy] = useState('newest');
-  const [filterAnime, setFilterAnime] = useState('All Origins');
-  const [filterBrand, setFilterBrand] = useState('All'); // Новое состояние
+  const [showFilters, setShowFilters] = useState<boolean>(false);
+  const [sortBy, setSortBy] = useState<SortOption>('newest');
+  const [filterAnime, setFilterAnime] = useState<string>('All Origins');
+  const [filterBrand, setFilterBrand] = useState<string>('All');
 
   useEffect(() => {
     // Подписываемся на все фигурки
     const q = query(collection(db, 'figures'), orderBy('createdAt', 'desc'));
 
-    const unsubscribe = onSnapshot(q, (querySnapshot) => {
-      const figuresArray = [];
-      querySnapshot.forEach((doc) => {
-        figuresArray.push({ ...doc.data(), id: doc.id });
+    const unsubscribe = onSnapshot(q, (querySnapshot: QuerySnapshot<DocumentData>) => {
+      const figuresArray: Figure[] = [];
+      querySnapshot.forEach((doc: QueryDocumentSnapshot<DocumentData>) => {
+        figuresArray.push({ ...doc.data(), id: doc.id } as Figure);
       });
       setFigures(figuresArray);
       setLoading(false);
@@ -34,15 +55,15 @@ const Community = () => {
   }, []);
 
   // Динамический список аниме для фильтра
-  const animeOptions = useMemo(() => {
-    const titles = figures.map((f) => f.anime).filter(Boolean);
-    return ['All Origins', ...new Set(titles)].sort();
+  const animeOptions = useMemo<string[]>(() => {
+    const titles = figures.map((f) => f.anime).filter((val): val is string => Boolean(val));
+    return ['All Origins', ...Array.from(new Set(titles))].sort();
   }, [figures]);
 
   // Динамический список брендов для фильтра
-  const brandOptions = useMemo(() => {
-    const brands = figures.map((f) => f.brand).filter(Boolean);
-    return ['All', ...new Set(brands)].sort();
+  const brandOptions = useMemo<string[]>(() => {
+    const brands = figures.map((f) => f.brand).filter((val): val is string => Boolean(val));
+    return ['All', ...Array.from(new Set(brands))].sort();
   }, [figures]);
 
   // Функция сброса калибровки
@@ -55,10 +76,11 @@ const Community = () => {
 
   // Логика фильтрации и сортировки
   const processedFigures = useMemo(() => {
-    let result = figures.filter((f) => {
+    const result = figures.filter((f) => {
+      const lowerSearch = searchTerm.toLowerCase();
       const matchesSearch =
-        f.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        f.anime?.toLowerCase().includes(searchTerm.toLowerCase());
+        (f.name?.toLowerCase().includes(lowerSearch) ?? false) ||
+        (f.anime?.toLowerCase().includes(lowerSearch) ?? false);
 
       const matchesAnime = filterAnime === 'All Origins' || f.anime === filterAnime;
       const matchesBrand = filterBrand === 'All' || f.brand === filterBrand;
@@ -139,7 +161,7 @@ const Community = () => {
                 placeholder="Search database..."
                 className="w-full bg-[#1a1a1a] border border-[#333] py-4 pl-12 pr-4 rounded-2xl outline-none focus:border-blue-500 transition-all font-bold text-base"
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
               />
             </div>
             <button
@@ -155,11 +177,11 @@ const Community = () => {
           </div>
         </div>
 
-        {/* Filters Component - Теперь со всеми пропсами */}
+        {/* Filters Component */}
         <CollectionFilters
           showFilters={showFilters}
           sortBy={sortBy}
-          setSortBy={setSortBy}
+          setSortBy={(val: string) => setSortBy(val as SortOption)}
           filterAnime={filterAnime}
           setFilterAnime={setFilterAnime}
           animeOptions={animeOptions}

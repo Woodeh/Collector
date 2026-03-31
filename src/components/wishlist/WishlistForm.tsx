@@ -1,8 +1,31 @@
-import React, { useState } from 'react';
+import React, { useState, FC, FormEvent, ChangeEvent } from 'react';
 import { X, Camera, Link as LinkIcon, Loader2 } from 'lucide-react';
 import AnimeSearch from '../AnimeSearch';
 
-export default function WishlistForm({
+// Интерфейс структуры данных формы
+interface WishlistFormData {
+  name: string;
+  anime: string;
+  brand: string;
+  price: string | number;
+  link: string;
+  image: string;
+}
+
+// Интерфейс пропсов компонента
+interface WishlistFormProps {
+  showForm: boolean;
+  setShowForm: (show: boolean) => void;
+  formData: WishlistFormData;
+  setFormData: React.Dispatch<React.SetStateAction<WishlistFormData>>;
+  handleSubmit: (e: FormEvent) => void;
+  submitting: boolean;
+  isEditing: boolean;
+  imagePreview: string | null;
+  handleImageChange: (e: ChangeEvent<HTMLInputElement>) => void;
+}
+
+const WishlistForm: FC<WishlistFormProps> = ({
   showForm,
   setShowForm,
   formData,
@@ -12,8 +35,8 @@ export default function WishlistForm({
   isEditing,
   imagePreview,
   handleImageChange,
-}) {
-  const [uploadMode, setUploadMode] = useState('file');
+}) => {
+  const [uploadMode, setUploadMode] = useState<'file' | 'url'>('file');
 
   if (!showForm) return null;
 
@@ -89,7 +112,7 @@ export default function WishlistForm({
                     placeholder="Direct Image URL (jpg, png, webp)"
                     className="w-full bg-[#121212] border border-[#333] py-4 pl-12 pr-4 rounded-xl outline-none focus:border-pink-600 text-sm text-white font-bold transition-all"
                     value={formData.image || ''}
-                    onChange={(e) => setFormData({ ...formData, image: e.target.value })}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, image: e.target.value })}
                   />
                 </div>
                 {formData.image && formData.image.startsWith('http') && (
@@ -98,8 +121,8 @@ export default function WishlistForm({
                       src={formData.image}
                       className="w-full h-full object-cover"
                       alt="URL Preview"
-                      onError={(e) => {
-                        e.target.src = 'https://via.placeholder.com/400x300?text=Invalid+Image+URL';
+                      onError={(e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+                        (e.target as HTMLImageElement).src = 'https://via.placeholder.com/400x300?text=Invalid+Image+URL';
                       }}
                     />
                   </div>
@@ -113,13 +136,13 @@ export default function WishlistForm({
               placeholder="Figure Name *"
               className="w-full bg-[#121212] border border-[#333] p-4 rounded-xl outline-none focus:border-pink-600 text-sm text-white font-bold"
               value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              onChange={(e: ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, name: e.target.value })}
               required
             />
 
             <AnimeSearch
               value={formData.anime}
-              onChange={(val) => setFormData({ ...formData, anime: val })}
+              onChange={(val: string) => setFormData({ ...formData, anime: val })}
             />
 
             <div className="grid grid-cols-2 gap-3">
@@ -127,14 +150,14 @@ export default function WishlistForm({
                 placeholder="Brand"
                 className="w-full bg-[#121212] border border-[#333] p-4 rounded-xl outline-none text-sm text-white font-bold"
                 value={formData.brand}
-                onChange={(e) => setFormData({ ...formData, brand: e.target.value })}
+                onChange={(e: ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, brand: e.target.value })}
               />
               <input
                 type="number"
                 placeholder="Price ($)"
                 className="w-full bg-[#121212] border border-[#333] p-4 rounded-xl outline-none text-sm text-white font-bold"
                 value={formData.price}
-                onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                onChange={(e: ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, price: e.target.value })}
               />
             </div>
 
@@ -142,7 +165,7 @@ export default function WishlistForm({
               placeholder="Store Link / Auction Link (URL)"
               className="w-full bg-[#121212] border border-[#333] p-4 rounded-xl outline-none text-sm text-white font-bold"
               value={formData.link}
-              onChange={(e) => setFormData({ ...formData, link: e.target.value })}
+              onChange={(e: ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, link: e.target.value })}
             />
           </div>
 
@@ -164,4 +187,6 @@ export default function WishlistForm({
       </div>
     </div>
   );
-}
+};
+
+export default WishlistForm;

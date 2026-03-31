@@ -1,7 +1,26 @@
-import React from 'react';
+import React, { FC, ChangeEvent } from 'react';
 import { Camera, Loader2, FileDown } from 'lucide-react';
+import { User } from 'firebase/auth';
 
-const ProfileHeader = ({
+// Define the Rank structure based on your logic in ProfilePage
+interface RankInfo {
+  name: string;
+  next: number;
+  color: string;
+  bg: string;
+}
+
+interface ProfileHeaderProps {
+  user: User | null;
+  isUploading: boolean;
+  handleAvatarChange: (e: ChangeEvent<HTMLInputElement>) => void;
+  rank: RankInfo;
+  count: number;
+  onRankClick: () => void;
+  onGenerateReport: () => void;
+}
+
+const ProfileHeader: FC<ProfileHeaderProps> = ({
   user,
   isUploading,
   handleAvatarChange,

@@ -1,18 +1,38 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, FC, ChangeEvent } from 'react';
 import { Search, Loader2, X, Bookmark } from 'lucide-react';
 
-const AnimeSearch = ({ value, onChange }) => {
-  const [query, setQuery] = useState(value || '');
-  const [results, setResults] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [isOpen, setIsOpen] = useState(false);
-  const wrapperRef = useRef(null);
-  const inputRef = useRef(null);
-  const lastSelectedRef = useRef('');
+// Интерфейс структуры аниме из Jikan API
+interface JikanAnime {
+  mal_id: number;
+  title: string;
+  type: string;
+  status: string;
+  images: {
+    jpg: {
+      small_image_url: string;
+    };
+  };
+}
 
+interface AnimeSearchProps {
+  value: string;
+  onChange: (value: string) => void;
+}
+
+const AnimeSearch: FC<AnimeSearchProps> = ({ value, onChange }) => {
+  const [query, setQuery] = useState<string>(value || '');
+  const [results, setResults] = useState<JikanAnime[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [isOpen, setIsOpen] = useState<boolean>(false);
+  
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const lastSelectedRef = useRef<string>('');
+
+  // Закрытие при клике вне компонента
   useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (wrapperRef.current && !wrapperRef.current.contains(event.target)) {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (wrapperRef.current && !wrapperRef.current.contains(event.target as Node)) {
         setIsOpen(false);
       }
     };
@@ -29,7 +49,6 @@ const AnimeSearch = ({ value, onChange }) => {
 
       setLoading(true);
       try {
-        // Добавляем обработку ошибок и таймаут
         const response = await fetch(
           `https://api.jikan.moe/v4/anime?q=${encodeURIComponent(query)}&limit=6`,
         );
@@ -48,13 +67,27 @@ const AnimeSearch = ({ value, onChange }) => {
     return () => clearTimeout(timeoutId);
   }, [query]);
 
-  const handleSelect = (anime) => {
+  const handleSelect = (anime: JikanAnime) => {
     lastSelectedRef.current = anime.title;
     setQuery(anime.title);
     onChange(anime.title);
     setIsOpen(false);
     setResults([]);
     inputRef.current?.blur();
+  };
+
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    lastSelectedRef.current = '';
+    setQuery(val);
+    onChange(val);
+    if (val.length >= 3) setIsOpen(true);
+  };
+
+  const clearSearch = () => {
+    setQuery('');
+    onChange('');
+    setResults([]);
   };
 
   return (
@@ -70,12 +103,7 @@ const AnimeSearch = ({ value, onChange }) => {
           placeholder="Origin Series *"
           className="w-full bg-[#121212] border border-[#333] h-[58px] pl-12 rounded-2xl outline-none focus:border-blue-500 transition-all text-white font-bold text-base placeholder:text-gray-700 placeholder:italic"
           value={query}
-          onChange={(e) => {
-            lastSelectedRef.current = '';
-            setQuery(e.target.value);
-            onChange(e.target.value);
-            if (e.target.value.length >= 3) setIsOpen(true);
-          }}
+          onChange={handleInputChange}
           onFocus={() => setIsOpen(true)}
         />
         <div className="absolute right-4 top-4 flex items-center gap-2">
@@ -85,11 +113,7 @@ const AnimeSearch = ({ value, onChange }) => {
             <X
               className="text-gray-500 cursor-pointer hover:text-white"
               size={18}
-              onClick={() => {
-                setQuery('');
-                onChange('');
-                setResults([]);
-              }}
+              onClick={clearSearch}
             />
           ) : (
             <Search className="text-gray-500" size={20} />

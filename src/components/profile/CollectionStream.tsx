@@ -1,15 +1,30 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, FC, MouseEvent } from 'react';
 import { History, ChevronLeft, ChevronRight, Info, TrendingUp, Target } from 'lucide-react';
 
-export default function CollectionStream({ recentFigures, navigate }) {
-  const scrollRef = useRef(null);
-  const [isDragging, setIsDragging] = useState(false);
-  const startX = useRef(0);
-  const scrollLeftStart = useRef(0);
-  const dragDistance = useRef(0);
+interface Figure {
+  id: string;
+  name: string;
+  anime: string;
+  price: string | number;
+  brand?: string;
+  previewImage?: string;
+  image?: string;
+}
 
-  // Логика перетаскивания мышкой (для десктопа)
-  const handleMouseDown = (e) => {
+interface CollectionStreamProps {
+  recentFigures: Figure[];
+  navigate: (path: string) => void;
+}
+
+const CollectionStream: FC<CollectionStreamProps> = ({ recentFigures, navigate }) => {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [isDragging, setIsDragging] = useState<boolean>(false);
+  const startX = useRef<number>(0);
+  const scrollLeftStart = useRef<number>(0);
+  const dragDistance = useRef<number>(0);
+
+  const handleMouseDown = (e: MouseEvent<HTMLDivElement>) => {
+    if (!scrollRef.current) return;
     setIsDragging(true);
     dragDistance.current = 0;
     startX.current = e.pageX - scrollRef.current.offsetLeft;
@@ -20,8 +35,8 @@ export default function CollectionStream({ recentFigures, navigate }) {
     setIsDragging(false);
   };
 
-  const handleMouseMove = (e) => {
-    if (!isDragging) return;
+  const handleMouseMove = (e: MouseEvent<HTMLDivElement>) => {
+    if (!isDragging || !scrollRef.current) return;
     e.preventDefault();
     const x = e.pageX - scrollRef.current.offsetLeft;
     const walk = (x - startX.current) * 2; // множитель скорости
@@ -29,7 +44,7 @@ export default function CollectionStream({ recentFigures, navigate }) {
     scrollRef.current.scrollLeft = scrollLeftStart.current - walk;
   };
 
-  const scroll = (direction) => {
+  const scroll = (direction: 'left' | 'right') => {
     if (scrollRef.current) {
       const { scrollLeft, clientWidth } = scrollRef.current;
       const scrollTo =
@@ -56,12 +71,14 @@ export default function CollectionStream({ recentFigures, navigate }) {
         </div>
         <div className="hidden md:flex items-center gap-3 self-end md:self-auto text-left">
           <button
+            type="button"
             onClick={() => scroll('left')}
             className="p-3 rounded-xl border border-white/5 bg-[#121212] text-white hover:bg-blue-600 hover:border-blue-600 transition-all cursor-pointer"
           >
             <ChevronLeft size={20} />
           </button>
           <button
+            type="button"
             onClick={() => scroll('right')}
             className="p-3 rounded-xl border border-white/5 bg-[#121212] text-white hover:bg-blue-600 hover:border-blue-600 transition-all cursor-pointer"
           >
@@ -85,7 +102,6 @@ export default function CollectionStream({ recentFigures, navigate }) {
             <div
               key={fig.id}
               onClick={() => {
-                // Если дистанция перемещения мала — значит это клик, а не свайп
                 if (dragDistance.current < 10) navigate(`/figure/${fig.id}`);
               }}
               className="flex-shrink-0 w-64 bg-[#121212] border border-white/5 rounded-3xl p-5 group hover:border-blue-500/40 transition-all duration-500 cursor-pointer relative text-left snap-start"
@@ -97,7 +113,7 @@ export default function CollectionStream({ recentFigures, navigate }) {
                 <img
                   src={fig.previewImage || fig.image}
                   className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                  alt=""
+                  alt={fig.name}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent opacity-60 text-left"></div>
                 <div className="absolute bottom-3 left-3 flex items-center gap-2 text-left">
@@ -144,4 +160,6 @@ export default function CollectionStream({ recentFigures, navigate }) {
       </div>
     </div>
   );
-}
+};
+
+export default CollectionStream;

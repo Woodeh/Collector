@@ -1,19 +1,44 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Search, Loader2, User } from 'lucide-react';
+import React, { useState, useEffect, useRef, FC, ChangeEvent } from 'react';
+import { Loader2, User } from 'lucide-react';
 
-const CharacterSearch = ({ value, onChange }) => {
-  const [query, setQuery] = useState(value || '');
-  const [results, setResults] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [isOpen, setIsOpen] = useState(false);
-  const wrapperRef = useRef(null);
-  const inputRef = useRef(null);
-  const lastSelectedRef = useRef('');
+// Интерфейс структуры данных от Jikan API
+interface JikanCharacter {
+  mal_id: number;
+  name: string;
+  images: {
+    jpg: {
+      image_url: string;
+    };
+  };
+}
+
+// Интерфейс объекта, который мы передаем наверх в onChange при выборе
+interface SelectedCharacter {
+  name: string;
+  mal_id: number;
+  image: string;
+}
+
+interface CharacterSearchProps {
+  value: string;
+  // onChange может принимать либо строку (ручной ввод), либо объект персонажа
+  onChange: (value: string | SelectedCharacter) => void;
+}
+
+const CharacterSearch: FC<CharacterSearchProps> = ({ value, onChange }) => {
+  const [query, setQuery] = useState<string>(value || '');
+  const [results, setResults] = useState<JikanCharacter[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [isOpen, setIsOpen] = useState<boolean>(false);
+  
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const lastSelectedRef = useRef<string>('');
 
   // Закрытие списка при клике вне компонента
   useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (wrapperRef.current && !wrapperRef.current.contains(e.target)) {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (wrapperRef.current && !wrapperRef.current.contains(e.target as Node)) {
         setIsOpen(false);
       }
     };
@@ -23,6 +48,7 @@ const CharacterSearch = ({ value, onChange }) => {
 
   useEffect(() => {
     const searchCharacters = async () => {
+      // query === lastSelectedRef.current предотвращает повторный поиск сразу после выбора
       if (query.length < 3 || query === lastSelectedRef.current) {
         setResults([]);
         return;
@@ -48,17 +74,27 @@ const CharacterSearch = ({ value, onChange }) => {
     return () => clearTimeout(timeoutId);
   }, [query]);
 
-  const handleSelect = (char) => {
+  const handleSelect = (char: JikanCharacter) => {
     lastSelectedRef.current = char.name;
     setQuery(char.name);
+    
     onChange({
       name: char.name,
       mal_id: char.mal_id,
       image: char.images?.jpg?.image_url,
     });
+    
     setIsOpen(false);
     setResults([]);
-    inputRef.current?.blur(); // Снимаем фокус, чтобы предотвратить повторное открытие на мобилках
+    inputRef.current?.blur(); 
+  };
+
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    lastSelectedRef.current = '';
+    setQuery(val);
+    onChange(val);
+    if (val.length >= 3) setIsOpen(true);
   };
 
   return (
@@ -76,12 +112,7 @@ const CharacterSearch = ({ value, onChange }) => {
           placeholder="Character Name (e.g. Zero Two) *"
           className="w-full bg-[#121212] border border-[#333] h-[58px] pl-12 rounded-2xl outline-none focus:border-blue-500 font-bold text-white text-base placeholder:text-gray-700 transition-all"
           value={query}
-          onChange={(e) => {
-            lastSelectedRef.current = '';
-            setQuery(e.target.value);
-            onChange(e.target.value);
-            if (e.target.value.length >= 3) setIsOpen(true);
-          }}
+          onChange={handleInputChange}
           onFocus={() => query.length >= 3 && setIsOpen(true)}
           required
         />

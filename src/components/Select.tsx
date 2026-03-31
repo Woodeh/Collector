@@ -1,14 +1,36 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { ChevronDown } from 'lucide-react';
+import React, { useState, useRef, useEffect, FC } from 'react';
+import { ChevronDown, LucideIcon } from 'lucide-react';
 
-const CustomSelect = ({ label, options, value, onChange, icon: Icon }) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const dropdownRef = useRef(null);
+// Интерфейс для одной опции
+interface SelectOption {
+  value: string;
+  label: string;
+}
+
+// Интерфейс для пропсов компонента
+interface CustomSelectProps {
+  label?: string;
+  options: SelectOption[];
+  value: string;
+  onChange: (value: string) => void;
+  icon?: LucideIcon; // Специальный тип для иконок Lucide
+}
+
+const CustomSelect: FC<CustomSelectProps> = ({ 
+  label, 
+  options, 
+  value, 
+  onChange, 
+  icon: Icon 
+}) => {
+  const [isOpen, setIsOpen] = useState<boolean>(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Закрытие при клике вне селекта
   useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+    const handleClickOutside = (event: MouseEvent) => {
+      // event.target приводится к Node для метода contains
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setIsOpen(false);
       }
     };

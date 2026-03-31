@@ -85,7 +85,6 @@ const Profile: FC = () => {
     const unsubAuth = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
       if (!currentUser && !auth.currentUser) {
-        // Редирект на лендинг для гостей
         navigate('/');
       }
       if (currentUser) {
@@ -116,19 +115,20 @@ const Profile: FC = () => {
           );
           setAnimeData(
             Object.keys(animeMap)
-              .map((n) => ({ name: n, value: animeMap[n] }))
+              .map((n) => ({ name: n, value: animeMap[n] ?? 0 }))
               .sort((a, b) => b.value - a.value)
               .slice(0, 5),
           );
           setBrandData(
             Object.keys(brandsMap)
-              .map((b) => ({ name: b, value: brandsMap[b] }))
+              .map((b) => ({ name: b, value: brandsMap[b] ?? 0 }))
               .sort((a, b) => b.value - a.value),
           );
           setCollectionStats({ totalValue, count });
 
           const manualFav = figuresList.find((f) => f.isFavorite === true);
-          setFavoriteFigure(manualFav || [...figuresList].sort((a, b) => Number(b.price) - Number(a.price))[0]);
+          // FIXED: Wrapped the logical OR in parentheses to allow nullish coalescing
+          setFavoriteFigure((manualFav || [...figuresList].sort((a, b) => Number(b.price) - Number(a.price))[0]) ?? null);
         });
 
         const qPreorders = query(
@@ -161,7 +161,7 @@ const Profile: FC = () => {
       }
     });
     return () => unsubAuth();
-  }, []);
+  }, [navigate]);
 
   const handleAvatarChange = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -200,11 +200,10 @@ const Profile: FC = () => {
     const timestamp = new Date().toLocaleString();
     const userName = user?.displayName || user?.email?.split('@')[0] || 'Collector';
 
-    // High-tech Header Styling
     pdfDoc.setFillColor(18, 18, 18);
     pdfDoc.rect(0, 0, 210, 40, 'F');
 
-    pdfDoc.setTextColor(59, 130, 246); // Blue-500
+    pdfDoc.setTextColor(59, 130, 246);
     pdfDoc.setFontSize(22);
     pdfDoc.text('FIGURE.COLLECTOR', 15, 22);
 
@@ -216,7 +215,6 @@ const Profile: FC = () => {
     pdfDoc.text(`GENERATED: ${timestamp}`, 140, 22);
     pdfDoc.text(`OWNER: ${userName.toUpperCase()}`, 140, 28);
 
-    // Inventory Table Construction
     const tableData = allFigures
       .filter((f) => f.conditionGrade?.toLowerCase().trim() !== 'pre-order')
       .sort((a, b) => (Number(b.price) || 0) - (Number(a.price) || 0))
@@ -252,7 +250,6 @@ const Profile: FC = () => {
     >
       <ProfileBackground />
 
-      {/* Grain Overlay */}
       <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
         <div
           className="absolute inset-0 opacity-[0.012] pointer-events-none"

@@ -1,10 +1,38 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, FC } from 'react';
 import Tilt from 'react-parallax-tilt';
 import { Trash2, Calendar, ImageIcon, Clock } from 'lucide-react';
 
-const PreOrderCard = ({ item, onDelete, onImageClick }) => {
-  // Выносим расчет в чистую функцию, чтобы она не зависела от рендеров
-  const calculateTimeLeft = (paymentDate) => {
+// Интерфейс для данных предзаказа
+interface PreOrderItem {
+  id: string;
+  name: string;
+  anime?: string;
+  brand?: string;
+  paymentDate: string; // ISO дата или строка даты
+  releaseDate: string;
+  deposit: number | string;
+  totalPrice: number | string;
+  screenshot?: string;
+}
+
+// Интерфейс для состояния обратного отсчета
+interface TimeLeft {
+  total: number;
+  days: number;
+  hours: number;
+  minutes: number;
+}
+
+interface PreOrderCardProps {
+  item: PreOrderItem;
+  onDelete: (id: string) => void;
+  onImageClick: (url: string) => void;
+}
+
+const PreOrderCard: FC<PreOrderCardProps> = ({ item, onDelete, onImageClick }) => {
+  
+  // Выносим расчет в чистую функцию
+  const calculateTimeLeft = (paymentDate: string): TimeLeft | null => {
     if (!paymentDate) return null;
 
     const start = new Date(paymentDate);
@@ -12,7 +40,7 @@ const PreOrderCard = ({ item, onDelete, onImageClick }) => {
     targetDate.setDate(start.getDate() + 25);
 
     const now = new Date();
-    const difference = targetDate - now;
+    const difference = targetDate.getTime() - now.getTime();
 
     if (difference <= 0) return { total: 0, days: 0, hours: 0, minutes: 0 };
 
@@ -24,20 +52,21 @@ const PreOrderCard = ({ item, onDelete, onImageClick }) => {
     };
   };
 
-  // Инициализируем стейт лениво (через функцию), чтобы расчет был только 1 раз при создании
-  const [timeLeft, setTimeLeft] = useState(() => calculateTimeLeft(item.paymentDate));
+  // Ленивая инициализация стейта
+  const [timeLeft, setTimeLeft] = useState<TimeLeft | null>(() => 
+    calculateTimeLeft(item.paymentDate)
+  );
 
   useEffect(() => {
-    // Внутри useEffect используем ТОЛЬКО асинхронный setInterval
     const timer = setInterval(() => {
       const newTime = calculateTimeLeft(item.paymentDate);
       setTimeLeft(newTime);
-    }, 60000); // Обновление раз в минуту
+    }, 60000);
 
     return () => clearInterval(timer);
-  }, [item.paymentDate]); // Эффект перезапустится только если сменится дата оплаты
+  }, [item.paymentDate]);
 
-  const getStatusDisplay = (time) => {
+  const getStatusDisplay = (time: TimeLeft | null) => {
     if (!time) return null;
     const baseClasses =
       'font-black uppercase tracking-[0.15em] leading-none text-[9px] flex items-center gap-1.5';
@@ -74,7 +103,7 @@ const PreOrderCard = ({ item, onDelete, onImageClick }) => {
       scale={1.02}
       transitionSpeed={2500}
       gyroscope={true}
-      reverse={true}
+      tiltReverse={true}
       glareEnable={true}
       glareMaxOpacity={0.05}
       glareColor="#ffffff"
@@ -90,7 +119,7 @@ const PreOrderCard = ({ item, onDelete, onImageClick }) => {
             e.stopPropagation();
             onDelete(item.id);
           }}
-          className="absolute top-5 right-5 z-50 pointer-events-auto text-gray-500 hover:text-red-500 transition-colors bg-[#121212] p-2 rounded-xl border border-[#333] opacity-0 group-hover:opacity-100 shadow-2xl transition-all"
+          className="absolute top-5 right-5 z-50 pointer-events-auto text-gray-500 hover:text-red-500 transition-colors bg-[#121212] p-2 rounded-xl border border-[#333] opacity-0 group-hover:opacity-100 shadow-2xl"
         >
           <Trash2 size={16} />
         </button>
@@ -99,7 +128,7 @@ const PreOrderCard = ({ item, onDelete, onImageClick }) => {
         {item.screenshot ? (
           <div
             className="relative aspect-[10/12] overflow-hidden border-b border-[#333] cursor-zoom-in"
-            onClick={() => onImageClick(item.screenshot)}
+            onClick={() => onImageClick(item.screenshot!)}
           >
             <img
               src={item.screenshot}

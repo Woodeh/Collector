@@ -1,6 +1,18 @@
-import React from 'react';
+import React, { FC } from 'react';
 
-export default function NextArrival({ nextRelease, navigate }) {
+interface NextRelease {
+  anime: string;
+  name: string;
+  releaseDate: string;
+  brand: string;
+}
+
+interface NextArrivalProps {
+  nextRelease: NextRelease | null | undefined;
+  navigate: (path: string) => void;
+}
+
+const NextArrival: FC<NextArrivalProps> = ({ nextRelease, navigate }) => {
   return (
     <div className="bg-[#1a1a1a] border border-[#333] p-8 rounded-[3rem] shadow-2xl relative group overflow-hidden text-left">
       <h4 className="text-[10px] font-black text-gray-600 uppercase tracking-[0.3em] italic mb-6">
@@ -31,6 +43,7 @@ export default function NextArrival({ nextRelease, navigate }) {
             </div>
           </div>
           <button
+            type="button"
             onClick={() => navigate('/preorders')}
             className="w-full py-4 bg-orange-600 text-white rounded-2xl font-black uppercase text-[10px] tracking-widest hover:bg-orange-500 transition-all cursor-pointer shadow-lg active:scale-95 flex items-center justify-center text-center"
           >
@@ -44,4 +57,6 @@ export default function NextArrival({ nextRelease, navigate }) {
       )}
     </div>
   );
-}
+};
+
+export default NextArrival;

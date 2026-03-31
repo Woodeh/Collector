@@ -1,8 +1,22 @@
-import React from 'react';
+import React, { FC } from 'react';
 import { motion as Motion, AnimatePresence } from 'framer-motion';
 import { Award, X } from 'lucide-react';
 
-const ranks = [
+interface Rank {
+  name: string;
+  min: number;
+  color: string;
+  bg: string;
+  desc: string;
+}
+
+interface RankModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  count: number;
+}
+
+const ranks: Rank[] = [
   {
     name: 'Mythic Overlord',
     min: 500,
@@ -61,7 +75,7 @@ const ranks = [
   },
 ];
 
-const RankModal = ({ isOpen, onClose, count }) => {
+const RankModal: FC<RankModalProps> = ({ isOpen, onClose, count }) => {
   return (
     <AnimatePresence>
       {isOpen && (
@@ -87,8 +101,9 @@ const RankModal = ({ isOpen, onClose, count }) => {
                 </div>
               </div>
               <button
+                type="button"
                 onClick={onClose}
-                className="p-2 text-gray-500 hover:text-white transition-colors"
+                className="p-2 text-gray-500 hover:text-white transition-colors cursor-pointer"
               >
                 <X size={24} />
               </button>

@@ -12,7 +12,16 @@ import {
   FinalCTA,
 } from '../components/landing';
 
-const generatePlaceholders = () => [
+interface Figure {
+  id: string;
+  name: string;
+  anime: string;
+  price: number;
+  previewImage: string;
+  [key: string]: any;
+}
+
+const generatePlaceholders = (): Figure[] => [
   {
     id: 'p1',
     name: 'Eva Unit-01',
@@ -43,10 +52,10 @@ const generatePlaceholders = () => [
   },
 ];
 
-const LandingPage = () => {
+const LandingPage: React.FC = () => {
   const navigate = useNavigate();
-  const [communityFigures, setCommunityFigures] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [communityFigures, setCommunityFigures] = useState<Figure[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
 
   // Параллакс логика
   const { scrollYProgress } = useScroll();
@@ -69,7 +78,7 @@ const LandingPage = () => {
         // иначе этот запрос может не работать или быть неэффективным.
         const q = query(collection(db, 'figures'), orderBy('createdAt', 'desc'), limit(15));
         const snap = await getDocs(q);
-        const data = snap.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+        const data = snap.docs.map((doc) => ({ id: doc.id, ...doc.data() }) as Figure);
 
         if (data.length > 0) {
           setCommunityFigures(data);

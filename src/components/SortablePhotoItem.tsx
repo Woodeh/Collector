@@ -1,14 +1,29 @@
-import React from 'react';
+import React, { FC } from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { Star, X } from 'lucide-react';
 
-const SortablePhotoItem = ({ id, url, isPreview, onSetPreview, onRemove }) => {
+// Определяем интерфейс пропсов
+interface SortablePhotoItemProps {
+  id: string;
+  url: string;
+  isPreview: boolean;
+  onSetPreview: () => void;
+  onRemove: () => void;
+}
+
+const SortablePhotoItem: FC<SortablePhotoItemProps> = ({
+  id,
+  url,
+  isPreview,
+  onSetPreview,
+  onRemove,
+}) => {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id,
   });
 
-  const style = {
+  const style: React.CSSProperties = {
     transform: CSS.Transform.toString(transform),
     transition,
     zIndex: isDragging ? 100 : 1,
@@ -22,23 +37,30 @@ const SortablePhotoItem = ({ id, url, isPreview, onSetPreview, onRemove }) => {
         isPreview ? 'border-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.3)]' : 'border-[#333]'
       } ${isDragging ? 'opacity-50' : 'opacity-100'}`}
     >
+      {/* Изображение */}
       <img src={url} className="w-full h-full object-cover pointer-events-none" alt="preview" />
+
+      {/* Зона захвата для перетаскивания (Overlay) */}
       <div
         {...attributes}
         {...listeners}
         className="absolute inset-0 cursor-grab active:cursor-grabbing"
       />
+
+      {/* Кнопка "Сделать главной" */}
       <button
         type="button"
-        onPointerDown={(e) => e.stopPropagation()}
+        onPointerDown={(e) => e.stopPropagation()} // Предотвращаем срабатывание dnd при клике
         onClick={onSetPreview}
         className="absolute top-1.5 left-1.5 sm:top-2 sm:left-2 z-20 bg-black/70 p-1.5 rounded-lg hover:bg-blue-600 transition-colors"
       >
         <Star size={14} className={isPreview ? 'text-yellow-400 fill-yellow-400' : 'text-white'} />
       </button>
+
+      {/* Кнопка удаления */}
       <button
         type="button"
-        onPointerDown={(e) => e.stopPropagation()}
+        onPointerDown={(e) => e.stopPropagation()} // Предотвращаем срабатывание dnd при клике
         onClick={onRemove}
         className="absolute top-1.5 right-1.5 sm:top-2 sm:right-2 z-20 bg-red-600/80 p-1.5 rounded-lg text-white"
       >

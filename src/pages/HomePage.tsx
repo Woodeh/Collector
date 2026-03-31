@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion as Motion, useScroll, useTransform } from 'framer-motion';
 import { db, auth } from '../firebase/config';
 import { collection, query, orderBy, limit, getDocs, where } from 'firebase/firestore';
-import { onAuthStateChanged } from 'firebase/auth';
+import { onAuthStateChanged, type User } from 'firebase/auth';
 import { Loader2 } from 'lucide-react';
 
 import { HeroSection, QuickStats, SpotlightCard } from '../components/home';
@@ -12,12 +12,40 @@ import RecentFigures from '../components/home/RecentFigures';
 import HomeWidgets from '../components/home/HomeWidgets';
 import LandingPage from './LandingPage';
 
-const HomePage = () => {
-  const [recentFigures, setRecentFigures] = useState([]);
-  const [spotlight, setSpotlight] = useState(null);
-  const [stats, setStats] = useState({ totalValue: 0, count: 0, topBrand: 'None', rank: 'Novice' });
-  const [loading, setLoading] = useState(true);
-  const [user, setUser] = useState(null);
+interface Figure {
+  id: string;
+  name?: string;
+  brand?: string;
+  price?: number | string;
+  previewImage?: string;
+  [key: string]: any;
+}
+
+interface RankInfo {
+  name: string;
+  next: number;
+  color: string;
+  bg: string;
+}
+
+interface Stats {
+  totalValue: number;
+  count: number;
+  topBrand: string;
+  rank: RankInfo | string;
+}
+
+interface WidgetStats {
+  preorders: number;
+  wishlist: number;
+}
+
+const HomePage: React.FC = () => {
+  const [recentFigures, setRecentFigures] = useState<Figure[]>([]);
+  const [spotlight, setSpotlight] = useState<Figure | null>(null);
+  const [stats, setStats] = useState<Stats>({ totalValue: 0, count: 0, topBrand: 'None', rank: 'Novice' });
+  const [loading, setLoading] = useState<boolean>(true);
+  const [user, setUser] = useState<User | null>(null);
 
   // Параллакс логика
   const { scrollYProgress } = useScroll();
@@ -41,23 +69,24 @@ const HomePage = () => {
     return () => unsubscribe();
   }, []);
 
-  const fetchData = async (uid) => {
+  const fetchData = async (uid: string) => {
     try {
       const qAll = query(collection(db, 'figures'), where('userId', '==', uid));
-      const allDocs = (await getDocs(qAll)).docs.map((d) => ({ ...d.data(), id: d.id }));
+      const allDocs = (await getDocs(qAll)).docs.map((d) => ({ ...d.data(), id: d.id } as Figure));
 
       if (allDocs.length > 0) {
-        setSpotlight(allDocs[Math.floor(Math.random() * allDocs.length)]);
+        const randomFigure = allDocs[Math.floor(Math.random() * allDocs.length)];
+        setSpotlight(randomFigure || null);
 
         // Расчет статистики
         const val = allDocs.reduce((acc, d) => acc + (Number(d.price) || 0), 0);
-        const brands = allDocs.reduce((acc, d) => {
+        const brands = allDocs.reduce((acc: Record<string, number>, d) => {
           if (d.brand) acc[d.brand] = (acc[d.brand] || 0) + 1;
           return acc;
         }, {});
         const topBrand = Object.entries(brands).sort((a, b) => b[1] - a[1])[0]?.[0] || 'Original';
 
-        const getRankInfo = (count) => {
+        const getRankInfo = (count: number): RankInfo | string => {
           if (count >= 500)
             return {
               name: 'Mythic Overlord',
@@ -119,7 +148,7 @@ const HomePage = () => {
         orderBy('createdAt', 'desc'),
         limit(5),
       );
-      setRecentFigures((await getDocs(recentQ)).docs.map((d) => ({ ...d.data(), id: d.id })));
+      setRecentFigures((await getDocs(recentQ)).docs.map((d) => ({ ...d.data(), id: d.id } as Figure)));
     } catch (e) {
       console.error(e);
     } finally {
@@ -127,8 +156,8 @@ const HomePage = () => {
     }
   };
 
-  const [widgetStats, setWidgetStats] = useState({ preorders: 0, wishlist: 0 });
-  const fetchWidgetStats = async (uid) => {
+  const [widgetStats, setWidgetStats] = useState<WidgetStats>({ preorders: 0, wishlist: 0 });
+  const fetchWidgetStats = async (uid: string) => {
     const qPre = query(collection(db, 'preorders'), where('userId', '==', uid));
     const qWish = query(collection(db, 'wishlist'), where('userId', '==', uid));
     const [preSnap, wishSnap] = await Promise.all([getDocs(qPre), getDocs(qWish)]);
@@ -172,7 +201,7 @@ const HomePage = () => {
           style={{ x: floatingTextX, opacity: 0.02 }}
           className="absolute top-1/4 left-0 text-[20vw] font-black uppercase italic whitespace-nowrap select-none"
         >
-          Collection 0x{user.uid.slice(0, 0.5)}
+          Collection 0x{user.uid.slice(0, 5)}
         </Motion.div>
 
         {/* Очень мягкий общий виньеточный градиент вместо пятен */}

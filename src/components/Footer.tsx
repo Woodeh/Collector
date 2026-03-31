@@ -1,19 +1,31 @@
-import React from 'react';
+import React, { FC } from 'react';
 import { Link } from 'react-router-dom';
 import { Heart, Database, Share2, Cpu, Instagram, Github, Info } from 'lucide-react';
-import faceLogo from '../assets/face.png'; // Путь к твоему лого
+// @ts-ignore
+import faceLogo from '../assets/face.png';
 
-const Footer = () => {
-  const currentYear = new Date().getFullYear();
+interface NavLink {
+  name: string;
+  path: string;
+}
+
+const Footer: FC = () => {
+  const currentYear: number = new Date().getFullYear();
+
+  const navLinks: NavLink[] = [
+    { name: 'My Collection', path: '/collection' },
+    { name: 'Statistics', path: '/stats' },
+    { name: 'Add Figure', path: '/add' },
+    { name: 'User Profile', path: '/profile' },
+  ];
 
   return (
     <footer className="bg-[#111] border-t border-[#222] pt-16 pb-8 px-6 mt-20 selection:bg-blue-500/30">
       <div className="max-w-6xl mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
-          {/* BRAND SECTION (STATIC LOGO) */}
+          {/* BRAND SECTION */}
           <div className="space-y-6 text-left">
             <Link to="/" className="flex items-center gap-3 select-none shrink-0 w-fit">
-              {/* Убраны все hover-эффекты: border и масштаб не меняются */}
               <div className="w-10 h-10 rounded-full border border-[#333] overflow-hidden">
                 <img src={faceLogo} alt="Logo" className="w-full h-full object-cover" />
               </div>
@@ -33,12 +45,7 @@ const Footer = () => {
               <Database size={12} /> Navigation
             </h4>
             <nav className="flex flex-col gap-4">
-              {[
-                { name: 'My Collection', path: '/collection' },
-                { name: 'Statistics', path: '/stats' },
-                { name: 'Add Figure', path: '/add' },
-                { name: 'User Profile', path: '/profile' },
-              ].map((link) => (
+              {navLinks.map((link) => (
                 <Link
                   key={link.name}
                   to={link.path}
@@ -50,7 +57,7 @@ const Footer = () => {
             </nav>
           </div>
 
-          {/* SOCIALS / COMMS */}
+          {/* COMMUNITY */}
           <div className="text-left">
             <h4 className="text-[10px] font-black text-blue-500 uppercase tracking-[0.4em] mb-8 flex items-center gap-2 italic">
               <Share2 size={12} /> Community

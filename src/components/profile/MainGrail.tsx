@@ -1,22 +1,41 @@
-import React from 'react';
+import React, { FC } from 'react';
 import { Info } from 'lucide-react';
 
-export default function MainGrail({ favoriteFigure, setIsSelectOpen, navigate }) {
+interface Figure {
+  id: string;
+  name: string;
+  anime: string;
+  price: number;
+  previewImage?: string;
+  image?: string;
+}
+
+interface MainGrailProps {
+  favoriteFigure: Figure | null | undefined;
+  setIsSelectOpen: (isOpen: boolean) => void;
+  navigate: (path: string) => void;
+}
+
+const MainGrail: FC<MainGrailProps> = ({ favoriteFigure, setIsSelectOpen, navigate }) => {
   return (
     <div className="lg:col-span-4 relative group/container text-left">
       <div className="bg-[#1a1a1a] border border-[#333] rounded-[3rem] shadow-3xl h-full overflow-hidden flex flex-col relative z-10 transition-all duration-500 group hover:border-blue-500/30">
         <button
+          type="button"
           onClick={() => setIsSelectOpen(true)}
           className="absolute top-6 left-6 z-40 bg-blue-600 hover:bg-blue-500 text-white px-5 py-2.5 rounded-xl shadow-xl transition-all active:scale-95 text-[10px] font-black uppercase italic tracking-widest cursor-pointer text-left"
         >
           Switch Grail
         </button>
+
         <button
+          type="button"
           onClick={() => navigate(`/figure/${favoriteFigure?.id}`)}
           className="absolute top-6 right-6 z-40 bg-black/40 backdrop-blur-md border border-white/10 text-white p-2.5 rounded-xl opacity-0 group-hover:opacity-100 transition-all duration-500 cursor-pointer hover:bg-white hover:text-black"
         >
           <Info size={20} />
         </button>
+
         {favoriteFigure ? (
           <div className="h-full relative flex flex-col">
             <div className="flex-1 overflow-hidden relative">
@@ -51,4 +70,6 @@ export default function MainGrail({ favoriteFigure, setIsSelectOpen, navigate })
       </div>
     </div>
   );
-}
+};
+
+export default MainGrail;

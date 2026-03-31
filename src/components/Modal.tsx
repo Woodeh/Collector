@@ -1,7 +1,15 @@
 import React from 'react';
 import { AlertTriangle, X } from 'lucide-react';
 
-const Modal = ({ isOpen, onClose, onConfirm, title, message }) => {
+interface ModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onConfirm: () => void;
+  title: string;
+  message: string;
+}
+
+const Modal: React.FC<ModalProps> = ({ isOpen, onClose, onConfirm, title, message }) => {
   if (!isOpen) return null;
 
   return (

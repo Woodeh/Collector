@@ -1,7 +1,15 @@
-import React from 'react';
+import React, { FC } from 'react';
 import { CheckCircle2 } from 'lucide-react';
 
-const SuccessModal = ({ data }) => {
+interface SuccessData {
+  img: string;
+}
+
+interface SuccessModalProps {
+  data: SuccessData | null | undefined;
+}
+
+const SuccessModal: FC<SuccessModalProps> = ({ data }) => {
   if (!data) return null;
 
   return (

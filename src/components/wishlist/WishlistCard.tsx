@@ -1,13 +1,32 @@
-import React from 'react';
-import { Tag, Trash2, Pencil, ExternalLink, CheckCircle, Heart } from 'lucide-react';
+import React, { FC, MouseEvent } from 'react';
+import { Tag, Trash2, Pencil, ExternalLink, Heart, CheckCircle } from 'lucide-react';
 
-export default function WishlistCard({ item, onEdit, onDelete, onGotIt }) {
+// Интерфейс для данных объекта в вишлисте
+interface WishlistItem {
+  id: string;
+  name: string;
+  anime: string;
+  price: string | number;
+  image?: string;
+  link?: string;
+  brand?: string;
+}
+
+// Интерфейс пропсов компонента
+interface WishlistCardProps {
+  item: WishlistItem;
+  onEdit: (item: WishlistItem) => void;
+  onDelete: (id: string) => void;
+  onGotIt: (item: WishlistItem) => void;
+}
+
+const WishlistCard: FC<WishlistCardProps> = ({ item, onEdit, onDelete, onGotIt }) => {
   return (
     <div className="relative group bg-[#1a1a1a] rounded-[2rem] border border-[#333] overflow-hidden hover:border-pink-500/50 transition-all duration-500 flex flex-col shadow-2xl h-full text-left">
       {/* Кнопки управления (Pencil и Trash) */}
       <div className="absolute top-4 right-4 z-40 flex gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform -translate-y-2 group-hover:translate-y-0">
         <button
-          onClick={(e) => {
+          onClick={(e: MouseEvent<HTMLButtonElement>) => {
             e.preventDefault();
             onEdit(item);
           }}
@@ -16,7 +35,7 @@ export default function WishlistCard({ item, onEdit, onDelete, onGotIt }) {
           <Pencil size={14} />
         </button>
         <button
-          onClick={(e) => {
+          onClick={(e: MouseEvent<HTMLButtonElement>) => {
             e.preventDefault();
             onDelete(item.id);
           }}
@@ -40,7 +59,6 @@ export default function WishlistCard({ item, onEdit, onDelete, onGotIt }) {
             <Heart size={48} />
           </div>
         )}
-        {/* Жирную розовую полосу слева УДАЛИЛ */}
       </div>
 
       {/* Инфо секция */}
@@ -55,7 +73,7 @@ export default function WishlistCard({ item, onEdit, onDelete, onGotIt }) {
                 href={item.link}
                 target="_blank"
                 rel="noopener noreferrer"
-                onClick={(e) => e.stopPropagation()}
+                onClick={(e: MouseEvent<HTMLAnchorElement>) => e.stopPropagation()}
                 className="text-gray-600 hover:text-pink-500 transition-colors"
               >
                 <ExternalLink size={14} />
@@ -63,7 +81,6 @@ export default function WishlistCard({ item, onEdit, onDelete, onGotIt }) {
             )}
           </div>
 
-          {/* Имя с полоской (оставил розовую полоску только у текста для стиля) */}
           <div className="relative pl-4 border-l-[3px] border-pink-600 py-1">
             <h3 className="text-xl font-black text-white leading-tight uppercase italic tracking-tighter group-hover:text-pink-400 transition-colors truncate">
               {item.name}
@@ -100,4 +117,6 @@ export default function WishlistCard({ item, onEdit, onDelete, onGotIt }) {
       </div>
     </div>
   );
-}
+};
+
+export default WishlistCard;

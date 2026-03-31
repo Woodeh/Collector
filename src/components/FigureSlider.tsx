@@ -1,7 +1,17 @@
-import React from 'react';
+import React, { FC } from 'react';
 import { ChevronLeft, ChevronRight, Pause } from 'lucide-react';
 
-const FigureSlider = ({
+interface FigureSliderProps {
+  images: string[];
+  activeImg: number;
+  setActiveImg: (index: number) => void;
+  isPaused: boolean;
+  setIsPaused: (paused: boolean) => void;
+  nextSlide: () => void;
+  prevSlide: () => void;
+}
+
+const FigureSlider: FC<FigureSliderProps> = ({
   images,
   activeImg,
   setActiveImg,
@@ -30,7 +40,6 @@ const FigureSlider = ({
           />
         ))}
 
-        {/* Использование isPaused: показываем индикатор паузы при наведении */}
         {isPaused && (
           <div className="absolute top-6 right-6 z-30 bg-black/40 backdrop-blur-md p-2 rounded-full text-white/50 animate-pulse">
             <Pause size={16} />
@@ -40,13 +49,19 @@ const FigureSlider = ({
         {images.length > 1 && (
           <div className="absolute inset-0 flex items-center justify-between px-6 z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
             <button
-              onClick={prevSlide}
+              onClick={(e) => {
+                e.stopPropagation();
+                prevSlide();
+              }}
               className="bg-black/40 backdrop-blur-xl p-4 rounded-full hover:bg-blue-600 text-white transition-all active:scale-90"
             >
               <ChevronLeft size={28} />
             </button>
             <button
-              onClick={nextSlide}
+              onClick={(e) => {
+                e.stopPropagation();
+                nextSlide();
+              }}
               className="bg-black/40 backdrop-blur-xl p-4 rounded-full hover:bg-blue-600 text-white transition-all active:scale-90"
             >
               <ChevronRight size={28} />

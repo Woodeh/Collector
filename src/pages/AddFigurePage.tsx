@@ -10,11 +10,10 @@ import {
   getDocs,
   limit,
   deleteDoc,
-  type DocumentData,
+  type DocumentData, // Added 'type' keyword to prevent Vite import errors
 } from 'firebase/firestore';
 import { ref, deleteObject } from 'firebase/storage';
-import { onAuthStateChanged } from 'firebase/auth';
-import type { User } from 'firebase/auth';
+import { onAuthStateChanged, type User } from 'firebase/auth';
 import { motion as Motion } from 'framer-motion';
 import { Loader2 } from 'lucide-react';
 
@@ -82,6 +81,7 @@ const FigureDetailsPage: React.FC = () => {
           const data = docSnap.data() as Figure;
           setFigure(data);
 
+          // --- RECOMMENDATION LOGIC ---
           let finalRelated: Figure[] = [];
           if (data.anime) {
             const sameAnimeQuery = query(

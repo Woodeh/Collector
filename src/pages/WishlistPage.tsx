@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, ChangeEvent, FormEvent } from 'react';
 import { db, auth, storage } from '../firebase/config';
 import {
   collection,
@@ -10,37 +10,53 @@ import {
   deleteDoc,
   updateDoc,
   where,
+  Unsubscribe,
 } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { Loader2, Heart, Plus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { onAuthStateChanged } from 'firebase/auth';
+import { onAuthStateChanged, User } from 'firebase/auth';
 
-import { WishlistCard, WishlistForm } from '../components/wishlist';
+import { WishlistCard, WishlistForm } from '../components/wishlist'; // Assuming these are already TS or will be
 
-const WishlistPage = () => {
-  const [items, setItems] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [showForm, setShowForm] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
-  const [user, setUser] = useState(null);
-  const [editingId, setEditingId] = useState(null);
+export interface WishlistItem {
+  id: string;
+  name: string;
+  anime: string;
+  brand: string;
+  price: number;
+  link: string;
+  image: string;
+  userId: string;
+  createdAt: any; // Firestore Timestamp
+  updatedAt?: any; // Firestore Timestamp
+}
+
+export interface WishlistFormData {
+  name: string;
+  anime: string;
+  brand: string;
+  price: string | number;
+  link: string;
+  image: string;
+}
+
+const WishlistPage: React.FC = () => {
+  const [items, setItems] = useState<WishlistItem[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [showForm, setShowForm] = useState<boolean>(false);
+  const [submitting, setSubmitting] = useState<boolean>(false);
+  const [user, setUser] = useState<User | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const navigate = useNavigate();
 
-  // Добавили 'image' в formData для хранения URL ссылки
-  const [formData, setFormData] = useState({
-    name: '',
-    anime: '',
-    brand: '',
-    price: '',
-    link: '',
-    image: '',
-  });
-  const [imageFile, setImageFile] = useState(null);
-  const [imagePreview, setImagePreview] = useState(null);
+  const [formData, setFormData] = useState<WishlistFormData>({ name: '', anime: '', brand: '', price: '', link: '', image: '' });
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   useEffect(() => {
-    const unsubAuth = onAuthStateChanged(auth, (currentUser) => {
+    let unsubscribeSnap: Unsubscribe | undefined;
+    const unsubAuth = onAuthStateChanged(auth, (currentUser: User | null) => {
       setUser(currentUser);
       if (currentUser) {
         const q = query(
@@ -48,20 +64,23 @@ const WishlistPage = () => {
           where('userId', '==', currentUser.uid),
           orderBy('createdAt', 'desc'),
         );
-        const unsubscribeSnap = onSnapshot(q, (snapshot) => {
-          setItems(snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
+        unsubscribeSnap = onSnapshot(q, (snapshot) => {
+          setItems(snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as WishlistItem)));
           setLoading(false);
         });
-        return () => unsubscribeSnap();
+        return () => { if (unsubscribeSnap) unsubscribeSnap(); };
       } else {
         setLoading(false);
       }
     });
-    return () => unsubAuth();
+    return () => {
+      unsubAuth();
+      if (unsubscribeSnap) unsubscribeSnap();
+    };
   }, []);
 
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
+  const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
     if (file) {
       setImageFile(file);
       setImagePreview(URL.createObjectURL(file));
@@ -78,7 +97,7 @@ const WishlistPage = () => {
     setShowForm(true);
   };
 
-  const openEditForm = (item) => {
+  const openEditForm = (item: WishlistItem) => {
     setEditingId(item.id);
     setFormData({
       name: item.name,
@@ -93,7 +112,7 @@ const WishlistPage = () => {
     setShowForm(true);
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (!user) return;
     setSubmitting(true);
@@ -138,13 +157,13 @@ const WishlistPage = () => {
     }
   };
 
-  const handleDelete = async (id) => {
+  const handleDelete = async (id: string) => {
     if (window.confirm('Remove this grail?')) {
       await deleteDoc(doc(db, 'wishlist', id));
     }
   };
 
-  const handleGotIt = (item) => {
+  const handleGotIt = (item: WishlistItem) => {
     navigate('/add', {
       state: {
         initialData: {
@@ -160,7 +179,7 @@ const WishlistPage = () => {
     });
   };
 
-  if (loading)
+  if (loading || user === null) // Added user === null to ensure user state is resolved
     return (
       <div className="h-screen flex items-center justify-center bg-[#121212]">
         <Loader2 className="animate-spin text-pink-500" size={40} />

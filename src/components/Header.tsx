@@ -1,11 +1,11 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, FC, ChangeEvent, ReactNode } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import {
   LayoutGrid,
   Home,
   Clock,
   Heart,
-  User,
+  User as UserIcon,
   LogIn,
   Globe,
   Menu,
@@ -16,18 +16,22 @@ import {
   Loader2,
 } from 'lucide-react';
 import { auth, storage } from '../firebase/config';
-import { onAuthStateChanged, signOut } from 'firebase/auth';
+import { onAuthStateChanged, signOut, User } from 'firebase/auth';
 import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
+
+// @ts-ignore
 import faceLogo from '../assets/face.png';
 
-const Header = () => {
-  const [user, setUser] = useState(null);
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isProfileOpen, setIsProfileOpen] = useState(false);
-  const [isScanning, setIsScanning] = useState(false);
+
+const Header: FC = () => {
+  const [user, setUser] = useState<User | null>(null);
+  const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
+  const [isProfileOpen, setIsProfileOpen] = useState<boolean>(false);
+  const [isScanning, setIsScanning] = useState<boolean>(false);
+  
   const navigate = useNavigate();
-  const profileRef = useRef(null);
-  const fileInputRef = useRef(null);
+  const profileRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const unsubAuth = onAuthStateChanged(auth, (currentUser) => {
@@ -36,7 +40,6 @@ const Header = () => {
     return () => unsubAuth();
   }, []);
 
-  // Block main scroll when mobile menu is open
   useEffect(() => {
     if (isMenuOpen) {
       document.body.style.overflow = 'hidden';
@@ -48,10 +51,9 @@ const Header = () => {
     };
   }, [isMenuOpen]);
 
-  // Close profile dropdown when clicking outside
   useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (profileRef.current && !profileRef.current.contains(event.target)) {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (profileRef.current && !profileRef.current.contains(event.target as Node)) {
         setIsProfileOpen(false);
       }
     };
@@ -65,13 +67,12 @@ const Header = () => {
     fileInputRef.current?.click();
   };
 
-  const handleFileChange = async (e) => {
+  const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     setIsScanning(true);
     try {
-      // Временная загрузка в Storage для получения URL (Google Lens требует URL)
       const storageRef = ref(storage, `temp_scans/${Date.now()}_scan.jpg`);
       await uploadBytes(storageRef, file);
       const downloadURL = await getDownloadURL(storageRef);
@@ -79,15 +80,14 @@ const Header = () => {
       const lensUrl = `https://lens.google.com/uploadbyurl?url=${encodeURIComponent(downloadURL)}`;
       window.open(lensUrl, '_blank');
 
-      // Удаляем временный файл через 10 минут
       setTimeout(async () => {
         try {
           await deleteObject(storageRef);
           console.log('Cleanup: Temporary scan removed');
         } catch (cleanupError) {
-          console.warn('Cleanup failed (already deleted or network error):', cleanupError);
+          console.warn('Cleanup failed:', cleanupError);
         }
-      }, 600000); // 10 минут
+      }, 600000); 
     } catch (error) {
       console.error('Scan failed:', error);
     } finally {
@@ -109,7 +109,6 @@ const Header = () => {
   return (
     <header className="sticky top-0 z-[100] font-sans selection:bg-blue-500/30">
       <nav className="bg-[#1a1a1a]/80 backdrop-blur-md border-b border-[#333] p-4 px-6 md:px-8 flex items-center justify-between shadow-xl relative z-20">
-        {/* Hidden Input for Camera Access */}
         <input
           type="file"
           accept="image/*"
@@ -178,7 +177,6 @@ const Header = () => {
         <div className="flex items-center gap-4">
           {user ? (
             <>
-              {/* Desktop User Links */}
               <div className="hidden lg:flex gap-8 text-xs font-black uppercase tracking-[0.2em] italic items-center border-r border-[#333] pr-8 mr-4">
                 <NavLink
                   to="/collection"
@@ -212,14 +210,13 @@ const Header = () => {
                 </NavLink>
               </div>
 
-              {/* Desktop Profile Dropdown */}
               <div className="hidden lg:flex items-center gap-4 relative" ref={profileRef}>
                 <div className="text-right shrink-0">
                   <p className="text-[9px] text-blue-500 font-black uppercase tracking-[0.2em] italic leading-none mb-1">
                     Identity
                   </p>
                   <p className="text-white text-xs font-black uppercase italic leading-none truncate max-w-[100px]">
-                    {user.displayName || user.email.split('@')[0]}
+                    {user.displayName || user.email?.split('@')[0]}
                   </p>
                 </div>
 
@@ -239,7 +236,7 @@ const Header = () => {
                         className="w-full h-full object-cover"
                       />
                     ) : (
-                      <User size={20} className="text-blue-500" />
+                      <UserIcon size={20} className="text-blue-500" />
                     )}
                   </button>
                 </div>
@@ -251,7 +248,7 @@ const Header = () => {
                         Collector Identity
                       </p>
                       <p className="text-white font-black italic uppercase text-sm truncate">
-                        {user.displayName || user.email.split('@')[0]}
+                        {user.displayName || user.email?.split('@')[0]}
                       </p>
                     </div>
                     <div className="p-2">
@@ -292,7 +289,6 @@ const Header = () => {
             </div>
           )}
 
-          {/* MOBILE MENU TOGGLE */}
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
             className="lg:hidden p-3 text-blue-500 bg-[#121212] border border-[#333] rounded-2xl hover:bg-blue-600/10 transition-all active:scale-90"
@@ -315,7 +311,7 @@ const Header = () => {
                 {user.photoURL ? (
                   <img src={user.photoURL} alt="Avatar" className="w-full h-full object-cover" />
                 ) : (
-                  user.email[0].toUpperCase()
+                  user.email?.[0]?.toUpperCase() || '?'
                 )}
               </div>
               <div className="text-left">
@@ -323,7 +319,7 @@ const Header = () => {
                   Account
                 </p>
                 <p className="text-white font-black italic uppercase text-lg tracking-tighter">
-                  {user.displayName || user.email.split('@')[0]}
+                  {user.displayName || user.email?.split('@')[0]}
                 </p>
               </div>
             </div>
@@ -340,7 +336,6 @@ const Header = () => {
 
             {user ? (
               <>
-                {/* Mobile Scan Action */}
                 <button
                   onClick={() => {
                     closeMenu();
@@ -381,7 +376,7 @@ const Header = () => {
                 />
                 <MobileNavLink
                   to="/profile"
-                  icon={<User size={20} />}
+                  icon={<UserIcon size={20} />}
                   label="Profile Settings"
                   activeColor="text-blue-500"
                   onClick={closeMenu}
@@ -433,7 +428,15 @@ const Header = () => {
   );
 };
 
-const MobileNavLink = ({ to, icon, label, activeColor, onClick }) => (
+interface MobileNavLinkProps {
+  to: string;
+  icon: ReactNode;
+  label: string;
+  activeColor: string;
+  onClick: () => void;
+}
+
+const MobileNavLink: FC<MobileNavLinkProps> = ({ to, icon, label, activeColor, onClick }) => (
   <NavLink
     to={to}
     onClick={onClick}

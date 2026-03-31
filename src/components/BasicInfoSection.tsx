@@ -1,10 +1,42 @@
-import React from 'react';
+import React, { FC, ChangeEvent } from 'react';
 import { Info, Tag, DollarSign, ChevronDown, Camera, X } from 'lucide-react';
 import CharacterSearch from './CharacterSearch';
 import AnimeSearch from './AnimeSearch';
 import CustomSelect from './Select';
 
-const BasicInfoSection = ({
+// Define the structure for a character selected from the API
+interface SelectedCharacter {
+  name: string;
+  mal_id: number;
+  image: string;
+}
+
+interface Option {
+  value: string;
+  label: string;
+}
+
+interface FormData {
+  name: string;
+  characterId: number | null;
+  characterImage: string;
+  anime: string;
+  brand: string;
+  price: string | number;
+  gender: string;
+}
+
+interface BasicInfoSectionProps {
+  formData: FormData;
+  handleCustomChange: (name: keyof FormData, value: any) => void;
+  brandOptions: Option[];
+  currency: string;
+  setCurrency: (value: string) => void;
+  handleChange: (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
+  onCharArtFileChange: (file: File | null) => void;
+}
+
+const BasicInfoSection: FC<BasicInfoSectionProps> = ({
   formData,
   handleCustomChange,
   brandOptions,
@@ -13,11 +45,12 @@ const BasicInfoSection = ({
   handleChange,
   onCharArtFileChange,
 }) => {
-  const handleCharFileChange = (e) => {
-    const file = e.target.files[0];
+  
+  const handleCharFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
     if (file) {
       onCharArtFileChange(file);
-      // Создаем временный URL для превью в форме
+      // Create a temporary URL for preview in the form
       handleCustomChange('characterImage', URL.createObjectURL(file));
     }
   };
@@ -36,16 +69,16 @@ const BasicInfoSection = ({
               handleCustomChange('name', selection.name);
               handleCustomChange('characterId', selection.mal_id);
               handleCustomChange('characterImage', selection.image);
-              onCharArtFileChange(null); // Сбрасываем файл, если выбрали из API
+              onCharArtFileChange(null); // Reset file if selected from API
             } else {
               handleCustomChange('name', selection);
               handleCustomChange('characterId', null);
-              // Не сбрасываем картинку сразу, чтобы не удалять превью при печати
+              // We don't reset the image immediately to avoid flickering during typing
             }
           }}
         />
 
-        {/* Блок ручной загрузки арта */}
+        {/* Manual Character Art Upload Block */}
         <div className="flex items-center gap-3 px-1">
           <label className="cursor-pointer group flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-[#1a1a1a] border border-[#333] flex items-center justify-center group-hover:border-blue-500 transition-colors">
@@ -87,14 +120,17 @@ const BasicInfoSection = ({
       </div>
 
       <div className="relative z-[60]">
-        <AnimeSearch value={formData.anime} onChange={(val) => handleCustomChange('anime', val)} />
+        <AnimeSearch 
+          value={formData.anime} 
+          onChange={(val: string) => handleCustomChange('anime', val)} 
+        />
       </div>
 
       <CustomSelect
         icon={Tag}
         options={brandOptions}
         value={formData.brand}
-        onChange={(val) => handleCustomChange('brand', val)}
+        onChange={(val: string) => handleCustomChange('brand', val)}
       />
 
       <div className="flex gap-2">
@@ -116,7 +152,7 @@ const BasicInfoSection = ({
         <div className="relative w-28 group">
           <select
             value={currency}
-            onChange={(e) => setCurrency(e.target.value)}
+            onChange={(e: ChangeEvent<HTMLSelectElement>) => setCurrency(e.target.value)}
             className="w-full h-[58px] bg-[#121212] border border-[#333] px-4 rounded-2xl text-white font-bold text-base appearance-none outline-none cursor-pointer hover:bg-[#181818] transition-all focus:border-blue-500 pr-10"
           >
             <option value="USD">USD</option>
@@ -136,7 +172,7 @@ const BasicInfoSection = ({
           { value: 'Female', label: 'Female' },
         ]}
         value={formData.gender}
-        onChange={(val) => handleCustomChange('gender', val)}
+        onChange={(val: string) => handleCustomChange('gender', val)}
       />
     </div>
   );

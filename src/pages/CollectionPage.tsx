@@ -1,19 +1,39 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { motion as Motion } from 'framer-motion';
 import { db, storage, auth } from '../firebase/config';
-import { collection, query, orderBy, onSnapshot, doc, deleteDoc, where } from 'firebase/firestore';
+import { 
+  collection, 
+  query, 
+  orderBy, 
+  onSnapshot, 
+  doc, 
+  deleteDoc, 
+  where,
+} from 'firebase/firestore';
 import { ref, deleteObject } from 'firebase/storage';
 import { Loader2, Monitor } from 'lucide-react';
+import type { User } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
-import Modal from '../components/Modal';
+import Modal from '../components/Modal.js';
 
 import { FigureCard, CollectionHeader, CollectionFilters } from '../components/collection';
 
-const Collection = () => {
-  const [figures, setFigures] = useState([]);
+interface Figure {
+  id: string;
+  name: string;
+  anime?: string;
+  brand?: string;
+  price?: string | number;
+  image?: string;
+  images?: string[];
+  createdAt?: { seconds: number };
+}
+
+const Collection: React.FC = () => {
+  const [figures, setFigures] = useState<Figure[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [figureToDelete, setFigureToDelete] = useState(null);
+  const [figureToDelete, setFigureToDelete] = useState<Figure | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [showFilters, setShowFilters] = useState(false);
 
@@ -25,21 +45,25 @@ const Collection = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const unsubscribeAuth = auth.onAuthStateChanged((user) => {
+    const unsubscribeAuth = auth.onAuthStateChanged((user: User | null) => {
       if (user) {
         const q = query(
           collection(db, 'figures'),
           where('userId', '==', user.uid),
           orderBy('createdAt', 'desc'),
         );
+        
         const unsubscribeSnap = onSnapshot(q, (snap) => {
-          const figuresArray = snap.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
+          const figuresArray = snap.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data()
+          } as Figure));
           setFigures(figuresArray);
           setLoading(false);
         });
+        
         return () => unsubscribeSnap();
       } else {
-        // Если не залогинен — отправляем на главную (к Landing Page)
         navigate('/');
       }
     });
@@ -68,10 +92,11 @@ const Collection = () => {
     let result = [...figures];
 
     if (searchTerm) {
+      const term = searchTerm.toLowerCase();
       result = result.filter(
         (f) =>
-          f.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          f.anime?.toLowerCase().includes(searchTerm.toLowerCase()),
+          f.name?.toLowerCase().includes(term) ||
+          f.anime?.toLowerCase().includes(term),
       );
     }
 
@@ -79,12 +104,15 @@ const Collection = () => {
     if (filterBrand !== 'All') result = result.filter((f) => f.brand === filterBrand);
 
     result.sort((a, b) => {
-      if (sortBy === 'cheap') return Number(a.price) - Number(b.price);
-      if (sortBy === 'expensive') return Number(b.price) - Number(a.price);
+      const timeA = a.createdAt?.seconds || 0;
+      const timeB = b.createdAt?.seconds || 0;
+
+      if (sortBy === 'cheap') return Number(a.price || 0) - Number(b.price || 0);
+      if (sortBy === 'expensive') return Number(b.price || 0) - Number(a.price || 0);
       if (sortBy === 'az') return (a.name || '').localeCompare(b.name || '');
       if (sortBy === 'za') return (b.name || '').localeCompare(a.name || '');
-      if (sortBy === 'oldest') return a.createdAt?.seconds - b.createdAt?.seconds;
-      return b.createdAt?.seconds - a.createdAt?.seconds; // newest
+      if (sortBy === 'oldest') return timeA - timeB;
+      return timeB - timeA; // newest
     });
 
     return result;
@@ -94,17 +122,21 @@ const Collection = () => {
     if (!figureToDelete) return;
     try {
       await deleteDoc(doc(db, 'figures', figureToDelete.id));
-      const imageUrls =
-        figureToDelete.images || (figureToDelete.image ? [figureToDelete.image] : []);
+      
+      const imageUrls = figureToDelete.images || (figureToDelete.image ? [figureToDelete.image] : []);
+      
       for (const url of imageUrls) {
-        try {
-          await deleteObject(ref(storage, url));
-        } catch {
-          console.warn('Image skip');
+        // Проверяем, что картинка лежит именно в нашем Firebase Storage
+        if (url && url.includes('firebasestorage.googleapis.com')) {
+          try {
+            await deleteObject(ref(storage, url));
+          } catch (e) {
+            console.warn('Image cleanup skipped or failed:', e);
+          }
         }
       }
     } catch (error) {
-      console.error(error);
+      console.error('Delete error:', error);
     } finally {
       setIsModalOpen(false);
       setFigureToDelete(null);
@@ -123,7 +155,7 @@ const Collection = () => {
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, ease: 'easeOut' }}
-      className="min-h-screen bg-[#121212] p-4 md:p-8 text-[#e4e4e4] pb-24 font-sans text-left overflow-x-hidden"
+      className="min-h-screen bg-[#121212] p-4 md:p-8 text-[#e4e4e4] pb-24 font-sans text-left overflow-x-hidden relative"
     >
       {/* Background System */}
       <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
@@ -144,7 +176,7 @@ const Collection = () => {
         message={`Delete "${figureToDelete?.name}"?`}
       />
 
-      <div className="max-w-7xl mx-auto space-y-10">
+      <div className="max-w-7xl mx-auto space-y-10 relative z-10">
         <CollectionHeader
           processedCount={processedFigures.length}
           searchTerm={searchTerm}

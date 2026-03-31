@@ -1,10 +1,33 @@
-import React from 'react';
+import React, { FC } from 'react';
 import { Upload } from 'lucide-react';
-import { DndContext, closestCenter } from '@dnd-kit/core';
+import {
+  DndContext,
+  closestCenter,
+  SensorDescriptor,
+  SensorOptions,
+  DragEndEvent,
+} from '@dnd-kit/core';
 import { SortableContext, horizontalListSortingStrategy } from '@dnd-kit/sortable';
 import SortablePhotoItem from './SortablePhotoItem';
 
-const PhotoUploadSection = ({
+interface MediaItem {
+  id: string;
+  url: string;
+}
+
+interface PhotoUploadSectionProps {
+  isDraggingOver: boolean;
+  setIsDraggingOver: (value: boolean) => void;
+  handleFiles: (files: FileList | null) => void;
+  sensors: SensorDescriptor<SensorOptions>[];
+  handleDragEnd: (event: DragEndEvent) => void;
+  mediaItems: MediaItem[];
+  previewId: string | null;
+  setPreviewId: (id: string) => void;
+  removeItem: (id: string) => void;
+}
+
+const PhotoUploadSection: FC<PhotoUploadSectionProps> = ({
   isDraggingOver,
   setIsDraggingOver,
   handleFiles,
@@ -18,12 +41,12 @@ const PhotoUploadSection = ({
   return (
     <div className="space-y-4 pt-4 border-t border-[#333]/50">
       <label
-        onDragOver={(e) => {
+        onDragOver={(e: React.DragEvent) => {
           e.preventDefault();
           setIsDraggingOver(true);
         }}
         onDragLeave={() => setIsDraggingOver(false)}
-        onDrop={(e) => {
+        onDrop={(e: React.DragEvent) => {
           e.preventDefault();
           setIsDraggingOver(false);
           handleFiles(e.dataTransfer.files);
@@ -45,7 +68,7 @@ const PhotoUploadSection = ({
           type="file"
           className="hidden"
           multiple
-          onChange={(e) => handleFiles(e.target.files)}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleFiles(e.target.files)}
           accept="image/*"
         />
       </label>
