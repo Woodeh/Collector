@@ -7,7 +7,7 @@ import FigureDetails from './pages/FigureDetailsPage';
 import PreOrders from './pages/PreOrdersPage';
 import Wishlist from './pages/WishlistPage';
 import Home from './pages/HomePage';
-import FigureForm from './features/FigureForm';
+import FigureForm from './features/figure-form/FigureForm';
 import Profile from './pages/ProfilePage';
 import Community from './pages/CommunityPage';
 import ScrollToTop from './app/providers/ScrollToTop';

@@ -35,24 +35,29 @@ const SpecsSection: FC<SpecsSectionProps> = ({
       </h3>
       
       <div className="grid grid-cols-2 gap-3 sm:gap-4">
-        <div className="relative group">
-          <Calendar
-            className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600 z-10 group-focus-within:text-blue-500 transition-colors"
-            size={18}
-          />
-          <DatePicker
-            selected={formData.purchaseDate ? new Date(formData.purchaseDate) : null}
-            onChange={(date: Date | null) =>
-              handleCustomChange(
-                'purchaseDate', 
-                date ? date.toISOString().split('T')[0] ?? '' : ''
-              )
-            }
-            dateFormat="yyyy-MM-dd"
-            placeholderText="Date"
-            wrapperClassName="w-full"
-            className="w-full bg-[#121212] border border-[#333] h-[58px] pl-12 rounded-2xl text-white font-bold text-base outline-none focus:border-blue-500 transition-all placeholder:text-gray-700 placeholder:font-medium placeholder:italic"
-          />
+        <div className="space-y-1">
+          <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-500 italic ml-1 block">
+            Purchase Date
+          </label>
+          <div className="relative group">
+            <Calendar
+              className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600 z-10 group-focus-within:text-blue-500 transition-colors"
+              size={18}
+            />
+            <DatePicker
+              selected={formData.purchaseDate ? new Date(formData.purchaseDate) : null}
+              onChange={(date: Date | null) =>
+                handleCustomChange(
+                  'purchaseDate', 
+                  date ? date.toISOString().split('T')[0] ?? '' : ''
+                )
+              }
+              dateFormat="yyyy-MM-dd"
+              placeholderText="Date"
+              wrapperClassName="w-full"
+              className="w-full bg-[#121212] border border-[#333] h-[58px] pl-12 rounded-2xl text-white font-bold text-base outline-none focus:border-blue-500 transition-all placeholder:text-gray-700 placeholder:font-medium placeholder:italic"
+            />
+          </div>
         </div>
 
         <CustomSelect

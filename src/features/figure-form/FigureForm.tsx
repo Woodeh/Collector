@@ -1,14 +1,14 @@
 import React, { useState, useEffect, FC, ChangeEvent, FormEvent } from 'react';
-import { db, storage, auth } from '../firebase/config';
+import { db, storage, auth } from '../../firebase/config';
 import { collection, addDoc, doc, getDoc, updateDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { PlusCircle, Loader2, Link as LinkIcon, Edit3, Zap, FileText } from 'lucide-react';
 import { useParams, useNavigate } from 'react-router-dom';
 
-import SuccessModal from './figure-form/ui/SuccessModal';
-import SpecsSection from './figure-form/SpecsSection';
-import BasicInfoSection from './figure-form/BasicInfoSection';
-import PhotoUploadSection from './upload-photo/PhotoUploadSection';
+import SuccessModal from './ui/SuccessModal';
+import SpecsSection from './SpecsSection';
+import BasicInfoSection from './BasicInfoSection';
+import PhotoUploadSection from '../upload-photo/PhotoUploadSection';
 
 import { useSensor, useSensors, PointerSensor, KeyboardSensor, SensorDescriptor, SensorOptions, DragEndEvent } from '@dnd-kit/core';
 import { arrayMove, sortableKeyboardCoordinates } from '@dnd-kit/sortable';
@@ -328,7 +328,7 @@ const FigureForm: FC<FigureFormProps> = ({ mode = 'add' }) => {
         onSubmit={handleSubmit}
         className="bg-gradient-to-b from-[#1c1c1c] to-[#161616] p-5 sm:p-10 rounded-[2rem] sm:rounded-[3rem] border border-[#262626] space-y-8"
       >
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 sm:gap-10">
+        <div className=""> 
           <BasicInfoSection
             formData={formData}
             handleCustomChange={handleCustomChange}
