@@ -2,13 +2,13 @@ import React, { FC } from 'react';
 import { ArrowLeft, Share2, Pencil, Trash2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
-// Define types for the User and Figure objects based on Firebase/App logic
+// Используем те же правила опциональности, что и в основном интерфейсе Figure
 interface UserProfile {
   uid: string;
 }
 
 interface FigureData {
-  userId: string;
+  userId?: string; 
 }
 
 interface DetailsHeaderProps {
@@ -19,11 +19,20 @@ interface DetailsHeaderProps {
   onDelete: () => void;
 }
 
-const DetailsHeader: FC<DetailsHeaderProps> = ({ currentUser, figure, id, onShare, onDelete }) => {
+const DetailsHeader: FC<DetailsHeaderProps> = ({ 
+  currentUser, 
+  figure, 
+  id, 
+  onShare, 
+  onDelete 
+}) => {
   const navigate = useNavigate();
 
+  // Проверка прав теперь безопасна: если любого из ID нет, условие просто вернет false
+  const isOwner = currentUser && figure && currentUser.uid === figure.userId;
+
   return (
-    <div className="flex flex-col sm:sm:flex-row justify-between items-start sm:items-center gap-4 mb-8 text-left">
+    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8 text-left">
       <button
         type="button"
         onClick={() => navigate(-1)}
@@ -32,7 +41,7 @@ const DetailsHeader: FC<DetailsHeaderProps> = ({ currentUser, figure, id, onShar
         <ArrowLeft size={16} /> Back to Vault
       </button>
 
-      {currentUser?.uid === figure?.userId && (
+      {isOwner && (
         <div className="flex flex-wrap items-center gap-3">
           <button
             type="button"

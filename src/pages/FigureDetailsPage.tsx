@@ -29,7 +29,7 @@ import DetailsActionButtons from '../components/details/DetailsActionButtons';
 import DetailsRelated from '../widgets/DetailsRelated';
 
 interface Figure extends DocumentData {
-  id?: string;
+  id: string;
   name: string;
   anime?: string;
   brand?: string;
@@ -40,6 +40,9 @@ interface Figure extends DocumentData {
   characterId?: string;
   characterImage?: string;
   auctionUrl?: string;
+  conditionGrade: string;
+  hasBox: string | boolean;
+  userId?: string;
 }
 
 interface CharacterData {
@@ -265,7 +268,7 @@ const FigureDetailsPage: React.FC = () => {
 
             <DetailsActionButtons
               handleMarketScan={handleMarketScan}
-              auctionUrl={figure.auctionUrl}
+              auctionUrl={figure.auctionUrl || null}
             />
           </div>
         </div>

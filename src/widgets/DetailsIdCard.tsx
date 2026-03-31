@@ -6,7 +6,7 @@ import { Cpu, Fingerprint, ShieldCheck } from 'lucide-react';
 interface FigureData {
   name: string;
   fullDisplayName?: string;
-  anime: string;
+  anime?: string;
   price: string | number;
   conditionGrade: string;
   hasBox: string | boolean;
