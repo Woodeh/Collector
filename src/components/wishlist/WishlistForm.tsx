@@ -1,6 +1,6 @@
 import React, { useState, FC, FormEvent, ChangeEvent } from 'react';
 import { X, Camera, Link as LinkIcon, Loader2 } from 'lucide-react';
-import AnimeSearch from '../AnimeSearch';
+import AnimeSearch from '../../features/AnimeSearch';
 
 // Интерфейс структуры данных формы
 interface WishlistFormData {

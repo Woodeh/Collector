@@ -17,18 +17,18 @@ import { onAuthStateChanged, type User } from 'firebase/auth';
 import { motion as Motion } from 'framer-motion';
 import { Loader2 } from 'lucide-react';
 
-import Modal from '../components/Modal';
-import ShareModal from '../components/modals/ShareModal';
+import Modal from '../shared/Modal';
+import ShareModal from '../features/ShareModal';
 
 import DetailsHeader from '../components/details/DetailsHeader';
-import DetailsSlider from '../components/details/DetailsSlider';
-import DetailsIdCard from '../components/details/DetailsIdCard';
+import DetailsSlider from '../widgets/DetailsSlider';
+import DetailsIdCard from '../widgets/DetailsIdCard';
 import DetailsThumbnails from '../components/details/DetailsThumbnails';
 import DetailsActionButtons from '../components/details/DetailsActionButtons';
-import DetailsRelated from '../components/details/DetailsRelated';
+import DetailsRelated from '../widgets/DetailsRelated';
 
 interface Figure extends DocumentData {
-  id?: string;
+  id: string;
   name: string;
   anime?: string;
   brand?: string;
@@ -39,6 +39,9 @@ interface Figure extends DocumentData {
   characterId?: string;
   characterImage?: string;
   auctionUrl?: string;
+  conditionGrade: string;
+  hasBox: string | boolean;
+  userId?: string;
 }
 
 interface CharacterData {

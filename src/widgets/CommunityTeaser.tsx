@@ -1,7 +1,7 @@
 import React, { FC } from 'react';
 import { motion as Motion } from 'framer-motion';
 import { Globe, Lock, ArrowRight } from 'lucide-react';
-import FigureCard from '../collection/FigureCard';
+import FigureCard from '../entities/figures/ui/FigureCard';
 
 // Интерфейс для данных фигурки в сообществе
 interface CommunityFigure {

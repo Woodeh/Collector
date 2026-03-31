@@ -6,9 +6,9 @@ import { onAuthStateChanged, type User } from 'firebase/auth';
 import { Loader2 } from 'lucide-react';
 
 import { HeroSection, QuickStats, SpotlightCard } from '../components/home';
-import RankSection from '../components/home/RankSection';
+import RankSection from '../widgets/RankSection';
 import QuickActions from '../components/home/QuickActions';
-import RecentFigures from '../components/home/RecentFigures';
+import RecentFigures from '../widgets/RecentFigures';
 import HomeWidgets from '../components/home/HomeWidgets';
 import LandingPage from './LandingPage';
 

@@ -1,5 +1,5 @@
 import React, { FC } from 'react';
-import FigureCard from '../collection/FigureCard';
+import FigureCard from '../entities/figures/ui/FigureCard';
 
 // Интерфейс для данных фигурки (должен совпадать с тем, что принимает FigureCard)
 interface RelatedFigure {

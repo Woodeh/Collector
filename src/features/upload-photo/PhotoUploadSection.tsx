@@ -8,7 +8,7 @@ import {
   DragEndEvent,
 } from '@dnd-kit/core';
 import { SortableContext, horizontalListSortingStrategy } from '@dnd-kit/sortable';
-import SortablePhotoItem from './SortablePhotoItem';
+import SortablePhotoItem from '../../shared/lib/SortablePhotoItem';
 
 interface MediaItem {
   id: string;

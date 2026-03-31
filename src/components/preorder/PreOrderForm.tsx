@@ -1,6 +1,6 @@
 import React, { FC, ChangeEvent, FormEvent } from 'react';
 import { X, Camera } from 'lucide-react';
-import AnimeSearch from '../AnimeSearch';
+import AnimeSearch from '../../features/AnimeSearch';
 
 // Интерфейс для данных формы
 interface PreOrderFormData {

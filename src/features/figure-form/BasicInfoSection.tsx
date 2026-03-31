@@ -1,8 +1,8 @@
 import React, { FC, ChangeEvent } from 'react';
 import { Info, Tag, DollarSign, ChevronDown, Camera, X } from 'lucide-react';
-import CharacterSearch from './CharacterSearch';
-import AnimeSearch from './AnimeSearch';
-import CustomSelect from './Select';
+import CharacterSearch from '../CharacterSearch';
+import AnimeSearch from '../AnimeSearch';
+import CustomSelect from '../../shared/Select';
 
 // Define the structure for a character selected from the API
 interface SelectedCharacter {

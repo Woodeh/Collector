@@ -9,9 +9,9 @@ import { FileDown, Camera, Loader2, Award, X } from 'lucide-react';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
-import StatsAndCharts from '../components/charts/StatsAndCharts';
-import BrandsSplit from '../components/charts/BrandsSplit';
-import GrailModal from '../components/modals/GrailModal';
+import StatsAndCharts from '../widgets/StatsAndCharts';
+import BrandsSplit from '../widgets/BrandsSplit';
+import GrailModal from '../features/set-main-grail/GrailModal';
 import {
   MainGrail,
   CollectionStream,
@@ -19,17 +19,17 @@ import {
   ProfileHeader,
   RankModal,
   ProfileBackground,
-} from '../components/profile/index';
+} from '../entities/user/index';
 
 interface Figure {
   id: string;
   name: string;
-  anime?: string;
+  anime: string;
   brand?: string;
-  price: number | string;
+  price: string | number;
   conditionGrade?: string;
   createdAt?: { seconds: number };
-  isFavorite?: boolean;
+  isFavorite: boolean;
   userId?: string;
 }
 
@@ -97,7 +97,11 @@ const Profile: FC = () => {
           const animeMap: Record<string, number> = {};
 
           snap.docs.forEach((document) => {
-            const data = { id: document.id, ...document.data() } as Figure;
+            const data = { 
+              id: document.id, 
+              isFavorite: false, 
+              anime: 'Original', 
+              ...document.data() } as Figure;
             figuresList.push(data);
             if (data.conditionGrade?.toLowerCase().trim() !== 'pre-order') {
               totalValue += typeof data.price === 'string' ? parseFloat(data.price) || 0 : data.price;

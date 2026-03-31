@@ -5,10 +5,10 @@ import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { PlusCircle, Loader2, Link as LinkIcon, Edit3, Zap, FileText } from 'lucide-react';
 import { useParams, useNavigate } from 'react-router-dom';
 
-import SuccessModal from './SuccessModal';
-import SpecsSection from './SpecsSection';
-import BasicInfoSection from './BasicInfoSection';
-import PhotoUploadSection from './PhotoUploadSection';
+import SuccessModal from './figure-form/ui/SuccessModal';
+import SpecsSection from './figure-form/SpecsSection';
+import BasicInfoSection from './figure-form/BasicInfoSection';
+import PhotoUploadSection from './upload-photo/PhotoUploadSection';
 
 import { useSensor, useSensors, PointerSensor, KeyboardSensor, SensorDescriptor, SensorOptions, DragEndEvent } from '@dnd-kit/core';
 import { arrayMove, sortableKeyboardCoordinates } from '@dnd-kit/sortable';
@@ -23,7 +23,7 @@ try {
 
 interface FormData {
   name: string;
-  characterId: string | null;
+  characterId: number | null;
   characterImage: string;
   fullDisplayName: string;
   anime: string;
@@ -150,7 +150,7 @@ const FigureForm: FC<FigureFormProps> = ({ mode = 'add' }) => {
     }
   }, [id, isEdit]);
 
-  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => 
+  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => 
     setFormData({ ...formData, [e.target.name]: e.target.value });
 
   const handleCustomChange = (name: keyof FormData, value: any) => 

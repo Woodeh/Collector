@@ -1,5 +1,5 @@
 import React, { FC } from 'react';
-import PreOrderCard from '../PreOrderCard';
+import PreOrderCard from '../entities/preorder/PreOrderCard';
 
 // Define the interface for a single preorder item
 interface PreOrderItem {

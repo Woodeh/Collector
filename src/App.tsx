@@ -1,17 +1,17 @@
 import React, { FC } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Header from './components/Header';
+import Header from './shared/Header';
 import Collection from './pages/CollectionPage';
 import Login from './pages/LoginPage';
 import FigureDetails from './pages/FigureDetailsPage';
 import PreOrders from './pages/PreOrdersPage';
 import Wishlist from './pages/WishlistPage';
 import Home from './pages/HomePage';
-import FigureForm from './components/FigureForm';
+import FigureForm from './features/FigureForm';
 import Profile from './pages/ProfilePage';
 import Community from './pages/CommunityPage';
-import ScrollToTop from './pages/ScrollToTop';
-import Footer from './components/Footer';
+import ScrollToTop from './app/providers/ScrollToTop';
+import Footer from './shared/Footer';
 
 const App: FC = () => {
   return (

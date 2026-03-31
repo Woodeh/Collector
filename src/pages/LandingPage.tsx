@@ -10,7 +10,7 @@ import {
   CommunityTeaser,
   FeaturesSection,
   FinalCTA,
-} from '../components/landing';
+} from '../widgets';
 
 interface Figure {
   id: string;

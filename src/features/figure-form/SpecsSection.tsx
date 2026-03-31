@@ -1,7 +1,7 @@
 import React, { FC } from 'react';
 import { ShieldCheck, Calendar, Sparkles, ShoppingCart } from 'lucide-react';
 import DatePicker from 'react-datepicker';
-import CustomSelect from './Select';
+import CustomSelect from '../shared/Select';
 
 interface Option {
   value: string;

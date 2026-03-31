@@ -14,7 +14,7 @@ import { ref, deleteObject } from 'firebase/storage';
 import { Loader2, Monitor } from 'lucide-react';
 import type { User } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
-import Modal from '../components/Modal.js';
+import Modal from '../shared/Modal.js';
 
 import { FigureCard, CollectionHeader, CollectionFilters } from '../components/collection';
 
