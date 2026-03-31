@@ -1,31 +1,45 @@
-import React, { useState } from 'react';
+import React, { useState, FC } from 'react';
 import { motion as Motion, AnimatePresence } from 'framer-motion';
 import { X, Copy, Check, Share2, QrCode, Shield, Send, MessageCircle } from 'lucide-react';
 
-const ShareModal = ({ isOpen, onClose, figure }) => {
-  const [copied, setCopied] = useState(false);
+// Интерфейс для данных фигурки
+interface Figure {
+  name: string;
+  anime: string;
+  price: string | number;
+  previewImage?: string;
+  images?: string[];
+}
+
+interface ShareModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  figure: Figure;
+}
+
+const ShareModal: FC<ShareModalProps> = ({ isOpen, onClose, figure }) => {
+  const [copied, setCopied] = useState<boolean>(false);
 
   if (!isOpen) return null;
 
-  const shareUrl = window.location.href;
-  const shareText = `Check out this asset: ${figure.name} from ${figure.anime} in my collection!`;
+  const shareUrl: string = window.location.href;
+  const shareText: string = `Check out this asset: ${figure.name} from ${figure.anime} in my collection!`;
 
-  const handleCopy = () => {
+  const handleCopy = (): void => {
     navigator.clipboard.writeText(shareUrl);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const shareToTelegram = () => {
-    const url = `https://t.me/share/url?url=${encodeURIComponent(
+  const shareToTelegram = (): void => {
+    const url: string = `https://t.me/share/url?url=${encodeURIComponent(
       shareUrl,
     )}&text=${encodeURIComponent(shareText)}`;
     window.open(url, '_blank');
   };
 
-  const shareToWhatsApp = () => {
-    // wa.me format: https://wa.me/?text=urlencodedtext
-    const url = `https://wa.me/?text=${encodeURIComponent(shareText + ' ' + shareUrl)}`;
+  const shareToWhatsApp = (): void => {
+    const url: string = `https://wa.me/?text=${encodeURIComponent(shareText + ' ' + shareUrl)}`;
     window.open(url, '_blank');
   };
 
@@ -46,7 +60,10 @@ const ShareModal = ({ isOpen, onClose, figure }) => {
                 Generate Asset Link
               </span>
             </div>
-            <button onClick={onClose} className="text-gray-500 hover:text-white transition-colors">
+            <button
+              onClick={onClose}
+              className="text-gray-500 hover:text-white transition-colors cursor-pointer"
+            >
               <X size={20} />
             </button>
           </div>
@@ -61,7 +78,7 @@ const ShareModal = ({ isOpen, onClose, figure }) => {
               <div className="w-24 sm:w-1/3 aspect-[3/4] rounded-xl overflow-hidden border border-white/5 relative shrink-0">
                 <img
                   src={figure.previewImage || figure.images?.[0]}
-                  alt=""
+                  alt={figure.name}
                   className="w-full h-full object-cover grayscale-[0.2] group-hover:grayscale-0 transition-all duration-700"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
@@ -109,13 +126,13 @@ const ShareModal = ({ isOpen, onClose, figure }) => {
 
             {/* Actions */}
             <div className="mt-6 sm:mt-8 space-y-4">
-              <div className="bg-[#0a0a0a] border border-[#333] rounded-2xl p-4 flex items-center justify-between">
+              <div className="bg-[#0a0a0a] border border-[#333] rounded-2xl p-4 flex items-center justify-between overflow-hidden">
                 <span className="text-[10px] font-mono text-gray-500 truncate mr-4">
                   {shareUrl}
                 </span>
                 <button
                   onClick={handleCopy}
-                  className="shrink-0 flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-[10px] font-black uppercase italic tracking-widest transition-all active:scale-95"
+                  className="shrink-0 flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-[10px] font-black uppercase italic tracking-widest transition-all active:scale-95 cursor-pointer"
                 >
                   {copied ? <Check size={14} /> : <Copy size={14} />}
                   {copied ? 'Copied' : 'Copy'}

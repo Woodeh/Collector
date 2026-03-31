@@ -1,6 +1,11 @@
-import React from 'react';
+import React, { FC } from 'react';
 
-export default function PreOrderLightbox({ selectedImage, setSelectedImage }) {
+interface PreOrderLightboxProps {
+  selectedImage: string | null;
+  setSelectedImage: (url: string | null) => void;
+}
+
+const PreOrderLightbox: FC<PreOrderLightboxProps> = ({ selectedImage, setSelectedImage }) => {
   if (!selectedImage) return null;
 
   return (
@@ -16,4 +21,6 @@ export default function PreOrderLightbox({ selectedImage, setSelectedImage }) {
       />
     </div>
   );
-}
+};
+
+export default PreOrderLightbox;

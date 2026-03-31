@@ -1,9 +1,28 @@
-import React from 'react';
+import React, { FC } from 'react';
 import { motion as Motion } from 'framer-motion';
 import { Globe, Lock, ArrowRight } from 'lucide-react';
 import FigureCard from '../collection/FigureCard';
 
-const CommunityTeaser = ({ loading, communityFigures, onJoin }) => {
+// Интерфейс для данных фигурки в сообществе
+interface CommunityFigure {
+  id: string;
+  name: string;
+  anime: string;
+  previewImage?: string;
+  image?: string;
+  price: number | string;
+  brand?: string;
+  authorName?: string;
+  // Добавьте другие поля, если они требуются в FigureCard
+}
+
+interface CommunityTeaserProps {
+  loading: boolean;
+  communityFigures: CommunityFigure[];
+  onJoin: () => void;
+}
+
+const CommunityTeaser: FC<CommunityTeaserProps> = ({ loading, communityFigures, onJoin }) => {
   return (
     <section
       id="community-scan"
@@ -40,10 +59,16 @@ const CommunityTeaser = ({ loading, communityFigures, onJoin }) => {
                 ease: 'linear',
               }}
             >
+              {/* Утроение массива для бесшовной анимации */}
               {[...communityFigures, ...communityFigures, ...communityFigures].map(
                 (figure, idx) => (
                   <div key={`${figure.id}-${idx}`} className="w-48 md:w-64 shrink-0">
-                    <FigureCard figure={figure} isCommunity={true} />
+                    <FigureCard 
+                      figure={figure} 
+                      isCommunity={true} 
+                      onEdit={() => {}} 
+                      onDelete={() => {}} 
+                    />
                   </div>
                 ),
               )}
@@ -63,6 +88,7 @@ const CommunityTeaser = ({ loading, communityFigures, onJoin }) => {
 
         <div className="text-center">
           <button
+            type="button"
             onClick={onJoin}
             className="group text-[11px] font-black uppercase tracking-[0.4em] text-blue-500 hover:text-white transition-colors flex items-center gap-2 mx-auto cursor-pointer"
           >

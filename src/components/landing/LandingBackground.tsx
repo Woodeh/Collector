@@ -1,10 +1,16 @@
-import React from 'react';
-import { motion as Motion } from 'framer-motion';
+import React, { FC } from 'react';
+import { motion as Motion, MotionValue } from 'framer-motion';
 
-const LandingBackground = ({ backgroundY, floatingTextY }) => {
+interface LandingBackgroundProps {
+  // MotionValues derived from scroll or other transforms
+  backgroundY: MotionValue<number> | number;
+  floatingTextY: MotionValue<number> | number;
+}
+
+const LandingBackground: FC<LandingBackgroundProps> = ({ backgroundY, floatingTextY }) => {
   return (
     <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
-      {/* Слой с сеткой (Grid) */}
+      {/* Grid Layer */}
       <Motion.div style={{ y: backgroundY }} className="absolute inset-0 opacity-[0.15]">
         <div
           className="absolute inset-0"
@@ -15,7 +21,7 @@ const LandingBackground = ({ backgroundY, floatingTextY }) => {
         />
       </Motion.div>
 
-      {/* Декоративный "зафокусный" текст на фоне */}
+      {/* Decorative "Out-of-Focus" Background Text */}
       <Motion.div
         style={{ y: floatingTextY, opacity: 0.03 }}
         className="absolute inset-0 flex items-center justify-center select-none pointer-events-none"
@@ -25,7 +31,7 @@ const LandingBackground = ({ backgroundY, floatingTextY }) => {
         </div>
       </Motion.div>
 
-      {/* Чистый глубокий фон с легким оттенком */}
+      {/* Deep tinted background overlay */}
       <div className="absolute inset-0 bg-gradient-to-tr from-blue-900/10 via-transparent to-purple-900/10" />
 
       {/* Grain/Noise Overlay to fix banding */}

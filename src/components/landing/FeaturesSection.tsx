@@ -1,8 +1,15 @@
-import React from 'react';
+import React, { FC, ReactNode } from 'react';
 import { motion as Motion } from 'framer-motion';
 import { Layers, BarChart3, Zap, Trophy } from 'lucide-react';
 
-const features = [
+// Интерфейс для структуры фичи
+interface Feature {
+  icon: ReactNode;
+  title: string;
+  desc: string;
+}
+
+const features: Feature[] = [
   {
     icon: <Layers className="text-blue-500" size={24} />,
     title: 'Secure Digital Vault',
@@ -25,7 +32,7 @@ const features = [
   },
 ];
 
-const FeaturesSection = () => {
+const FeaturesSection: FC = () => {
   return (
     <section className="relative py-32 px-4 z-10">
       <div className="max-w-7xl mx-auto">
