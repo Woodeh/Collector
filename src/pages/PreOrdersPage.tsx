@@ -20,7 +20,7 @@ import {
   PreOrderGrid,
   PreOrderForm,
   PreOrderLightbox,
-} from '../components/preorder';
+} from '../entities/preorder';
 
 export interface PreOrder {
   id: string;

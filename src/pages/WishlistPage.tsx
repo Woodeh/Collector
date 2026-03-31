@@ -17,7 +17,8 @@ import { Loader2, Heart, Plus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { onAuthStateChanged, User } from 'firebase/auth';
 
-import { WishlistCard, WishlistForm } from '../components/wishlist'; // Assuming these are already TS or will be
+import WishlistCard from '../entities/wishlist/WishlistCard';
+import WishlistForm from '../entities/wishlist/WishlistForm';
 
 export interface WishlistItem {
   id: string;
@@ -97,7 +98,7 @@ const WishlistPage: React.FC = () => {
     setShowForm(true);
   };
 
-  const openEditForm = (item: WishlistItem) => {
+  const openEditForm = (item: any) => {
     setEditingId(item.id);
     setFormData({
       name: item.name,
@@ -163,7 +164,7 @@ const WishlistPage: React.FC = () => {
     }
   };
 
-  const handleGotIt = (item: WishlistItem) => {
+  const handleGotIt = (item: any) => {
     navigate('/add', {
       state: {
         initialData: {
