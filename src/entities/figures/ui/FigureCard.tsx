@@ -6,9 +6,9 @@ import { Link } from 'react-router-dom';
 interface Figure {
   id: string;
   name: string;
-  anime: string;
+  anime?: string;
   brand?: string;
-  price: string | number;
+  price?: string | number;
   previewImage?: string;
   image?: string;
   gender?: 'Male' | 'Female' | string;

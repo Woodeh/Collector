@@ -30,7 +30,7 @@ import DetailsRelated from '../widgets/DetailsRelated';
 interface Figure extends DocumentData {
   id: string;
   name: string;
-  anime?: string;
+  anime: string;
   brand?: string;
   price?: string | number;
   previewImage?: string;
@@ -268,7 +268,7 @@ const FigureDetailsPage: React.FC = () => {
 
             <DetailsActionButtons
               handleMarketScan={handleMarketScan}
-              auctionUrl={figure.auctionUrl}
+              auctionUrl={figure.auctionUrl || null}
             />
           </div>
         </div>

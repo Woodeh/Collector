@@ -5,8 +5,8 @@ import FigureCard from '../entities/figures/ui/FigureCard';
 interface RelatedFigure {
   id: string;
   name: string;
-  anime: string;
-  price: string | number;
+  anime?: string;
+  price?: string | number;
   previewImage?: string;
   image?: string;
   // Добавьте другие поля, если они используются в FigureCard

@@ -5,8 +5,8 @@ import { X, Copy, Check, Share2, QrCode, Shield, Send, MessageCircle } from 'luc
 // Интерфейс для данных фигурки
 interface Figure {
   name: string;
-  anime: string;
-  price: string | number;
+  anime?: string;
+  price?: string | number;
   previewImage?: string;
   images?: string[];
 }

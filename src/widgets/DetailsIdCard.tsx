@@ -7,7 +7,7 @@ interface FigureData {
   name: string;
   fullDisplayName?: string;
   anime?: string;
-  price: string | number;
+  price?: string | number;
   conditionGrade: string;
   hasBox: string | boolean;
   authorName?: string;
