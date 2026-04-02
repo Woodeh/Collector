@@ -201,7 +201,7 @@ const HomePage: React.FC = () => {
           style={{ x: floatingTextX, opacity: 0.02 }}
           className="absolute top-1/4 left-0 text-[20vw] font-black uppercase italic whitespace-nowrap select-none"
         >
-          Collection 0x{user.uid.slice(0, 5)}
+          Woody 0x{user.uid.slice(0, 5)}
         </Motion.div>
 
         {/* Очень мягкий общий виньеточный градиент вместо пятен */}
