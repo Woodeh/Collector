@@ -30,7 +30,7 @@ const SpecsSection: FC<SpecsSectionProps> = ({
 }) => {
   return (
     <div className="space-y-5 sm:space-y-6">
-      <h3 className="text-gray-500 font-black text-[10px] sm:text-[11px] uppercase tracking-[0.25em] flex items-center gap-2 italic">
+      <h3 className="text-blue-500 font-black text-[10px] sm:text-[11px] uppercase tracking-[0.25em] flex items-center gap-2 italic mt-5 sm:mt-10">
         <ShieldCheck size={14} /> Spec & Condition
       </h3>
       

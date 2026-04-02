@@ -58,7 +58,7 @@ const BasicInfoSection: FC<BasicInfoSectionProps> = ({
   return (
     <div className="space-y-5 sm:space-y-6">
       <h3 className="text-blue-500 font-black text-[10px] sm:text-[11px] uppercase tracking-[0.25em] flex items-center gap-2 italic">
-        <Info size={14} /> Basic Information
+        <Info size={14} /> Basic information
       </h3>
 
       <div className="space-y-3">

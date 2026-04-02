@@ -41,13 +41,17 @@ const Header: FC = () => {
   }, []);
 
   useEffect(() => {
+    const html = document.documentElement;
     if (isMenuOpen) {
       document.body.style.overflow = 'hidden';
+      html.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = 'unset';
+      html.style.overflow = 'unset';
     }
     return () => {
       document.body.style.overflow = 'unset';
+      html.style.overflow = 'unset';
     };
   }, [isMenuOpen]);
 
@@ -300,7 +304,7 @@ const Header: FC = () => {
 
       {/* MOBILE DROPDOWN MENU */}
       <div
-        className={`lg:hidden fixed inset-0 top-[77px] bg-[#121212]/95 backdrop-blur-2xl transition-all duration-500 z-10 overflow-y-auto ${
+        className={`lg:hidden fixed inset-0 top-[77px] bg-[#121212]/95 backdrop-blur-2xl transition-all duration-500 z-10 overflow-y-auto overscroll-contain ${
           isMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none translate-y-4'
         }`}
       >

@@ -15,7 +15,6 @@ const Footer: FC = () => {
   const navLinks: NavLink[] = [
     { name: 'My Collection', path: '/collection' },
     { name: 'Statistics', path: '/stats' },
-    { name: 'Add Figure', path: '/add' },
     { name: 'User Profile', path: '/profile' },
   ];
 

@@ -1,6 +1,5 @@
-import React, { useState, useEffect, FC } from 'react';
-import Tilt from 'react-parallax-tilt';
-import { Trash2, Calendar, ImageIcon, Clock } from 'lucide-react';
+import React, { useState, useEffect, FC, useRef, MouseEvent } from 'react';
+import { Trash2, Calendar, ImageIcon, Clock, Tag, MoreVertical } from 'lucide-react';
 
 // Интерфейс для данных предзаказа
 interface PreOrderItem {
@@ -30,6 +29,27 @@ interface PreOrderCardProps {
 }
 
 const PreOrderCard: FC<PreOrderCardProps> = ({ item, onDelete, onImageClick }) => {
+  const [showMenu, setShowMenu] = useState<boolean>(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  // Закрываем меню при клике вне компонента
+  useEffect(() => {
+    const handleClickOutside = (event: any) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setShowMenu(false);
+      }
+    };
+    if (showMenu) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showMenu]);
+
+  const handleMenuToggle = (e: MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setShowMenu(!showMenu);
+  };
   
   // Выносим расчет в чистую функцию
   const calculateTimeLeft = (paymentDate: string): TimeLeft | null => {
@@ -95,103 +115,117 @@ const PreOrderCard: FC<PreOrderCardProps> = ({ item, onDelete, onImageClick }) =
   };
 
   return (
-    <Tilt
-      className="tilt-card"
-      tiltMaxAngleX={5}
-      tiltMaxAngleY={5}
-      perspective={2000}
-      scale={1.02}
-      transitionSpeed={2500}
-      gyroscope={true}
-      tiltReverse={true}
-      glareEnable={true}
-      glareMaxOpacity={0.05}
-      glareColor="#ffffff"
-      glarePosition="all"
-      glareBorderRadius="2rem"
-    >
-      <div className="bg-[#1a1a1a] border border-[#333] rounded-[2rem] relative group shadow-[0_20px_50px_rgba(0,0,0,0.5)] flex flex-col h-full overflow-hidden transition-all duration-500 hover:border-orange-500/20 select-none transform-gpu">
-        {/* Delete Button */}
-        <button
-          type="button"
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            onDelete(item.id);
-          }}
-          className="absolute top-5 right-5 z-50 pointer-events-auto text-gray-500 hover:text-red-500 transition-colors bg-[#121212] p-2 rounded-xl border border-[#333] opacity-0 group-hover:opacity-100 shadow-2xl"
+    <div className="relative group bg-[#1a1a1a] rounded-[2rem] border border-[#333] overflow-hidden hover:border-blue-500/50 transition-all duration-500 flex flex-col shadow-2xl h-full text-left font-sans">
+        {/* Action Menu */}
+        <div
+          className="absolute top-4 right-4 z-50 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-all duration-300 transform translate-y-0 md:-translate-y-2 md:group-hover:translate-y-0"
+          ref={menuRef}
         >
-          <Trash2 size={16} />
-        </button>
+          <button
+            type="button"
+            onClick={handleMenuToggle}
+            className={`p-2 rounded-xl backdrop-blur-md border transition-all shadow-lg cursor-pointer ${
+              showMenu
+                ? 'bg-blue-600 border-blue-400 text-white'
+                : 'bg-black/60 border-white/10 text-gray-400 hover:text-white'
+            }`}
+          >
+            <MoreVertical size={18} />
+          </button>
+
+          {/* Dropdown menu */}
+          {showMenu && (
+            <div className="absolute right-0 mt-2 w-32 bg-[#1a1a1a] border border-[#333] rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.5)] overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  onDelete(item.id);
+                  setShowMenu(false);
+                }}
+                className="w-full flex items-center gap-3 px-4 py-3 text-[11px] font-black uppercase italic tracking-widest text-red-500/70 hover:bg-red-500/10 hover:text-red-500 transition-all cursor-pointer"
+              >
+                <Trash2 size={14} />
+                <span>Delete</span>
+              </button>
+            </div>
+          )}
+        </div>
 
         {/* Screenshot Section */}
-        {item.screenshot ? (
-          <div
-            className="relative aspect-[10/12] overflow-hidden border-b border-[#333] cursor-zoom-in"
-            onClick={() => onImageClick(item.screenshot!)}
-          >
-            <img
-              src={item.screenshot}
-              className="w-full h-full object-cover object-top pointer-events-none brightness-[0.8] group-hover:brightness-100 transition-all duration-500"
-              alt={item.name}
-            />
-          </div>
-        ) : (
-          <div className="aspect-[10/12] bg-[#121212] flex items-center justify-center border-b border-[#333]">
-            <ImageIcon className="text-gray-700" size={48} />
-          </div>
-        )}
+        <div className="aspect-[10/12] overflow-hidden bg-[#121212] relative border-b border-[#333]/50">
+          {item.screenshot ? (
+            <div
+              className="w-full h-full cursor-zoom-in"
+              onClick={() => onImageClick(item.screenshot!)}
+            >
+              <img
+                src={item.screenshot}
+                loading="lazy"
+                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 brightness-[0.9] group-hover:brightness-100"
+                alt={item.name}
+              />
+            </div>
+          ) : (
+            <div className="w-full h-full flex items-center justify-center">
+              <ImageIcon className="text-gray-800" size={48} />
+            </div>
+          )}
+          <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/80 to-transparent pointer-events-none" />
+        </div>
 
-        {/* Info Content */}
-        <div className="p-7 flex-1 flex flex-col justify-between">
-          <div className="text-left space-y-1">
-            <p className="text-[9px] text-orange-500 font-black uppercase tracking-[0.3em] opacity-80 leading-none">
-              {item.anime}
-            </p>
+        {/* INFO SECTION */}
+        <div className="p-6 flex-grow flex flex-col justify-between">
+          <div className="space-y-4">
+            <div className="flex justify-between items-center">
+              <span className="text-[10px] text-blue-500 font-black uppercase tracking-[0.25em] italic truncate max-w-[80%]">
+                {item.anime}
+              </span>
+              <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[9px] font-black border border-white/10 bg-white/5 text-gray-400">
+                <Calendar size={10} className="text-blue-500" />
+                {item.releaseDate}
+              </div>
+            </div>
 
-            <div className="py-3 mt-1 h-8 flex items-center">{getStatusDisplay(timeLeft)}</div>
+            <div className="py-1">
+              {getStatusDisplay(timeLeft)}
+            </div>
 
-            <div className="border-l-2 border-orange-500/40 pl-4 mt-2 py-1">
-              <h3 className="text-2xl font-black text-white leading-[1.1] mb-2 truncate group-hover:text-orange-400 transition-colors uppercase italic tracking-tighter">
+            <div className="relative pl-4 border-l-[3px] border-blue-600 py-1">
+              <h3 className="text-xl font-black text-white leading-tight uppercase italic tracking-tighter group-hover:text-blue-400 transition-colors truncate">
                 {item.name}
               </h3>
-              <p className="text-gray-500 text-[10px] font-bold uppercase tracking-[0.2em] italic leading-none">
+              <p className="text-gray-500 text-[10px] font-bold uppercase tracking-widest mt-1 italic leading-none">
                 {item.brand || 'Original Character'}
               </p>
             </div>
           </div>
 
-          <div className="space-y-4 mt-8">
-            <div className="grid grid-cols-2 gap-3">
-              <div className="bg-[#121212] p-4 rounded-[1.5rem] border border-white/5 text-center transition-all group-hover:border-orange-500/10 shadow-inner">
-                <p className="text-gray-500 text-[9px] uppercase font-bold mb-1 tracking-wider opacity-60">
-                  Paid
-                </p>
-                <p className="text-green-500 font-black text-xl leading-none">${item.deposit}</p>
-              </div>
-              <div className="bg-[#121212] p-4 rounded-[1.5rem] border border-white/5 text-center transition-all group-hover:border-orange-500/10 shadow-inner">
-                <p className="text-gray-500 text-[9px] uppercase font-bold mb-1 tracking-wider opacity-60">
-                  Total
-                </p>
-                <p className="text-white font-black text-xl leading-none">${item.totalPrice}</p>
+          {/* PRICE SECTION */}
+          <div className="mt-8 pt-5 border-t border-white/5 space-y-3">
+            <div className="flex justify-between items-center opacity-60">
+              <span className="text-[10px] uppercase font-black tracking-widest text-white italic">Deposit</span>
+              <div className="flex items-center gap-1">
+                <span className="text-xl font-black text-green-500 italic tracking-tighter">
+                  {Math.round(Number(item.deposit) || 0).toLocaleString()}
+                </span>
+                <span className="text-green-600 font-black text-sm">$</span>
               </div>
             </div>
-
-            <div className="bg-white/5 p-4 rounded-[1.5rem] flex items-center justify-between px-6 border border-white/5 transition-all group-hover:bg-white/[0.07]">
-              <div className="flex items-center gap-3">
-                <Calendar size={16} className="text-blue-500" />
-                <p className="text-gray-500 text-[9px] uppercase font-bold tracking-widest leading-none">
-                  Release
-                </p>
+            <div className="flex justify-between items-center">
+              <div className="flex items-center gap-2 opacity-40">
+                <Tag size={14} className="text-blue-500" />
+                <span className="text-[10px] uppercase font-black tracking-widest text-white italic">Total</span>
               </div>
-              <p className="text-sm font-black text-gray-200 italic uppercase leading-none">
-                {item.releaseDate}
-              </p>
+              <div className="text-3xl font-black text-white italic tracking-tighter flex items-center gap-1">
+                {Math.round(Number(item.totalPrice) || 0).toLocaleString()}
+                <span className="text-blue-500 not-italic text-xl ml-1">$</span>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </Tilt>
   );
 };
 
