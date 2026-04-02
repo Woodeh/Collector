@@ -20,7 +20,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, onConfirm, title, messag
           <div className="bg-red-500/10 p-3 rounded-xl">
             <AlertTriangle className="text-red-500" size={24} />
           </div>
-          <button onClick={onClose} className="text-gray-500 hover:text-white transition-colors">
+          <button onClick={onClose} className="text-gray-500 hover:text-white transition-colors cursor-pointer">
             <X size={20} />
           </button>
         </div>
@@ -35,7 +35,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, onConfirm, title, messag
         <div className="p-6 bg-[#121212]/50 flex gap-3">
           <button
             onClick={onClose}
-            className="flex-1 px-4 py-2.5 rounded-xl bg-[#252525] hover:bg-[#2a2a2a] text-white font-medium transition-all border border-[#333]"
+            className="flex-1 px-4 py-2.5 rounded-xl bg-[#252525] hover:bg-[#2a2a2a] text-white font-medium transition-all border border-[#333] cursor-pointer"
           >
             Отмена
           </button>
@@ -44,7 +44,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, onConfirm, title, messag
               onConfirm();
               onClose();
             }}
-            className="flex-1 px-4 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold transition-all shadow-lg shadow-red-900/20"
+            className="flex-1 px-4 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold transition-all shadow-lg shadow-red-900/20 cursor-pointer"
           >
             Удалить
           </button>

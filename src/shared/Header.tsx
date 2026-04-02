@@ -126,7 +126,7 @@ const Header: FC = () => {
         <Link
           to="/"
           onClick={closeMenu}
-          className="flex items-center gap-3 group select-none shrink-0"
+          className="flex items-center gap-3 group select-none shrink-0 cursor-pointer"
         >
           <div className="w-10 h-10 rounded-full border border-[#333] overflow-hidden group-hover:border-blue-500/50 transition-all duration-500 group-hover:shadow-[0_0_15px_rgba(59,130,246,0.3)]">
             <img
@@ -145,7 +145,7 @@ const Header: FC = () => {
           <NavLink
             to="/"
             className={({ isActive }) =>
-              `flex items-center gap-2 transition-colors ${
+              `flex items-center gap-2 transition-colors cursor-pointer ${
                 isActive ? 'text-blue-500' : 'text-gray-500 hover:text-white'
               }`
             }
@@ -155,7 +155,7 @@ const Header: FC = () => {
           <NavLink
             to="/community"
             className={({ isActive }) =>
-              `flex items-center gap-2 transition-colors ${
+              `flex items-center gap-2 transition-colors cursor-pointer ${
                 isActive ? 'text-blue-500' : 'text-gray-500 hover:text-white'
               }`
             }
@@ -185,7 +185,7 @@ const Header: FC = () => {
                 <NavLink
                   to="/collection"
                   className={({ isActive }) =>
-                    `flex items-center gap-2 transition-colors ${
+                    `flex items-center gap-2 transition-colors cursor-pointer ${
                       isActive ? 'text-blue-500' : 'text-gray-500 hover:text-white'
                     }`
                   }
@@ -195,7 +195,7 @@ const Header: FC = () => {
                 <NavLink
                   to="/preorders"
                   className={({ isActive }) =>
-                    `flex items-center gap-2 transition-colors ${
+                    `flex items-center gap-2 transition-colors cursor-pointer ${
                       isActive ? 'text-orange-500' : 'text-gray-500 hover:text-white'
                     }`
                   }
@@ -205,7 +205,7 @@ const Header: FC = () => {
                 <NavLink
                   to="/wishlist"
                   className={({ isActive }) =>
-                    `flex items-center gap-2 transition-colors ${
+                    `flex items-center gap-2 transition-colors cursor-pointer ${
                       isActive ? 'text-pink-500' : 'text-gray-500 hover:text-white'
                     }`
                   }
@@ -261,7 +261,7 @@ const Header: FC = () => {
                           navigate('/profile');
                           setIsProfileOpen(false);
                         }}
-                        className="w-full flex items-center gap-4 p-4 rounded-xl text-gray-400 hover:bg-white/5 hover:text-white transition-all group text-left"
+                        className="w-full flex items-center gap-4 p-4 rounded-xl text-gray-400 hover:bg-white/5 hover:text-white transition-all group text-left cursor-pointer"
                       >
                         <Settings size={18} className="group-hover:text-blue-500" />
                         <span className="text-[11px] font-black uppercase italic tracking-widest">
@@ -270,7 +270,7 @@ const Header: FC = () => {
                       </button>
                       <button
                         onClick={handleLogout}
-                        className="w-full flex items-center gap-4 p-4 rounded-xl text-red-500/70 hover:bg-red-500/10 hover:text-red-500 transition-all group text-left"
+                        className="w-full flex items-center gap-4 p-4 rounded-xl text-red-500/70 hover:bg-red-500/10 hover:text-red-500 transition-all group text-left cursor-pointer"
                       >
                         <LogOut size={18} />
                         <span className="text-[11px] font-black uppercase italic tracking-widest">
@@ -286,7 +286,7 @@ const Header: FC = () => {
             <div className="hidden lg:block">
               <Link
                 to="/login"
-                className="flex items-center gap-3 px-6 py-3 rounded-2xl bg-blue-600 text-white font-black uppercase italic text-[11px] tracking-widest hover:bg-blue-500 shadow-xl shadow-blue-600/20 active:scale-95 transition-all"
+                className="flex items-center gap-3 px-6 py-3 rounded-2xl bg-blue-600 text-white font-black uppercase italic text-[11px] tracking-widest hover:bg-blue-500 shadow-xl shadow-blue-600/20 active:scale-95 transition-all cursor-pointer"
               >
                 <LogIn size={16} /> <span>Access System</span>
               </Link>
@@ -295,7 +295,7 @@ const Header: FC = () => {
 
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="lg:hidden p-3 text-blue-500 bg-[#121212] border border-[#333] rounded-2xl hover:bg-blue-600/10 transition-all active:scale-90"
+            className="lg:hidden p-3 text-blue-500 bg-[#121212] border border-[#333] rounded-2xl hover:bg-blue-600/10 transition-all active:scale-90 cursor-pointer"
           >
             {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
@@ -346,7 +346,7 @@ const Header: FC = () => {
                     handleScanClick();
                   }}
                   disabled={isScanning}
-                  className={`flex items-center gap-5 p-5 rounded-2xl transition-all border mb-2 ${
+                  className={`flex items-center gap-5 p-5 rounded-2xl transition-all border mb-2 cursor-pointer ${
                     isScanning
                       ? 'bg-blue-500/10 border-blue-500/20 text-blue-500'
                       : 'text-gray-500 border-transparent hover:bg-[#1a1a1a] active:scale-95'
@@ -402,7 +402,7 @@ const Header: FC = () => {
                 />
                 <button
                   onClick={handleLogout}
-                  className="flex items-center gap-4 p-5 rounded-2xl text-red-500 font-bold uppercase tracking-widest text-xs mt-4 bg-red-500/5 border border-red-500/10"
+                  className="flex items-center gap-4 p-5 rounded-2xl text-red-500 font-bold uppercase tracking-widest text-xs mt-4 bg-red-500/5 border border-red-500/10 cursor-pointer"
                 >
                   <LogOut size={20} /> Log Out
                 </button>
@@ -419,7 +419,7 @@ const Header: FC = () => {
                 <Link
                   to="/login"
                   onClick={closeMenu}
-                  className="flex items-center gap-4 p-5 rounded-2xl bg-blue-600 text-white font-bold uppercase tracking-widest text-sm mt-4 shadow-xl shadow-blue-600/20"
+                  className="flex items-center gap-4 p-5 rounded-2xl bg-blue-600 text-white font-bold uppercase tracking-widest text-sm mt-4 shadow-xl shadow-blue-600/20 cursor-pointer"
                 >
                   <LogIn size={20} /> Sign In
                 </Link>
@@ -445,7 +445,7 @@ const MobileNavLink: FC<MobileNavLinkProps> = ({ to, icon, label, activeColor, o
     to={to}
     onClick={onClick}
     className={({ isActive }) =>
-      `flex items-center gap-5 p-5 rounded-2xl transition-all border
+      `flex items-center gap-5 p-5 rounded-2xl transition-all border cursor-pointer
       ${
         isActive
           ? `bg-[#1a1a1a] border-[#333] ${activeColor}`

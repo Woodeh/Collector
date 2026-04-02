@@ -131,7 +131,7 @@ const CharacterSearch: FC<CharacterSearchProps> = ({ value, onChange }) => {
               key={char.mal_id}
               type="button"
               onClick={() => handleSelect(char)}
-              className="w-full flex items-center gap-4 p-3 hover:bg-blue-600/10 transition-colors text-left group border-b border-white/5 last:border-0"
+              className="w-full flex items-center gap-4 p-3 hover:bg-blue-600/10 transition-colors text-left group border-b border-white/5 last:border-0 cursor-pointer"
             >
               <div className="w-10 h-10 rounded-lg overflow-hidden bg-[#121212] flex-shrink-0">
                 <img

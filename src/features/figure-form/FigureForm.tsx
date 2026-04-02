@@ -408,7 +408,7 @@ const FigureForm: FC<FigureFormProps> = ({ mode = 'add' }) => {
         <button
           type="submit"
           disabled={loading}
-          className="w-full py-5 sm:py-6 rounded-xl sm:rounded-[2rem] bg-blue-600 hover:bg-blue-500 text-white font-black text-lg sm:text-xl tracking-widest transition-all shadow-xl active:scale-95 uppercase italic flex items-center justify-center gap-3 disabled:opacity-50"
+          className="w-full py-5 sm:py-6 rounded-xl sm:rounded-[2rem] bg-blue-600 hover:bg-blue-500 text-white font-black text-lg sm:text-xl tracking-widest transition-all shadow-xl active:scale-95 uppercase italic flex items-center justify-center gap-3 disabled:opacity-50 cursor-pointer"
         >
           {loading ? (
             <Loader2 className="animate-spin" size={24} />

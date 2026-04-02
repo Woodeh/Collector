@@ -53,7 +53,7 @@ const CustomSelect: FC<CustomSelectProps> = ({
         onClick={() => setIsOpen(!isOpen)}
         className={`w-full bg-[#121212] border ${
           isOpen ? 'border-blue-500 shadow-[0_0_20px_rgba(59,130,246,0.1)]' : 'border-[#333]'
-        } h-[58px] px-4 rounded-2xl flex items-center justify-between transition-all duration-300 hover:bg-[#181818]`}
+        } h-[58px] px-4 rounded-2xl flex items-center justify-between transition-all duration-300 hover:bg-[#181818] cursor-pointer`}
       >
         <div className="flex items-center gap-3 min-w-0">
           {Icon && <Icon size={18} className={isOpen ? 'text-blue-500' : 'text-gray-500'} />}
@@ -87,7 +87,7 @@ const CustomSelect: FC<CustomSelectProps> = ({
                 }}
                 className={`w-full text-left p-4 hover:bg-blue-600/10 hover:text-blue-400 transition-colors flex items-center justify-between group/opt ${
                   value === option.value ? 'bg-blue-600/5 text-blue-500' : 'text-gray-400'
-                }`}
+                } cursor-pointer`}
               >
                 <span className="font-bold text-sm">{option.label}</span>
                 {value === option.value && (

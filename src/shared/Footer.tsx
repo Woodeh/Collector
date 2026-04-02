@@ -24,7 +24,7 @@ const Footer: FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
           {/* BRAND SECTION */}
           <div className="space-y-6 text-left">
-            <Link to="/" className="flex items-center gap-3 select-none shrink-0 w-fit">
+            <Link to="/" className="flex items-center gap-3 select-none shrink-0 w-fit cursor-pointer">
               <div className="w-10 h-10 rounded-full border border-[#333] overflow-hidden">
                 <img src={faceLogo} alt="Logo" className="w-full h-full object-cover" />
               </div>
@@ -48,7 +48,7 @@ const Footer: FC = () => {
                 <Link
                   key={link.name}
                   to={link.path}
-                  className="text-gray-500 hover:text-white text-[11px] font-black uppercase tracking-[0.2em] transition-all italic w-fit"
+                  className="text-gray-500 hover:text-white text-[11px] font-black uppercase tracking-[0.2em] transition-all italic w-fit cursor-pointer"
                 >
                   {link.name}
                 </Link>
@@ -64,20 +64,20 @@ const Footer: FC = () => {
             <nav className="flex flex-col gap-4">
               <a
                 href="#"
-                className="flex items-center gap-3 text-gray-500 hover:text-white text-[11px] font-black uppercase tracking-[0.2em] transition-all italic group"
+                className="flex items-center gap-3 text-gray-500 hover:text-white text-[11px] font-black uppercase tracking-[0.2em] transition-all italic group cursor-pointer"
               >
                 <Instagram size={14} className="group-hover:text-pink-500 transition-colors" />{' '}
                 Instagram
               </a>
               <a
                 href="#"
-                className="flex items-center gap-3 text-gray-500 hover:text-white text-[11px] font-black uppercase tracking-[0.2em] transition-all italic group"
+                className="flex items-center gap-3 text-gray-500 hover:text-white text-[11px] font-black uppercase tracking-[0.2em] transition-all italic group cursor-pointer"
               >
                 <Github size={14} className="group-hover:text-white transition-colors" /> Repository
               </a>
               <a
                 href="#"
-                className="flex items-center gap-3 text-gray-500 hover:text-white text-[11px] font-black uppercase tracking-[0.2em] transition-all italic group"
+                className="flex items-center gap-3 text-gray-500 hover:text-white text-[11px] font-black uppercase tracking-[0.2em] transition-all italic group cursor-pointer"
               >
                 <Info size={14} className="group-hover:text-blue-500 transition-colors" /> Support
               </a>

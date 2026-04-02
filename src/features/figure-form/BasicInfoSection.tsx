@@ -110,7 +110,7 @@ const BasicInfoSection: FC<BasicInfoSectionProps> = ({
                   handleCustomChange('characterImage', '');
                   onCharArtFileChange(null);
                 }}
-                className="text-gray-600 hover:text-red-500 transition-colors"
+                className="text-gray-600 hover:text-red-500 transition-colors cursor-pointer"
               >
                 <X size={14} />
               </button>
