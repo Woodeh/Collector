@@ -15,10 +15,19 @@ import LandingPage from './LandingPage';
 interface Figure {
   id: string;
   name?: string;
+  anime?: string;
   brand?: string;
   price?: number | string;
   previewImage?: string;
   [key: string]: any;
+}
+
+interface SpotlightFigure {
+  id: string;
+  name: string;
+  anime?: string;
+  brand?: string;
+  previewImage?: string;
 }
 
 interface RankInfo {
@@ -32,7 +41,7 @@ interface Stats {
   totalValue: number;
   count: number;
   topBrand: string;
-  rank: RankInfo | string;
+  rank: RankInfo;
 }
 
 interface WidgetStats {
@@ -42,8 +51,13 @@ interface WidgetStats {
 
 const HomePage: React.FC = () => {
   const [recentFigures, setRecentFigures] = useState<Figure[]>([]);
-  const [spotlight, setSpotlight] = useState<Figure | null>(null);
-  const [stats, setStats] = useState<Stats>({ totalValue: 0, count: 0, topBrand: 'None', rank: 'Novice' });
+  const [spotlight, setSpotlight] = useState<SpotlightFigure | null>(null);
+  const [stats, setStats] = useState<Stats>({ 
+    totalValue: 0, 
+    count: 0, 
+    topBrand: 'None', 
+    rank: { name: 'Novice', next: 5, color: 'text-gray-500', bg: 'bg-gray-500' } 
+  });
   const [loading, setLoading] = useState<boolean>(true);
   const [user, setUser] = useState<User | null>(null);
 
@@ -75,8 +89,11 @@ const HomePage: React.FC = () => {
       const allDocs = (await getDocs(qAll)).docs.map((d) => ({ ...d.data(), id: d.id } as Figure));
 
       if (allDocs.length > 0) {
-        const randomFigure = allDocs[Math.floor(Math.random() * allDocs.length)];
-        setSpotlight(randomFigure || null);
+        const randomFigure = allDocs[Math.floor(Math.random() * allDocs.length)] as Figure;
+        if (randomFigure && randomFigure.name) {
+          // Ensure the figure has a name to satisfy SpotlightFigure requirement
+          setSpotlight(randomFigure as SpotlightFigure);
+        }
 
         // Расчет статистики
         const val = allDocs.reduce((acc, d) => acc + (Number(d.price) || 0), 0);
@@ -86,7 +103,7 @@ const HomePage: React.FC = () => {
         }, {});
         const topBrand = Object.entries(brands).sort((a, b) => b[1] - a[1])[0]?.[0] || 'Original';
 
-        const getRankInfo = (count: number): RankInfo | string => {
+        const getRankInfo = (count: number): RankInfo => {
           if (count >= 500)
             return {
               name: 'Mythic Overlord',
