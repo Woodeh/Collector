@@ -8,14 +8,16 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       injectRegister: 'auto',
-      
-      // Позволяет видеть манифест в режиме npm run dev
       devOptions: {
-        enabled: true,
+        enabled: true, // Помогает отлаживать PWA локально
       },
-
-      includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'mask-icon.svg'],
-      
+      includeAssets: [
+        'favicon.ico', 
+        'apple-touch-icon.png', 
+        'mask-icon.svg', 
+        'pwa-192x192.png', 
+        'pwa-512x512.png'
+      ],
       manifest: {
         name: 'Figure Collector App',
         short_name: 'Figures',
@@ -27,51 +29,41 @@ export default defineConfig({
         start_url: '/',
         icons: [
           {
-            src: '/pwa-192x192.png', // Добавлен слеш для корректного поиска в public
+            src: '/pwa-192x192.png',
             sizes: '192x192',
             type: 'image/png'
           },
           {
-            src: '/pwa-512x512.png', // Добавлен слеш
+            src: '/pwa-512x512.png',
             sizes: '512x512',
             type: 'image/png'
           },
           {
-            src: '/pwa-512x512.png', // Добавлен слеш
+            src: '/pwa-512x512.png',
             sizes: '512x512',
             type: 'image/png',
             purpose: 'any maskable'
           }
         ]
       },
-
       workbox: {
-        // Указываем явно, что кэшировать, включая твои разделенные чанки
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,json,webmanifest}'],
-        maximumFileSizeToCacheInBytes: 5000000, // Увеличил до 5МБ, чтобы Firebase точно влез
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,json}'],
+        maximumFileSizeToCacheInBytes: 5000000,
+        // Это КРИТИЧЕСКИ ВАЖНО: заставляем Service Worker игнорировать спец-пути Firebase
+        navigateFallbackDenylist: [/^\/__/],
       }
     })
   ],
-
-  // Фикс для recharts и react-is, чтобы не было ошибок импорта
   optimizeDeps: {
-    include: ['react-is', 'recharts', 'lucide-react', 'firebase/app', 'firebase/firestore']
+    // Добавляем основные модули в оптимизацию, чтобы Vite не "тупил" при их загрузке
+    include: ['react-is', 'recharts', 'lucide-react', 'firebase/app', 'firebase/auth', 'firebase/firestore']
   },
-
   build: {
-    chunkSizeWarningLimit: 1000, // Немного поднял лимит
+    chunkSizeWarningLimit: 1000,
     rollupOptions: {
       output: {
+        // Упростили manualChunks, чтобы избежать ошибок с циклическими зависимостями
         manualChunks(id) {
-          // Выносим Firebase в отдельный чанк
-          if (id.includes('firebase')) {
-            return 'firebase-provider';
-          }
-          // Выносим тяжелый UI (графики и иконки)
-          if (id.includes('recharts') || id.includes('lucide-react')) {
-            return 'ui-vendors';
-          }
-          // Все остальное из библиотек
           if (id.includes('node_modules')) {
             return 'vendor';
           }

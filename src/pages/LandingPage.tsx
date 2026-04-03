@@ -4,6 +4,7 @@ import { useScroll, useTransform } from 'framer-motion';
 import { db } from '../firebase/config';
 import { collection, query, orderBy, limit, getDocs } from 'firebase/firestore';
 
+import { Figure } from '../types/figure'; // Import the unified Figure interface
 import {
   LandingBackground,
   HeroSection,
@@ -11,15 +12,6 @@ import {
   FeaturesSection,
   FinalCTA,
 } from '../widgets';
-
-interface Figure {
-  id: string;
-  name: string;
-  anime: string;
-  price: number;
-  previewImage: string;
-  [key: string]: any;
-}
 
 const generatePlaceholders = (): Figure[] => [
   {
