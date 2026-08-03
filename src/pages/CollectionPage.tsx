@@ -17,17 +17,7 @@ import { useNavigate } from 'react-router-dom';
 import Modal from '../shared/Modal.js';
 
 import { FigureCard, CollectionHeader, CollectionFilters } from '../components/collection';
-
-interface Figure {
-  id: string;
-  name: string;
-  anime?: string;
-  brand?: string;
-  price?: string | number;
-  image?: string;
-  images?: string[];
-  createdAt?: { seconds: number };
-}
+import type { Figure } from '../types/figure';
 
 const Collection: React.FC = () => {
   const [figures, setFigures] = useState<Figure[]>([]);
@@ -72,12 +62,16 @@ const Collection: React.FC = () => {
 
   // Подготовка опций для селектов
   const animeOptions = useMemo(() => {
-    const titles = figures.map((f) => f.anime).filter(Boolean);
+    const titles = figures
+      .map((f) => f.anime)
+      .filter((val): val is string => Boolean(val));
     return ['All', ...new Set(titles)].sort();
   }, [figures]);
 
   const brandOptions = useMemo(() => {
-    const brands = figures.map((f) => f.brand).filter(Boolean);
+    const brands = figures
+      .map((f) => f.brand)
+      .filter((val): val is string => Boolean(val));
     return ['All', ...new Set(brands)].sort();
   }, [figures]);
 

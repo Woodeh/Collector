@@ -1,14 +1,6 @@
 import React, { FC } from 'react';
 import { X } from 'lucide-react';
-
-// Интерфейс для данных фигурки
-interface Figure {
-  id: string;
-  name: string;
-  anime: string;
-  previewImage?: string;
-  image?: string;
-}
+import type { Figure } from '../../types/figure';
 
 // Интерфейс пропсов модального окна
 interface GrailModalProps {

@@ -4,14 +4,25 @@ import { getStorage } from "firebase/storage";
 import { getAuth } from "firebase/auth";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyC7iOGTdVqP371ipyJ8dfrKvxESQHPpc38",
-  authDomain: "figure-collector.firebaseapp.com",
-  projectId: "figure-collector",
-  storageBucket: "figure-collector.firebasestorage.app",
-  messagingSenderId: "385627858193",
-  appId: "1:385627858193:web:a3dabef13c8b3d64a358b0",
-  measurementId: "G-X8GPXY5EP4"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
 };
+
+const missingKeys = Object.entries(firebaseConfig)
+  .filter(([, value]) => !value)
+  .map(([key]) => key);
+
+if (missingKeys.length > 0) {
+  console.warn(
+    `[Firebase] Missing environment variables: ${missingKeys.join(", ")}. ` +
+      "Firebase may fail to initialize correctly."
+  );
+}
 
 const app = initializeApp(firebaseConfig);
 

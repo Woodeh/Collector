@@ -20,7 +20,9 @@ const DetailsThumbnails: FC<DetailsThumbnailsProps> = ({
           key={idx}
           type="button"
           onClick={() => handleManualSelect(idx)}
-          className={`w-20 aspect-[4/5] rounded-xl border-2 overflow-hidden transition-all duration-300 cursor-pointer ${
+          aria-label={`Show image ${idx + 1}`}
+          aria-current={activeImg === idx ? 'true' : undefined}
+          className={`w-20 aspect-[4/5] rounded-xl border-2 overflow-hidden transition-all duration-300 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[#121212] ${
             activeImg === idx
               ? 'border-blue-500 shadow-[0_0_20px_rgba(59,130,246,0.4)] scale-105'
               : 'border-[#333] opacity-40 hover:opacity-100 hover:scale-105'

@@ -1,19 +1,7 @@
 import React, { useState, useRef, useEffect, FC, MouseEvent } from 'react';
 import { Tag, Trash2, Pencil, User, MoreVertical } from 'lucide-react';
 import { Link } from 'react-router-dom';
-
-// Интерфейс для данных фигурки
-interface Figure {
-  id: string;
-  name: string;
-  anime?: string;
-  brand?: string;
-  price?: string | number;
-  previewImage?: string;
-  image?: string;
-  gender?: 'Male' | 'Female' | string;
-  authorName?: string;
-}
+import type { Figure } from '../../../types/figure';
 
 interface FigureCardProps {
   figure: Figure;

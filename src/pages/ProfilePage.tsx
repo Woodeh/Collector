@@ -8,6 +8,7 @@ import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { FileDown, Camera, Loader2, Award, X } from 'lucide-react';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import type { Figure } from '../types/figure';
 
 import StatsAndCharts from '../widgets/StatsAndCharts';
 import BrandsSplit from '../widgets/BrandsSplit';
@@ -21,16 +22,8 @@ import {
   ProfileBackground,
 } from '../entities/user/index';
 
-interface Figure {
-  id: string;
-  name: string;
-  anime: string;
-  brand?: string;
-  price: string | number;
-  conditionGrade?: string;
-  createdAt?: { seconds: number };
+interface ProfileFigure extends Figure {
   isFavorite: boolean;
-  userId?: string;
 }
 
 interface Stats {
@@ -46,8 +39,8 @@ interface ChartData {
 const Profile: FC = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState<User | null>(null);
-  const [allFigures, setAllFigures] = useState<Figure[]>([]);
-  const [recentFigures, setRecentFigures] = useState<Figure[]>([]);
+  const [allFigures, setAllFigures] = useState<ProfileFigure[]>([]);
+  const [recentFigures, setRecentFigures] = useState<ProfileFigure[]>([]);
   const [collectionStats, setCollectionStats] = useState<Stats>({ totalValue: 0, count: 0 });
   const [preorderStats, setPreorderStats] = useState<Stats>({ totalValue: 0, count: 0 });
   const [wishlistStats, setWishlistStats] = useState<Stats>({ totalValue: 0, count: 0 });
@@ -90,21 +83,23 @@ const Profile: FC = () => {
       if (currentUser) {
         const qFigures = query(collection(db, 'figures'), where('userId', '==', currentUser.uid));
         const unsubFigures = onSnapshot(qFigures, (snap) => {
-          const figuresList: Figure[] = [];
+          const figuresList: ProfileFigure[] = [];
           let totalValue = 0,
             count = 0;
           const brandsMap: Record<string, number> = {};
           const animeMap: Record<string, number> = {};
 
           snap.docs.forEach((document) => {
-            const data = { 
-              id: document.id, 
-              isFavorite: false, 
-              anime: 'Original', 
-              ...document.data() } as Figure;
+            const data = {
+              id: document.id,
+              isFavorite: false,
+              anime: 'Original',
+              ...document.data(),
+            } as ProfileFigure;
             figuresList.push(data);
             if (data.conditionGrade?.toLowerCase().trim() !== 'pre-order') {
-              totalValue += typeof data.price === 'string' ? parseFloat(data.price) || 0 : data.price;
+              const priceValue = typeof data.price === 'string' ? parseFloat(data.price) : Number(data.price);
+              totalValue += Number.isNaN(priceValue) ? 0 : priceValue;
               count++;
               brandsMap[data.brand || 'Other'] = (brandsMap[data.brand || 'Other'] || 0) + 1;
               animeMap[data.anime || 'Original'] = (animeMap[data.anime || 'Original'] || 0) + 1;

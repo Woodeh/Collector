@@ -35,7 +35,7 @@ const DetailsSlider: FC<DetailsSliderProps> = ({
   setIsHovered,
 }) => {
   return (
-    <div className="flex flex-col items-center lg:items-end w-full">
+    <div className="flex flex-col items-center lg:items-end w-full" role="region" aria-label="Figure image carousel">
       <div
         className="relative w-full max-w-md aspect-[4/5] z-10"
         onMouseEnter={() => setIsHovered(true)}
@@ -76,7 +76,7 @@ const DetailsSlider: FC<DetailsSliderProps> = ({
               exit="exit"
               transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
               className="absolute inset-0 w-full h-full object-cover cursor-grab active:cursor-grabbing"
-              alt="Display"
+              alt={`Figure image ${activeImg + 1}`}
             />
           </AnimatePresence>
 
@@ -85,14 +85,16 @@ const DetailsSlider: FC<DetailsSliderProps> = ({
               <button
                 type="button"
                 onClick={prevSlide}
-                className="absolute left-4 top-1/2 -translate-y-1/2 p-3 rounded-full bg-black/40 border border-white/5 hover:bg-blue-600 transition-all opacity-0 group-hover/slider:opacity-100 z-20 cursor-pointer"
+                aria-label="Previous image"
+                className="absolute left-4 top-1/2 -translate-y-1/2 p-3 rounded-full bg-black/40 border border-white/5 hover:bg-blue-600 transition-all opacity-0 group-hover/slider:opacity-100 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[#121212] z-20 cursor-pointer"
               >
                 <ChevronLeft size={24} className="text-white" />
               </button>
               <button
                 type="button"
                 onClick={nextSlide}
-                className="absolute right-4 top-1/2 -translate-y-1/2 p-3 rounded-full bg-black/40 border border-white/5 hover:bg-blue-600 transition-all opacity-0 group-hover/slider:opacity-100 z-20 cursor-pointer"
+                aria-label="Next image"
+                className="absolute right-4 top-1/2 -translate-y-1/2 p-3 rounded-full bg-black/40 border border-white/5 hover:bg-blue-600 transition-all opacity-0 group-hover/slider:opacity-100 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[#121212] z-20 cursor-pointer"
               >
                 <ChevronRight size={24} className="text-white" />
               </button>

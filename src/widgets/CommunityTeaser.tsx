@@ -2,23 +2,11 @@ import React, { FC } from 'react';
 import { motion as Motion } from 'framer-motion';
 import { Globe, Lock, ArrowRight } from 'lucide-react';
 import FigureCard from '../entities/figures/ui/FigureCard';
-
-// Интерфейс для данных фигурки в сообществе
-interface CommunityFigure {
-  id: string;
-  name: string;
-  anime: string;
-  previewImage?: string;
-  image?: string;
-  price: number | string;
-  brand?: string;
-  authorName?: string;
-  // Добавьте другие поля, если они требуются в FigureCard
-}
+import type { Figure } from '../types/figure';
 
 interface CommunityTeaserProps {
   loading: boolean;
-  communityFigures: CommunityFigure[];
+  communityFigures: Figure[];
   onJoin: () => void;
 }
 

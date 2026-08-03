@@ -12,7 +12,8 @@ const DetailsActionButtons: FC<DetailsActionButtonsProps> = ({ handleMarketScan,
       <button
         type="button"
         onClick={handleMarketScan}
-        className="group flex items-center justify-between bg-blue-600/10 border border-blue-500/30 text-blue-500 p-6 rounded-[1.5rem] hover:bg-blue-600 hover:text-white transition-all shadow-xl active:scale-95 cursor-pointer"
+        aria-label="Start a market scan for this figure"
+        className="group flex items-center justify-between bg-blue-600/10 border border-blue-500/30 text-blue-500 p-6 rounded-[1.5rem] hover:bg-blue-600 hover:text-white transition-all shadow-xl active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[#121212] cursor-pointer"
       >
         <div className="flex items-center gap-4 text-left">
           <SearchCode size={20} />
@@ -33,7 +34,8 @@ const DetailsActionButtons: FC<DetailsActionButtonsProps> = ({ handleMarketScan,
           href={auctionUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="group flex items-center justify-between bg-white text-black p-6 rounded-[1.5rem] hover:bg-blue-600 hover:text-white transition-all shadow-xl active:scale-95"
+          aria-label="Open auction link in new tab"
+          className="group flex items-center justify-between bg-white text-black p-6 rounded-[1.5rem] hover:bg-blue-600 hover:text-white transition-all shadow-xl active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[#121212]"
         >
           <div className="flex items-center gap-4 text-left">
             <ExternalLink size={20} />

@@ -3,8 +3,8 @@ import { motion as Motion, MotionValue } from 'framer-motion';
 
 interface LandingBackgroundProps {
   // MotionValues derived from scroll or other transforms
-  backgroundY: MotionValue<number> | number;
-  floatingTextY: MotionValue<number> | number;
+  backgroundY: MotionValue<string> | MotionValue<number> | number;
+  floatingTextY: MotionValue<string> | MotionValue<number> | number;
 }
 
 const LandingBackground: FC<LandingBackgroundProps> = ({ backgroundY, floatingTextY }) => {

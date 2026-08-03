@@ -226,7 +226,9 @@ const FigureDetailsPage: React.FC = () => {
   if (!figure) return null;
 
   return (
-    <Motion.div
+    <Motion.main
+      role="main"
+      aria-label="Figure details"
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, ease: 'easeOut' }}
@@ -289,7 +291,7 @@ const FigureDetailsPage: React.FC = () => {
         onClose={() => setIsShareModalOpen(false)}
         figure={figure}
       />
-    </Motion.div>
+    </Motion.main>
   );
 };
 

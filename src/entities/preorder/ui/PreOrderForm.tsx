@@ -1,6 +1,7 @@
 import React, { FC, ChangeEvent, FormEvent } from 'react';
 import { X, Camera } from 'lucide-react';
 import AnimeSearch from '../../../features/figure-form/AnimeSearch';
+import type { Currency } from '../../../types/figure';
 
 // Интерфейс для данных формы
 interface PreOrderFormData {
@@ -19,8 +20,8 @@ interface PreOrderFormProps {
   setShowForm: (show: boolean) => void;
   formData: PreOrderFormData;
   setFormData: React.Dispatch<React.SetStateAction<PreOrderFormData>>;
-  formCurrency: string;
-  setFormCurrency: (currency: string) => void;
+  formCurrency: Currency;
+  setFormCurrency: (currency: Currency) => void;
   screenshotPreview: string | null;
   handleFileChange: (e: ChangeEvent<HTMLInputElement>) => void;
   handleSubmit: (e: FormEvent) => void;
@@ -85,7 +86,7 @@ const PreOrderForm: FC<PreOrderFormProps> = ({
             <select
               className="w-full bg-[#121212] border border-[#333] p-4 rounded-xl text-white font-bold appearance-none cursor-pointer outline-none focus:border-orange-500"
               value={formCurrency}
-              onChange={(e: ChangeEvent<HTMLSelectElement>) => setFormCurrency(e.target.value)}
+              onChange={(e: ChangeEvent<HTMLSelectElement>) => setFormCurrency(e.target.value as Currency)}
             >
               <option value="USD">USD ($)</option>
               <option value="KZT">KZT (₸)</option>

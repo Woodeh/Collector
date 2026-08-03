@@ -2,16 +2,7 @@ import React, { FC } from 'react';
 import { motion as Motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { Zap, ChevronRight, LayoutGrid } from 'lucide-react';
-
-// Интерфейс для данных фигурки
-interface Figure {
-  id: string;
-  name: string;
-  anime: string;
-  price: string | number;
-  previewImage?: string;
-  image?: string;
-}
+import type { Figure } from '../types/figure';
 
 interface RecentFiguresProps {
   recentFigures: Figure[];

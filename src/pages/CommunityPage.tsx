@@ -12,18 +12,7 @@ import {
 } from 'firebase/firestore';
 import { Users, Search, SlidersHorizontal } from 'lucide-react';
 import { FigureCard, CollectionFilters } from '../components/collection';
-
-interface Figure {
-  id: string;
-  name?: string;
-  anime?: string;
-  brand?: string;
-  price?: number | string;
-  createdAt?: {
-    seconds: number;
-  };
-  [key: string]: any;
-}
+import type { Figure } from '../types/figure';
 
 type SortOption = 'newest' | 'oldest' | 'cheap' | 'expensive' | 'az' | 'za';
 

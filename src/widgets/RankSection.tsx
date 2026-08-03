@@ -1,20 +1,7 @@
 import React, { FC } from 'react';
 import { motion as Motion } from 'framer-motion';
 import { Shield } from 'lucide-react';
-
-// Интерфейс для вложенного объекта ранга
-interface RankProtocol {
-  name: string;
-  next: number;
-  color: string;
-  bg: string;
-}
-
-// Интерфейс для общей статистики
-interface RankStats {
-  count: number;
-  rank: RankProtocol;
-}
+import type { RankStats } from '../types/figure';
 
 interface RankSectionProps {
   stats: RankStats | null | undefined;

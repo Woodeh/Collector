@@ -1,25 +1,20 @@
 import React, { FC } from 'react';
 import { Link } from 'react-router-dom';
 import { Box, Target, ChevronRight, Fingerprint, ShieldCheck } from 'lucide-react';
-
-// Интерфейс для данных объекта Spotlight
-interface SpotlightFigure {
-  id: string;
-  name: string;
-  anime: string;
-  price: string | number;
-  brand: string;
-  previewImage?: string;
-  image?: string;
-  category?: string;
-}
+import type { Figure } from '../../types/figure';
 
 interface SpotlightCardProps {
-  spotlight: SpotlightFigure | null | undefined;
+  spotlight: Figure | null | undefined;
 }
 
 const SpotlightCard: FC<SpotlightCardProps> = ({ spotlight }) => {
   if (!spotlight) return null;
+
+  const spotlightName = spotlight.name || 'Unknown Asset';
+  const spotlightAnime = spotlight.anime || 'Unknown Origin';
+  const spotlightBrand = spotlight.brand || 'Original';
+  const spotlightPrice = Number(spotlight.price || 0).toLocaleString();
+  const spotlightCategory = spotlight.category || 'Scale_Unit';
 
   return (
     <div className="relative group w-full">
@@ -84,7 +79,7 @@ const SpotlightCard: FC<SpotlightCardProps> = ({ spotlight }) => {
                   <div className="flex items-center gap-2">
                     <Box size={14} className="text-blue-500" />
                     <p className="text-white text-sm font-black uppercase italic truncate">
-                      {spotlight.brand}
+                      {spotlightBrand}
                     </p>
                   </div>
                 </div>
@@ -95,7 +90,7 @@ const SpotlightCard: FC<SpotlightCardProps> = ({ spotlight }) => {
                   <div className="flex items-center gap-2">
                     <Fingerprint size={14} className="text-blue-500" />
                     <p className="text-white text-sm font-black uppercase italic">
-                      {spotlight.category || 'Scale_Unit'}
+                      {spotlightCategory}
                     </p>
                   </div>
                 </div>
@@ -108,7 +103,7 @@ const SpotlightCard: FC<SpotlightCardProps> = ({ spotlight }) => {
                   </p>
                   <p className="text-4xl md:text-5xl font-black text-white italic tracking-tighter leading-none">
                     <span className="text-blue-500 text-2xl mr-1">$</span>
-                    {Number(spotlight.price).toLocaleString()}
+                    {spotlightPrice}
                   </p>
                 </div>
 

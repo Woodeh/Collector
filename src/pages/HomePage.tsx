@@ -11,28 +11,13 @@ import QuickActions from '../components/home/QuickActions';
 import RecentFigures from '../widgets/RecentFigures';
 import HomeWidgets from '../components/home/HomeWidgets';
 import LandingPage from './LandingPage';
-
-interface Figure {
-  id: string;
-  name?: string;
-  brand?: string;
-  price?: number | string;
-  previewImage?: string;
-  [key: string]: any;
-}
-
-interface RankInfo {
-  name: string;
-  next: number;
-  color: string;
-  bg: string;
-}
+import type { Figure, RankProtocol } from '../types/figure';
 
 interface Stats {
   totalValue: number;
   count: number;
   topBrand: string;
-  rank: RankInfo | string;
+  rank: RankProtocol;
 }
 
 interface WidgetStats {
@@ -43,7 +28,7 @@ interface WidgetStats {
 const HomePage: React.FC = () => {
   const [recentFigures, setRecentFigures] = useState<Figure[]>([]);
   const [spotlight, setSpotlight] = useState<Figure | null>(null);
-  const [stats, setStats] = useState<Stats>({ totalValue: 0, count: 0, topBrand: 'None', rank: 'Novice' });
+  const [stats, setStats] = useState<Stats>({ totalValue: 0, count: 0, topBrand: 'None', rank: { name: 'Novice', next: 5, color: 'text-gray-500', bg: 'bg-gray-500' } });
   const [loading, setLoading] = useState<boolean>(true);
   const [user, setUser] = useState<User | null>(null);
 
@@ -86,7 +71,7 @@ const HomePage: React.FC = () => {
         }, {});
         const topBrand = Object.entries(brands).sort((a, b) => b[1] - a[1])[0]?.[0] || 'Original';
 
-        const getRankInfo = (count: number): RankInfo | string => {
+        const getRankInfo = (count: number): RankProtocol => {
           if (count >= 500)
             return {
               name: 'Mythic Overlord',

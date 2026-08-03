@@ -1,15 +1,7 @@
 import React, { useState, FC } from 'react';
 import { motion as Motion, AnimatePresence } from 'framer-motion';
 import { X, Copy, Check, Share2, QrCode, Shield, Send, MessageCircle } from 'lucide-react';
-
-// Интерфейс для данных фигурки
-interface Figure {
-  name: string;
-  anime?: string;
-  price?: string | number;
-  previewImage?: string;
-  images?: string[];
-}
+import type { Figure } from '../types/figure';
 
 interface ShareModalProps {
   isOpen: boolean;

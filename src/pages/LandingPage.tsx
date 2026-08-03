@@ -11,15 +11,7 @@ import {
   FeaturesSection,
   FinalCTA,
 } from '../widgets';
-
-interface Figure {
-  id: string;
-  name: string;
-  anime: string;
-  price: number;
-  previewImage: string;
-  [key: string]: any;
-}
+import type { Figure } from '../types/figure';
 
 const generatePlaceholders = (): Figure[] => [
   {

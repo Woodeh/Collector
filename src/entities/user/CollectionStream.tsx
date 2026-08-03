@@ -1,15 +1,6 @@
 import React, { useRef, useState, FC, MouseEvent } from 'react';
 import { History, ChevronLeft, ChevronRight, Info, TrendingUp, Target } from 'lucide-react';
-
-interface Figure {
-  id: string;
-  name: string;
-  anime: string;
-  price: string | number;
-  brand?: string;
-  previewImage?: string;
-  image?: string;
-}
+import type { Figure } from '../../types/figure';
 
 interface CollectionStreamProps {
   recentFigures: Figure[];

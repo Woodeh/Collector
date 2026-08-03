@@ -1,14 +1,6 @@
 import React, { FC } from 'react';
 import { Info } from 'lucide-react';
-
-interface Figure {
-  id: string;
-  name: string;
-  anime: string;
-  price: number;
-  previewImage?: string;
-  image?: string;
-}
+import type { Figure } from '../../types/figure';
 
 interface MainGrailProps {
   favoriteFigure: Figure | null | undefined;
@@ -56,7 +48,7 @@ const MainGrail: FC<MainGrailProps> = ({ favoriteFigure, setIsSelectOpen, naviga
                     Main grail
                   </span>
                   <span className="text-2xl font-black text-white italic tracking-tight leading-none">
-                    ${favoriteFigure.price.toLocaleString()}
+                    ${Number(favoriteFigure.price || 0).toLocaleString()}
                   </span>
                 </div>
               </div>
