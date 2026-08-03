@@ -32,6 +32,11 @@ const HomePage: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [user, setUser] = useState<User | null>(null);
 
+  const nickname =
+    user?.displayName?.trim() ||
+    user?.email?.split('@')[0] ||
+    'Collector';
+
   // Параллакс логика
   const { scrollYProgress } = useScroll();
 
@@ -183,10 +188,12 @@ const HomePage: React.FC = () => {
 
         {/* Хайповый фоновый текст */}
         <Motion.div
-          style={{ x: floatingTextX, opacity: 0.02 }}
-          className="absolute top-1/4 left-0 text-[20vw] font-black uppercase italic whitespace-nowrap select-none"
+          style={{ x: floatingTextX, opacity: 0.05 }}
+          className="absolute top-1/3 left-1/2 -translate-x-1/2 text-[16vw] font-black uppercase tracking-[-0.04em] text-slate-800 dark:text-slate-200 select-none pointer-events-none"
         >
-          Woody 0x{user.uid.slice(0, 5)}
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-300 to-violet-400">
+            {nickname}
+          </span>
         </Motion.div>
 
         {/* Очень мягкий общий виньеточный градиент вместо пятен */}
