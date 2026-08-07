@@ -28,12 +28,13 @@ interface FormData {
 
 interface BasicInfoSectionProps {
   formData: FormData;
-  handleCustomChange: (name: keyof FormData, value: any) => void;
+  handleCustomChange: (name: keyof FormData, value: FormData[keyof FormData]) => void;
   brandOptions: Option[];
   currency: string;
   setCurrency: (value: string) => void;
   handleChange: (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
   onCharArtFileChange: (file: File | null) => void;
+  onCharacterSelected?: (character: SelectedCharacter) => void;
 }
 
 const BasicInfoSection: FC<BasicInfoSectionProps> = ({
@@ -44,6 +45,7 @@ const BasicInfoSection: FC<BasicInfoSectionProps> = ({
   setCurrency,
   handleChange,
   onCharArtFileChange,
+  onCharacterSelected,
 }) => {
   
   const handleCharFileChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -70,6 +72,7 @@ const BasicInfoSection: FC<BasicInfoSectionProps> = ({
               handleCustomChange('characterId', selection.mal_id);
               handleCustomChange('characterImage', selection.image);
               onCharArtFileChange(null); // Reset file if selected from API
+              onCharacterSelected?.(selection);
             } else {
               handleCustomChange('name', selection);
               handleCustomChange('characterId', null);

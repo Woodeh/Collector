@@ -21,8 +21,8 @@ interface DetailsSliderProps {
   images: string[];
   activeImg: number;
   direction: number;
-  nextSlide: (e?: MouseEvent | any) => void;
-  prevSlide: (e?: MouseEvent | any) => void;
+  nextSlide: (e?: MouseEvent) => void;
+  prevSlide: (e?: MouseEvent) => void;
   setIsHovered: (hovered: boolean) => void;
 }
 

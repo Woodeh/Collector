@@ -1,7 +1,6 @@
 import React, { FC } from 'react';
 import { Link } from 'react-router-dom';
 import { Heart, Database, Share2, Cpu, Instagram, Github, Info } from 'lucide-react';
-// @ts-ignore
 import faceLogo from '../assets/face.png';
 
 interface NavLink {

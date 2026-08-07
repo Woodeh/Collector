@@ -24,7 +24,7 @@
     "noUncheckedIndexedAccess": true,
     "exactOptionalPropertyTypes": true,
     "noUncheckedSideEffectImports": true,
-    "types": []
+    "types": ["vite/client", "vitest/globals"]
   },
   "include": ["src"]
 }

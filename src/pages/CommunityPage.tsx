@@ -1,19 +1,9 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { motion as Motion } from 'framer-motion';
-import { db } from '../firebase/config';
-import { 
-  collection, 
-  query, 
-  orderBy, 
-  onSnapshot, 
-  where,
-  type QuerySnapshot, 
-  type DocumentData, 
-  type QueryDocumentSnapshot 
-} from 'firebase/firestore';
 import { Users, Search, SlidersHorizontal } from 'lucide-react';
 import { FigureCard, CollectionFilters } from '../components/collection';
 import type { Figure } from '../types/figure';
+import { subscribeToPublicFigures } from '../entities/figures/api/figureRepository';
 
 type SortOption = 'newest' | 'oldest' | 'cheap' | 'expensive' | 'az' | 'za';
 
@@ -30,20 +20,16 @@ const Community: React.FC = () => {
 
   useEffect(() => {
     // Подписываемся на все фигурки
-    const q = query(
-      collection(db, 'figures'),
-      where('visibility', '==', 'public'),
-      orderBy('createdAt', 'desc'),
+    const unsubscribe = subscribeToPublicFigures(
+      (items) => {
+        setFigures(items);
+        setLoading(false);
+      },
+      (error) => {
+        console.error('Community subscription failed:', error);
+        setLoading(false);
+      },
     );
-
-    const unsubscribe = onSnapshot(q, (querySnapshot: QuerySnapshot<DocumentData>) => {
-      const figuresArray: Figure[] = [];
-      querySnapshot.forEach((doc: QueryDocumentSnapshot<DocumentData>) => {
-        figuresArray.push({ ...doc.data(), id: doc.id } as Figure);
-      });
-      setFigures(figuresArray);
-      setLoading(false);
-    });
 
     return () => unsubscribe();
   }, []);

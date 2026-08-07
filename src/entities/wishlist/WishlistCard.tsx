@@ -1,17 +1,8 @@
 import React, { FC, MouseEvent } from 'react';
 import { Tag, Trash2, Pencil, ExternalLink, Heart, CheckCircle } from 'lucide-react';
+import type { WishlistItem } from './model';
 
 // Интерфейс для данных объекта в вишлисте
-interface WishlistItem {
-  id: string;
-  name: string;
-  anime: string;
-  price: string | number;
-  image?: string;
-  link?: string;
-  brand?: string;
-}
-
 // Интерфейс пропсов компонента
 interface WishlistCardProps {
   item: WishlistItem;

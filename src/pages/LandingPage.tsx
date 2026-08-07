@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useScroll, useTransform } from 'framer-motion';
-import { db } from '../firebase/config';
-import { collection, query, orderBy, limit, getDocs, where } from 'firebase/firestore';
 
 import {
   LandingBackground,
@@ -12,6 +10,7 @@ import {
   FinalCTA,
 } from '../widgets';
 import type { Figure } from '../types/figure';
+import { getRecentPublicFigures } from '../entities/figures/api/figureRepository';
 
 const generatePlaceholders = (): Figure[] => [
   {
@@ -68,14 +67,7 @@ const LandingPage: React.FC = () => {
         // Для "Live Database Scan" и "real-time additions" логично показывать последние добавленные.
         // Убедитесь, что у вас есть индекс для 'createdAt' в Firebase Console,
         // иначе этот запрос может не работать или быть неэффективным.
-        const q = query(
-          collection(db, 'figures'),
-          where('visibility', '==', 'public'),
-          orderBy('createdAt', 'desc'),
-          limit(15),
-        );
-        const snap = await getDocs(q);
-        const data = snap.docs.map((doc) => ({ id: doc.id, ...doc.data() }) as Figure);
+        const data = await getRecentPublicFigures(15);
 
         if (data.length > 0) {
           setCommunityFigures(data);

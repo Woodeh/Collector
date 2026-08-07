@@ -1,15 +1,21 @@
 import React, { useState, useEffect, FC, ChangeEvent } from 'react';
 import { motion as Motion } from 'framer-motion';
-import { auth, db, storage } from '../firebase/config';
+import { auth, storage } from '../firebase/config';
 import { updateProfile } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
-import { collection, onSnapshot, query, where, doc, updateDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { FileDown, Camera, Loader2, Award, X } from 'lucide-react';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import type { Figure } from '../types/figure';
 import { useAuth } from '../app/providers/AuthProvider';
+import {
+  setFavoriteFigure as persistFavoriteFigure,
+  subscribeToUserFigures,
+} from '../entities/figures/api/figureRepository';
+import { subscribeToPreOrders } from '../entities/preorder/preOrderRepository';
+import type { PreOrder } from '../entities/preorder/model';
+import { subscribeToWishlist } from '../entities/wishlist/wishlistRepository';
 
 import StatsAndCharts from '../widgets/StatsAndCharts';
 import BrandsSplit from '../widgets/BrandsSplit';
@@ -45,7 +51,7 @@ const Profile: FC = () => {
   const [collectionStats, setCollectionStats] = useState<Stats>({ totalValue: 0, count: 0 });
   const [preorderStats, setPreorderStats] = useState<Stats>({ totalValue: 0, count: 0 });
   const [wishlistStats, setWishlistStats] = useState<Stats>({ totalValue: 0, count: 0 });
-  const [nextRelease, setNextRelease] = useState<any>(null);
+  const [nextRelease, setNextRelease] = useState<PreOrder | null>(null);
   const [brandData, setBrandData] = useState<ChartData[]>([]);
   const [animeData, setAnimeData] = useState<ChartData[]>([]);
   const [favoriteFigure, setFavoriteFigure] = useState<Figure | null>(null);
@@ -77,20 +83,18 @@ const Profile: FC = () => {
 
   useEffect(() => {
     if (!user) return;
-        const qFigures = query(collection(db, 'figures'), where('userId', '==', user.uid));
-        const unsubFigures = onSnapshot(qFigures, (snap) => {
+        const unsubFigures = subscribeToUserFigures(user.uid, (figures) => {
           const figuresList: ProfileFigure[] = [];
           let totalValue = 0,
             count = 0;
           const brandsMap: Record<string, number> = {};
           const animeMap: Record<string, number> = {};
 
-          snap.docs.forEach((document) => {
+          figures.forEach((figure) => {
             const data = {
-              id: document.id,
               isFavorite: false,
               anime: 'Original',
-              ...document.data(),
+              ...figure,
             } as ProfileFigure;
             figuresList.push(data);
             if (data.conditionGrade?.toLowerCase().trim() !== 'pre-order') {
@@ -124,29 +128,23 @@ const Profile: FC = () => {
           const manualFav = figuresList.find((f) => f.isFavorite === true);
           // FIXED: Wrapped the logical OR in parentheses to allow nullish coalescing
           setFavoriteFigure((manualFav || [...figuresList].sort((a, b) => Number(b.price) - Number(a.price))[0]) ?? null);
-        });
+        }, (error) => console.error('Profile figures subscription failed:', error));
 
-        const qPreorders = query(
-          collection(db, 'preorders'),
-          where('userId', '==', user.uid),
-        );
-        const unsubPreorders = onSnapshot(qPreorders, (snap) => {
+        const unsubPreorders = subscribeToPreOrders(user.uid, (items) => {
           let totalPreValue = 0;
-          const items = snap.docs.map((document) => ({ id: document.id, ...document.data() }));
-          items.forEach((i: any) => (totalPreValue += Number(i.totalPrice) || 0));
+          items.forEach((item) => (totalPreValue += item.totalPrice));
           if (items.length > 0)
             setNextRelease(
-              [...items].sort((a: any, b: any) => new Date(a.paymentDate).getTime() - new Date(b.paymentDate).getTime())[0],
+              [...items].sort((a, b) => new Date(a.paymentDate).getTime() - new Date(b.paymentDate).getTime())[0]!,
             );
-          setPreorderStats({ totalValue: totalPreValue, count: snap.size });
-        });
+          setPreorderStats({ totalValue: totalPreValue, count: items.length });
+        }, (error) => console.error('Profile pre-orders subscription failed:', error));
 
-        const qWish = query(collection(db, 'wishlist'), where('userId', '==', user.uid));
-        const unsubWish = onSnapshot(qWish, (snap) => {
+        const unsubWish = subscribeToWishlist(user.uid, (items) => {
           let totalWishValue = 0;
-          snap.docs.forEach((doc) => (totalWishValue += Number(doc.data().price) || 0));
-          setWishlistStats({ totalValue: totalWishValue, count: snap.size });
-        });
+          items.forEach((item) => (totalWishValue += item.price));
+          setWishlistStats({ totalValue: totalWishValue, count: items.length });
+        }, (error) => console.error('Profile wishlist subscription failed:', error));
 
     return () => {
           unsubFigures();
@@ -177,8 +175,7 @@ const Profile: FC = () => {
   const handleSelectFavorite = async (figureId: string) => {
     try {
       const currentFav = allFigures.find((f) => f.isFavorite === true);
-      if (currentFav) await updateDoc(doc(db, 'figures', currentFav.id), { isFavorite: false });
-      await updateDoc(doc(db, 'figures', figureId), { isFavorite: true });
+      await persistFavoriteFigure(currentFav?.id, figureId);
       setIsSelectOpen(false);
     } catch (error) {
       console.error(error);

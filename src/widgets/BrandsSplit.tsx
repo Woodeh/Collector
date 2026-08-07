@@ -1,5 +1,5 @@
 import React, { FC } from 'react';
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, TooltipProps } from 'recharts';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import { Layers } from 'lucide-react';
 
 // Типизация для данных бренда
@@ -14,15 +14,21 @@ interface CollectionStats {
 }
 
 // Пропсы для CustomTooltip (используем встроенный тип Recharts)
-const CustomTooltip = ({ active, payload }: any) => {
-  if (active && payload && payload.length > 0) {
+interface ChartTooltipProps {
+  active?: boolean;
+  payload?: ReadonlyArray<{ name?: string; value?: number | string }>;
+}
+
+const CustomTooltip = ({ active, payload }: ChartTooltipProps) => {
+  const entry = payload?.[0];
+  if (active && entry) {
     return (
       <div className="bg-[#1a1a1a] p-3 rounded-xl border border-[#333] shadow-2xl text-left backdrop-blur-md">
         <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1 leading-none italic">
-          {payload[0].name}
+          {entry.name}
         </p>
         <p className="text-sm font-black text-blue-500 italic leading-none">
-          {payload[0].value} Units
+          {entry.value} Units
         </p>
       </div>
     );

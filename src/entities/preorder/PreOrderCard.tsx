@@ -1,4 +1,4 @@
-import React, { useState, useEffect, FC, useRef, MouseEvent } from 'react';
+import React, { useState, useEffect, FC, useRef, MouseEvent as ReactMouseEvent } from 'react';
 import { Trash2, Calendar, ImageIcon, Clock, Tag, MoreVertical } from 'lucide-react';
 
 // Интерфейс для данных предзаказа
@@ -34,7 +34,7 @@ const PreOrderCard: FC<PreOrderCardProps> = ({ item, onDelete, onImageClick }) =
 
   // Закрываем меню при клике вне компонента
   useEffect(() => {
-    const handleClickOutside = (event: any) => {
+    const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
         setShowMenu(false);
       }
@@ -45,7 +45,7 @@ const PreOrderCard: FC<PreOrderCardProps> = ({ item, onDelete, onImageClick }) =
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [showMenu]);
 
-  const handleMenuToggle = (e: MouseEvent<HTMLButtonElement>) => {
+  const handleMenuToggle = (e: ReactMouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     e.stopPropagation();
     setShowMenu(!showMenu);

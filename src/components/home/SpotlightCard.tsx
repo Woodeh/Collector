@@ -10,8 +10,6 @@ interface SpotlightCardProps {
 const SpotlightCard: FC<SpotlightCardProps> = ({ spotlight }) => {
   if (!spotlight) return null;
 
-  const spotlightName = spotlight.name || 'Unknown Asset';
-  const spotlightAnime = spotlight.anime || 'Unknown Origin';
   const spotlightBrand = spotlight.brand || 'Original';
   const spotlightPrice = Number(spotlight.price || 0).toLocaleString();
   const spotlightCategory = spotlight.category || 'Scale_Unit';

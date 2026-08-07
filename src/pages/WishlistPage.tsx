@@ -1,16 +1,5 @@
 import React, { useState, useEffect, ChangeEvent, FormEvent } from 'react';
-import { db, storage } from '../firebase/config';
-import {
-  collection,
-  addDoc,
-  query,
-  orderBy,
-  onSnapshot,
-  doc,
-  deleteDoc,
-  updateDoc,
-  where,
-} from 'firebase/firestore';
+import { storage } from '../firebase/config';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { Loader2, Heart, Plus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -18,28 +7,13 @@ import { useAuth } from '../app/providers/AuthProvider';
 
 import WishlistCard from '../entities/wishlist/WishlistCard';
 import WishlistForm from '../entities/wishlist/WishlistForm';
-
-export interface WishlistItem {
-  id: string;
-  name: string;
-  anime: string;
-  brand: string;
-  price: number;
-  link: string;
-  image: string;
-  userId: string;
-  createdAt: any; // Firestore Timestamp
-  updatedAt?: any; // Firestore Timestamp
-}
-
-export interface WishlistFormData {
-  name: string;
-  anime: string;
-  brand: string;
-  price: string | number;
-  link: string;
-  image: string;
-}
+import type { WishlistFormData, WishlistItem } from '../entities/wishlist/model';
+import {
+  createWishlistItem,
+  deleteWishlistItem,
+  subscribeToWishlist,
+  updateWishlistItem,
+} from '../entities/wishlist/wishlistRepository';
 
 const WishlistPage: React.FC = () => {
   const [items, setItems] = useState<WishlistItem[]>([]);
@@ -57,16 +31,11 @@ const WishlistPage: React.FC = () => {
   useEffect(() => {
     if (!user) return;
     setLoading(true);
-    const q = query(
-      collection(db, 'wishlist'),
-      where('userId', '==', user.uid),
-      orderBy('createdAt', 'desc'),
-    );
-    const unsubscribeSnap = onSnapshot(
-      q,
+    const unsubscribeSnap = subscribeToWishlist(
+      user.uid,
       (snapshot) => {
-          setItems(snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as WishlistItem)));
-          setLoading(false);
+        setItems(snapshot);
+        setLoading(false);
       },
       (error) => {
         console.error('Wishlist subscription failed:', error);
@@ -94,7 +63,7 @@ const WishlistPage: React.FC = () => {
     setShowForm(true);
   };
 
-  const openEditForm = (item: any) => {
+  const openEditForm = (item: WishlistItem) => {
     setEditingId(item.id);
     setFormData({
       name: item.name,
@@ -132,17 +101,12 @@ const WishlistPage: React.FC = () => {
         price: Number(formData.price),
         link: formData.link,
         image: finalImageUrl || '', // Сохраняем итоговую ссылку
-        updatedAt: new Date(),
       };
 
       if (editingId) {
-        await updateDoc(doc(db, 'wishlist', editingId), data);
+        await updateWishlistItem(editingId, data);
       } else {
-        await addDoc(collection(db, 'wishlist'), {
-          ...data,
-          userId: user.uid,
-          createdAt: new Date(),
-        });
+        await createWishlistItem(user.uid, data);
       }
       setShowForm(false);
       setImageFile(null);
@@ -156,11 +120,11 @@ const WishlistPage: React.FC = () => {
 
   const handleDelete = async (id: string) => {
     if (window.confirm('Remove this grail?')) {
-      await deleteDoc(doc(db, 'wishlist', id));
+      await deleteWishlistItem(id);
     }
   };
 
-  const handleGotIt = (item: any) => {
+  const handleGotIt = (item: WishlistItem) => {
     navigate('/add', {
       state: {
         initialData: {

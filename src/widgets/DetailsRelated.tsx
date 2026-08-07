@@ -1,5 +1,6 @@
 import React, { FC } from 'react';
 import FigureCard from '../entities/figures/ui/FigureCard';
+import type { Figure } from '../types/figure';
 
 // Интерфейс для данных фигурки (должен совпадать с тем, что принимает FigureCard)
 interface RelatedFigure {
@@ -13,7 +14,7 @@ interface RelatedFigure {
 }
 
 interface DetailsRelatedProps {
-  relatedFigures: RelatedFigure[] | null | undefined;
+  relatedFigures: Figure[] | null | undefined;
   anime: string;
 }
 

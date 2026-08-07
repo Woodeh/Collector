@@ -1,8 +1,11 @@
+import type { Timestamp } from 'firebase/firestore';
+
 export interface Figure {
   id: string;
-  name?: string;
+  name: string;
   anime?: string;
   brand?: string;
+  category?: string;
   price?: number | string;
   image?: string;
   previewImage?: string;
@@ -13,10 +16,17 @@ export interface Figure {
   hasBox?: string | boolean;
   userId?: string;
   visibility?: 'private' | 'public';
-  createdAt?: {
-    seconds: number;
-  };
-  [key: string]: any;
+  authorId?: string;
+  fullDisplayName?: string;
+  characterId?: string | number | null;
+  characterImage?: string;
+  auctionUrl?: string;
+  purchaseDate?: string;
+  conditionNotes?: string;
+  purchasePlace?: string;
+  isFavorite?: boolean;
+  createdAt?: Timestamp;
+  updatedAt?: Timestamp;
 }
 
 export interface SpotlightFigure extends Figure {

@@ -1,25 +1,16 @@
 import React, { FC } from 'react';
 import { motion as Motion } from 'framer-motion';
 import { Cpu, Fingerprint, ShieldCheck } from 'lucide-react';
+import type { Figure } from '../types/figure';
 
 // Интерфейсы для типизации данных
-interface FigureData {
-  name: string;
-  fullDisplayName?: string;
-  anime?: string;
-  price?: string | number;
-  conditionGrade: string;
-  hasBox: string | boolean;
-  authorName?: string;
-}
-
 interface CharacterData {
   name?: string;
   image?: string;
 }
 
 interface DetailsIdCardProps {
-  figure: FigureData;
+  figure: Figure;
   characterData?: CharacterData | null;
   images: string[];
   imageError: boolean;

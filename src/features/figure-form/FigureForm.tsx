@@ -1,8 +1,7 @@
 import React, { useState, useEffect, FC, ChangeEvent, FormEvent } from 'react';
-import { db, storage, auth } from '../../firebase/config';
-import { collection, addDoc, doc, getDoc, updateDoc } from 'firebase/firestore';
+import { storage, auth } from '../../firebase/config';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { PlusCircle, Loader2, Link as LinkIcon, Edit3, Zap, FileText, Globe2, LockKeyhole } from 'lucide-react';
+import { PlusCircle, Loader2, Link as LinkIcon, Edit3, Zap, FileText, Globe2, LockKeyhole, LibraryBig } from 'lucide-react';
 import { useParams, useNavigate } from 'react-router-dom';
 
 import SuccessModal from './ui/SuccessModal';
@@ -13,11 +12,15 @@ import PhotoUploadSection from '../upload-photo/PhotoUploadSection';
 import { useSensor, useSensors, PointerSensor, KeyboardSensor, SensorDescriptor, SensorOptions, DragEndEvent } from '@dnd-kit/core';
 import { arrayMove, sortableKeyboardCoordinates } from '@dnd-kit/sortable';
 import imageCompression from 'browser-image-compression';
+import {
+  createFigure,
+  getFigureById,
+  getPublicCatalogMatches,
+  updateFigure,
+} from '../../entities/figures/api/figureRepository';
+import type { Figure } from '../../types/figure';
 
-try {
-  // @ts-ignore
-  import('react-datepicker/dist/react-datepicker.css');
-} catch (e) {}
+import 'react-datepicker/dist/react-datepicker.css';
 
 // --- Interfaces ---
 
@@ -28,6 +31,7 @@ interface FormData {
   fullDisplayName: string;
   anime: string;
   brand: string;
+  category: string;
   price: string | number;
   gender: string;
   auctionUrl: string;
@@ -70,6 +74,8 @@ const FigureForm: FC<FigureFormProps> = ({ mode = 'add' }) => {
   const [mediaItems, setMediaItems] = useState<MediaItem[]>([]);
   const [previewId, setPreviewId] = useState<string | null>(null);
   const [charArtFile, setCharArtFile] = useState<File | null>(null);
+  const [catalogMatches, setCatalogMatches] = useState<Figure[]>([]);
+  const [catalogLoading, setCatalogLoading] = useState(false);
 
   const [formData, setFormData] = useState<FormData>({
     name: '',
@@ -78,6 +84,7 @@ const FigureForm: FC<FigureFormProps> = ({ mode = 'add' }) => {
     fullDisplayName: '',
     anime: '',
     brand: '',
+    category: '',
     price: '',
     gender: 'Male',
     auctionUrl: '',
@@ -133,18 +140,30 @@ const FigureForm: FC<FigureFormProps> = ({ mode = 'add' }) => {
     if (isEdit && id) {
       const fetchFigure = async () => {
         try {
-          const docSnap = await getDoc(doc(db, 'figures', id));
-          if (docSnap.exists()) {
-            const data = docSnap.data() as FormData & { images?: string[]; previewImage?: string };
-            if (!auth.currentUser || docSnap.data().userId !== auth.currentUser.uid) {
+          const data = await getFigureById(id);
+          if (data) {
+            if (!auth.currentUser || data.userId !== auth.currentUser.uid) {
               navigate(`/figure/${id}`, { replace: true });
               return;
             }
-            setFormData((current) => ({
-              ...current,
-              ...data,
+            setFormData({
+              name: data.name,
+              characterId: typeof data.characterId === 'number' ? data.characterId : null,
+              characterImage: data.characterImage ?? '',
+              fullDisplayName: data.fullDisplayName ?? '',
+              anime: data.anime ?? '',
+              brand: data.brand ?? '',
+              category: data.category ?? '',
+              price: data.price ?? '',
+              gender: data.gender ?? 'Male',
+              auctionUrl: data.auctionUrl ?? '',
+              purchaseDate: data.purchaseDate ?? '',
+              conditionGrade: data.conditionGrade ?? 'New (Sealed)',
+              conditionNotes: data.conditionNotes ?? '',
+              hasBox: typeof data.hasBox === 'string' ? data.hasBox : data.hasBox ? 'Yes' : 'No',
+              purchasePlace: data.purchasePlace ?? '',
               visibility: data.visibility ?? 'private',
-            }));
+            });
             const images = data.images || [];
             const items: MediaItem[] = images.map((url) => ({ id: url, url, type: 'existing' }));
             setMediaItems(items);
@@ -163,7 +182,7 @@ const FigureForm: FC<FigureFormProps> = ({ mode = 'add' }) => {
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => 
     setFormData({ ...formData, [e.target.name]: e.target.value });
 
-  const handleCustomChange = (name: keyof FormData, value: any) => 
+  const handleCustomChange = (name: keyof FormData, value: FormData[keyof FormData]) =>
     setFormData((prev) => ({ ...prev, [name]: value }));
 
   const handleFiles = async (newFiles: FileList | null) => {
@@ -223,6 +242,28 @@ const FigureForm: FC<FigureFormProps> = ({ mode = 'add' }) => {
     });
   };
 
+  const findCatalogMatches = async (character: { name: string; mal_id: number }) => {
+    setCatalogLoading(true);
+    try {
+      setCatalogMatches(await getPublicCatalogMatches(character.name, character.mal_id));
+    } catch (error) {
+      console.error('Community catalog search failed:', error);
+      setCatalogMatches([]);
+    } finally {
+      setCatalogLoading(false);
+    }
+  };
+
+  const applyCatalogMatch = (match: Figure) => {
+    setFormData((current) => ({
+      ...current,
+      anime: match.anime || current.anime,
+      brand: match.brand || current.brand,
+      category: match.category || current.category,
+      fullDisplayName: match.fullDisplayName || current.fullDisplayName,
+    }));
+  };
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (mediaItems.length === 0) return alert('Please upload photo');
@@ -267,23 +308,21 @@ const FigureForm: FC<FigureFormProps> = ({ mode = 'add' }) => {
         images: finalUrls,
         previewImage: previewUrl,
         price: priceInUSD,
-        updatedAt: new Date(),
       };
 
       if (isEdit && id) {
-        await updateDoc(doc(db, 'figures', id), finalData);
+        await updateFigure(id, finalData);
       } else {
-        await addDoc(collection(db, 'figures'), {
+        await createFigure({
           ...finalData,
-          createdAt: new Date(),
-          authorName: (auth.currentUser.displayName || auth.currentUser.email || 'Anon').split('@')[0],
+          authorName: (auth.currentUser.displayName || auth.currentUser.email || 'Anon').split('@')[0] ?? 'Anon',
           authorId: auth.currentUser.uid,
         });
       }
       setEpicSuccess({ name: formData.name, img: previewUrl });
       setTimeout(() => navigate('/collection'), 3000);
-    } catch (error: any) {
-      alert(error.message);
+    } catch (error: unknown) {
+      alert(error instanceof Error ? error.message : 'Unable to save figure');
     } finally {
       setLoading(false);
     }
@@ -350,7 +389,46 @@ const FigureForm: FC<FigureFormProps> = ({ mode = 'add' }) => {
             setCurrency={setCurrency}
             handleChange={handleChange}
             onCharArtFileChange={setCharArtFile}
+            onCharacterSelected={findCatalogMatches}
           />
+          {(catalogLoading || catalogMatches.length > 0) && (
+            <section className="my-6 rounded-2xl border border-blue-500/20 bg-blue-500/5 p-4">
+              <div className="flex items-center gap-2 text-blue-400">
+                {catalogLoading ? <Loader2 size={16} className="animate-spin" /> : <LibraryBig size={16} />}
+                <h3 className="text-[10px] font-black uppercase tracking-[0.2em]">
+                  Community catalog
+                </h3>
+              </div>
+              {catalogLoading ? (
+                <p className="mt-3 text-xs text-gray-500">Looking for matching public figures...</p>
+              ) : (
+                <div className="mt-3 grid gap-2">
+                  {catalogMatches.map((match) => (
+                    <button
+                      key={match.id}
+                      type="button"
+                      onClick={() => applyCatalogMatch(match)}
+                      className="flex items-center gap-3 rounded-xl border border-[#333] bg-[#121212] p-3 text-left transition hover:border-blue-500"
+                    >
+                      <img
+                        src={match.previewImage || match.images?.[0] || match.characterImage}
+                        alt=""
+                        className="h-12 w-12 rounded-lg object-cover bg-[#222]"
+                      />
+                      <span className="min-w-0">
+                        <span className="block truncate text-sm font-black text-white">
+                          {match.fullDisplayName || match.name}
+                        </span>
+                        <span className="block truncate text-[10px] uppercase tracking-wider text-gray-500">
+                          {[match.anime, match.brand, match.category].filter(Boolean).join(' · ')}
+                        </span>
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </section>
+          )}
           <SpecsSection
             formData={formData}
             handleCustomChange={handleCustomChange}

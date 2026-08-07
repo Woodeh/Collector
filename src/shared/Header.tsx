@@ -20,7 +20,6 @@ import { signOut } from 'firebase/auth';
 import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 import { useAuth } from '../app/providers/AuthProvider';
 
-// @ts-ignore
 import faceLogo from '../assets/face.png';
 
 

@@ -17,12 +17,12 @@ export default defineConfig({
             return 'firebase-provider';
           }
           // Выносим библиотеки графиков и иконок
-          if (id.includes('recharts') || id.includes('lucide-react')) {
-            return 'ui-vendors';
+          if (id.includes('recharts')) {
+            return 'charts';
           }
           // Все остальные зависимости из node_modules в один общий файл
-          if (id.includes('node_modules')) {
-            return 'vendor';
+          if (id.includes('jspdf') || id.includes('html2canvas') || id.includes('dompurify')) {
+            return 'export-tools';
           }
         },
       },

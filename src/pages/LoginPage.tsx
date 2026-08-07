@@ -39,8 +39,8 @@ const LoginPage: React.FC = () => {
         }
       }
       navigate(destination, { replace: true });
-    } catch (error: any) {
-      alert('Error: ' + error.message);
+    } catch (error: unknown) {
+      alert('Error: ' + (error instanceof Error ? error.message : 'Authentication failed'));
     } finally {
       setLoading(false);
     }

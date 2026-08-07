@@ -1,15 +1,6 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { motion as Motion } from 'framer-motion';
-import { db, storage } from '../firebase/config';
-import { 
-  collection, 
-  query, 
-  orderBy, 
-  onSnapshot, 
-  doc, 
-  deleteDoc, 
-  where,
-} from 'firebase/firestore';
+import { storage } from '../firebase/config';
 import { ref, deleteObject } from 'firebase/storage';
 import { Loader2, Monitor } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -18,6 +9,7 @@ import { useAuth } from '../app/providers/AuthProvider';
 
 import { FigureCard, CollectionHeader, CollectionFilters } from '../components/collection';
 import type { Figure } from '../types/figure';
+import { deleteFigure, subscribeToUserFigures } from '../entities/figures/api/figureRepository';
 
 const Collection: React.FC = () => {
   const [figures, setFigures] = useState<Figure[]>([]);
@@ -38,21 +30,11 @@ const Collection: React.FC = () => {
   useEffect(() => {
     if (!user) return;
     setLoading(true);
-    const q = query(
-      collection(db, 'figures'),
-      where('userId', '==', user.uid),
-      orderBy('createdAt', 'desc'),
-    );
-
-    const unsubscribeSnap = onSnapshot(
-      q,
-      (snap) => {
-          const figuresArray = snap.docs.map((doc) => ({
-            id: doc.id,
-            ...doc.data()
-          } as Figure));
-          setFigures(figuresArray);
-          setLoading(false);
+    const unsubscribeSnap = subscribeToUserFigures(
+      user.uid,
+      (items) => {
+        setFigures(items);
+        setLoading(false);
       },
       (error) => {
         console.error('Collection subscription failed:', error);
@@ -118,7 +100,7 @@ const Collection: React.FC = () => {
   const handleConfirmDelete = async () => {
     if (!figureToDelete) return;
     try {
-      await deleteDoc(doc(db, 'figures', figureToDelete.id));
+      await deleteFigure(figureToDelete.id);
       
       const imageUrls = figureToDelete.images || (figureToDelete.image ? [figureToDelete.image] : []);
       

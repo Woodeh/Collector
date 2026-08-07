@@ -38,7 +38,7 @@ if (missingKeys.length > 0) {
   );
 }
 
-const app = initializeApp(firebaseConfig);
+export const app = initializeApp(firebaseConfig);
 
 export const db = getFirestore(app);      // База данных (текст, инфо)
 export const storage = getStorage(app);   // Хранилище (фотографии)

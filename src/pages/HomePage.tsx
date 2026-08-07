@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { motion as Motion, useScroll, useTransform } from 'framer-motion';
-import { db } from '../firebase/config';
-import { collection, query, orderBy, limit, getDocs, where } from 'firebase/firestore';
 import { Loader2 } from 'lucide-react';
 import { useAuth } from '../app/providers/AuthProvider';
 
@@ -12,6 +10,9 @@ import RecentFigures from '../widgets/RecentFigures';
 import HomeWidgets from '../components/home/HomeWidgets';
 import LandingPage from './LandingPage';
 import type { Figure, RankProtocol } from '../types/figure';
+import { getUserFigures } from '../entities/figures/api/figureRepository';
+import { getPreOrderCount } from '../entities/preorder/preOrderRepository';
+import { getWishlistCount } from '../entities/wishlist/wishlistRepository';
 
 interface Stats {
   totalValue: number;
@@ -60,8 +61,7 @@ const HomePage: React.FC = () => {
 
   const fetchData = async (uid: string) => {
     try {
-      const qAll = query(collection(db, 'figures'), where('userId', '==', uid));
-      const allDocs = (await getDocs(qAll)).docs.map((d) => ({ ...d.data(), id: d.id } as Figure));
+      const allDocs = await getUserFigures(uid);
 
       if (allDocs.length > 0) {
         const randomFigure = allDocs[Math.floor(Math.random() * allDocs.length)];
@@ -131,13 +131,7 @@ const HomePage: React.FC = () => {
         });
       }
 
-      const recentQ = query(
-        collection(db, 'figures'),
-        where('userId', '==', uid),
-        orderBy('createdAt', 'desc'),
-        limit(5),
-      );
-      setRecentFigures((await getDocs(recentQ)).docs.map((d) => ({ ...d.data(), id: d.id } as Figure)));
+      setRecentFigures(allDocs.slice(0, 5));
     } catch (e) {
       console.error(e);
     } finally {
@@ -147,12 +141,13 @@ const HomePage: React.FC = () => {
 
   const [widgetStats, setWidgetStats] = useState<WidgetStats>({ preorders: 0, wishlist: 0 });
   const fetchWidgetStats = async (uid: string) => {
-    const qPre = query(collection(db, 'preorders'), where('userId', '==', uid));
-    const qWish = query(collection(db, 'wishlist'), where('userId', '==', uid));
-    const [preSnap, wishSnap] = await Promise.all([getDocs(qPre), getDocs(qWish)]);
+    const [preorders, wishlist] = await Promise.all([
+      getPreOrderCount(uid),
+      getWishlistCount(uid),
+    ]);
     setWidgetStats({
-      preorders: preSnap.size,
-      wishlist: wishSnap.size,
+      preorders,
+      wishlist,
     });
   };
 

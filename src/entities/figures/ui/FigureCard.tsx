@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, FC, MouseEvent } from 'react';
+import React, { useState, useRef, useEffect, FC, MouseEvent as ReactMouseEvent } from 'react';
 import { Tag, Trash2, Pencil, User, MoreVertical } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import type { Figure } from '../../../types/figure';
@@ -21,7 +21,7 @@ const FigureCard: FC<FigureCardProps> = ({
 
   // Закрываем меню при клике вне компонента
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent | any) => {
+    const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
         setShowMenu(false);
       }
@@ -32,7 +32,7 @@ const FigureCard: FC<FigureCardProps> = ({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [showMenu]);
 
-  const handleMenuToggle = (e: MouseEvent<HTMLButtonElement>) => {
+  const handleMenuToggle = (e: ReactMouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     e.stopPropagation();
     setShowMenu(!showMenu);

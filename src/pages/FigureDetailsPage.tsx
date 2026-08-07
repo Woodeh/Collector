@@ -1,17 +1,6 @@
 import React, { useEffect, useState, useRef, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { db, storage } from '../firebase/config';
-import {
-  doc,
-  getDoc,
-  collection,
-  query,
-  where,
-  getDocs,
-  limit,
-  deleteDoc,
-  type DocumentData,
-} from 'firebase/firestore';
+import { storage } from '../firebase/config';
 import { ref, deleteObject } from 'firebase/storage';
 import { motion as Motion } from 'framer-motion';
 import { Loader2 } from 'lucide-react';
@@ -26,23 +15,13 @@ import DetailsIdCard from '../widgets/DetailsIdCard';
 import DetailsThumbnails from '../components/details/DetailsThumbnails';
 import DetailsActionButtons from '../components/details/DetailsActionButtons';
 import DetailsRelated from '../widgets/DetailsRelated';
-
-interface Figure extends DocumentData {
-  id: string;
-  name: string;
-  anime?: string;
-  brand?: string;
-  price?: string | number;
-  previewImage?: string;
-  image?: string;
-  images?: string[];
-  characterId?: string;
-  characterImage?: string;
-  auctionUrl?: string;
-  conditionGrade: string;
-  hasBox: string | boolean;
-  userId?: string;
-}
+import type { Figure } from '../types/figure';
+import FigureDnaCard from '../widgets/FigureDnaCard';
+import {
+  deleteFigure,
+  getFigureById,
+  getRelatedPublicFigures,
+} from '../entities/figures/api/figureRepository';
 
 interface CharacterData {
   image: string;
@@ -72,43 +51,11 @@ const FigureDetailsPage: React.FC = () => {
       setLoading(true);
       setImageError(false); 
       try {
-        const docSnap = await getDoc(doc(db, 'figures', id));
-        if (docSnap.exists()) {
-          const data = docSnap.data() as Figure;
+        const data = await getFigureById(id);
+        if (data) {
           setFigure(data);
 
-          let finalRelated: Figure[] = [];
-          if (data.anime) {
-            const sameAnimeQuery = query(
-              collection(db, 'figures'),
-              where('anime', '==', data.anime),
-              where('visibility', '==', 'public'),
-              limit(10),
-            );
-            const sameAnimeSnap = await getDocs(sameAnimeQuery);
-            finalRelated = sameAnimeSnap.docs
-              .map((doc) => ({ id: doc.id, ...doc.data() } as Figure))
-              .filter((item) => item.id !== id);
-          }
-
-          if (finalRelated.length < 4) {
-            const randomQuery = query(
-              collection(db, 'figures'),
-              where('visibility', '==', 'public'),
-              limit(20),
-            );
-            const randomSnap = await getDocs(randomQuery);
-            const randomFigures = randomSnap.docs
-              .map((doc) => ({ id: doc.id, ...doc.data() } as Figure))
-              .filter((item) => item.id !== id && !finalRelated.some((r) => r.id === item.id));
-
-            const shuffledRandom = randomFigures.sort(() => 0.5 - Math.random());
-            finalRelated = [...finalRelated, ...shuffledRandom].slice(0, 4);
-          } else {
-            finalRelated = finalRelated.sort(() => 0.5 - Math.random()).slice(0, 4);
-          }
-
-          setRelatedFigures(finalRelated);
+          setRelatedFigures(await getRelatedPublicFigures(id, data.anime));
 
           if (data.characterImage) {
             setCharacterData({
@@ -193,7 +140,7 @@ const FigureDetailsPage: React.FC = () => {
     if (!id || !figure) return;
     try {
       setLoading(true);
-      await deleteDoc(doc(db, 'figures', id));
+      await deleteFigure(id);
 
       const imageUrls = figure.images || (figure.previewImage ? [figure.previewImage] : []);
       for (const url of imageUrls) {
@@ -258,6 +205,8 @@ const FigureDetailsPage: React.FC = () => {
               imageError={imageError}
               setImageError={setImageError}
             />
+
+            <FigureDnaCard figure={figure} />
 
             <DetailsThumbnails 
               images={images} 

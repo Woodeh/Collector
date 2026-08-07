@@ -1,15 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { db, storage } from '../firebase/config';
-import {
-  collection,
-  addDoc,
-  query,
-  orderBy,
-  onSnapshot,
-  doc,
-  deleteDoc,
-  where,
-} from 'firebase/firestore';
+import { storage } from '../firebase/config';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { Loader2 } from 'lucide-react';
 import { useAuth } from '../app/providers/AuthProvider';
@@ -20,31 +10,12 @@ import {
   PreOrderForm,
   PreOrderLightbox,
 } from '../entities/preorder';
-
-export interface PreOrder {
-  id: string;
-  name: string;
-  anime: string;
-  brand: string;
-  totalPrice: number;
-  deposit: number;
-  releaseDate: string;
-  paymentDate: string;
-  screenshot?: string;
-  userId: string;
-  createdAt: any;
-  authorName: string;
-}
-
-export interface PreOrderFormData {
-  name: string;
-  anime: string;
-  brand: string;
-  totalPrice: string | number;
-  deposit: string | number;
-  releaseDate: string;
-  paymentDate: string;
-}
+import type { PreOrder, PreOrderFormData } from '../entities/preorder/model';
+import {
+  createPreOrder,
+  deletePreOrder,
+  subscribeToPreOrders,
+} from '../entities/preorder/preOrderRepository';
 
 export type Currency = 'USD' | 'KZT' | 'CNY';
 
@@ -71,16 +42,11 @@ const PreOrdersPage: React.FC = () => {
   useEffect(() => {
     if (!user) return;
     setLoading(true);
-    const q = query(
-      collection(db, 'preorders'),
-      where('userId', '==', user.uid),
-      orderBy('createdAt', 'desc'),
-    );
-    const unsubscribeSnap = onSnapshot(
-      q,
+    const unsubscribeSnap = subscribeToPreOrders(
+      user.uid,
       (snapshot) => {
-          setPreorders(snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as PreOrder)));
-          setLoading(false);
+        setPreorders(snapshot);
+        setLoading(false);
       },
       (error) => {
         console.error('Pre-orders subscription failed:', error);
@@ -146,20 +112,21 @@ const PreOrdersPage: React.FC = () => {
         screenshotUrl = await getDownloadURL(fileRef);
       }
 
-      await addDoc(collection(db, 'preorders'), {
-        ...formData,
-        userId: currentUser.uid,
-        totalPrice: Number(finalPrice.toFixed(2)),
-        deposit: Number(finalDeposit.toFixed(2)),
-        screenshot: screenshotUrl,
-        createdAt: new Date(),
-        authorName: currentUser.displayName || (currentUser.email?.split('@')[0] ?? 'Unknown'),
-      });
+      await createPreOrder(
+        currentUser.uid,
+        currentUser.displayName || (currentUser.email?.split('@')[0] ?? 'Unknown'),
+        {
+          ...formData,
+          totalPrice: Number(finalPrice.toFixed(2)),
+          deposit: Number(finalDeposit.toFixed(2)),
+          screenshot: screenshotUrl,
+        },
+      );
 
       setShowForm(false);
       resetForm();
-    } catch (error: any) {
-      alert('Error: ' + error.message);
+    } catch (error: unknown) {
+      alert('Error: ' + (error instanceof Error ? error.message : 'Unable to save pre-order'));
     } finally {
       setSubmitting(false);
     }
@@ -167,7 +134,7 @@ const PreOrdersPage: React.FC = () => {
 
   const handleDelete = async (id: string) => {
     if (window.confirm('Delete this pre-order?')) {
-      await deleteDoc(doc(db, 'preorders', id));
+      await deletePreOrder(id);
     }
   };
 

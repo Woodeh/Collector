@@ -1,6 +1,6 @@
 import React, { FC, ReactNode } from 'react';
 import { DollarSign, Clock, Target } from 'lucide-react';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, TooltipProps } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 
 /**
  * Interfaces for Data Structures
@@ -24,15 +24,21 @@ interface StatsAndChartsProps {
 /**
  * Custom Tooltip for the Recharts BarChart
  */
-const CustomTooltip = ({ active, payload }: any) => {
-  if (active && payload && payload.length) {
+interface ChartTooltipProps {
+  active?: boolean;
+  payload?: ReadonlyArray<{ name?: string; value?: number | string }>;
+}
+
+const CustomTooltip = ({ active, payload }: ChartTooltipProps) => {
+  const entry = payload?.[0];
+  if (active && entry) {
     return (
       <div className="bg-[#1a1a1a] p-3 rounded-xl border border-[#333] shadow-2xl text-left backdrop-blur-md">
         <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1 leading-none italic">
-          {payload[0].name}
+          {entry.name}
         </p>
         <p className="text-sm font-black text-blue-500 italic leading-none">
-          {payload[0].value} Units
+          {entry.value} Units
         </p>
       </div>
     );
