@@ -2,7 +2,7 @@ import React, { useState, useEffect, FC, ChangeEvent, FormEvent } from 'react';
 import { db, storage, auth } from '../../firebase/config';
 import { collection, addDoc, doc, getDoc, updateDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { PlusCircle, Loader2, Link as LinkIcon, Edit3, Zap, FileText } from 'lucide-react';
+import { PlusCircle, Loader2, Link as LinkIcon, Edit3, Zap, FileText, Globe2, LockKeyhole } from 'lucide-react';
 import { useParams, useNavigate } from 'react-router-dom';
 
 import SuccessModal from './ui/SuccessModal';
@@ -36,6 +36,7 @@ interface FormData {
   conditionNotes: string;
   hasBox: string;
   purchasePlace: string;
+  visibility: 'private' | 'public';
 }
 
 interface MediaItem {
@@ -85,6 +86,7 @@ const FigureForm: FC<FigureFormProps> = ({ mode = 'add' }) => {
     conditionNotes: '',
     hasBox: 'Yes',
     purchasePlace: '',
+    visibility: 'private',
   });
 
   const sensors: SensorDescriptor<SensorOptions>[] = useSensors(
@@ -134,7 +136,15 @@ const FigureForm: FC<FigureFormProps> = ({ mode = 'add' }) => {
           const docSnap = await getDoc(doc(db, 'figures', id));
           if (docSnap.exists()) {
             const data = docSnap.data() as FormData & { images?: string[]; previewImage?: string };
-            setFormData(data);
+            if (!auth.currentUser || docSnap.data().userId !== auth.currentUser.uid) {
+              navigate(`/figure/${id}`, { replace: true });
+              return;
+            }
+            setFormData((current) => ({
+              ...current,
+              ...data,
+              visibility: data.visibility ?? 'private',
+            }));
             const images = data.images || [];
             const items: MediaItem[] = images.map((url) => ({ id: url, url, type: 'existing' }));
             setMediaItems(items);
@@ -148,7 +158,7 @@ const FigureForm: FC<FigureFormProps> = ({ mode = 'add' }) => {
       };
       fetchFigure();
     }
-  }, [id, isEdit]);
+  }, [id, isEdit, navigate]);
 
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => 
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -225,7 +235,7 @@ const FigureForm: FC<FigureFormProps> = ({ mode = 'add' }) => {
       if (charArtFile) {
         const charArtRef = ref(
           storage,
-          `character_arts/${Date.now()}_${auth.currentUser.uid}.webp`,
+          `character_arts/${auth.currentUser.uid}/${Date.now()}.webp`,
         );
         await uploadBytes(charArtRef, charArtFile, { contentType: 'image/webp' });
         characterImageUrl = await getDownloadURL(charArtRef);
@@ -236,7 +246,10 @@ const FigureForm: FC<FigureFormProps> = ({ mode = 'add' }) => {
         if (item.type === 'existing') {
           finalUrls.push(item.url);
         } else if (item.file) {
-          const fileRef = ref(storage, `figures/${Date.now()}_${item.id}.webp`);
+          const fileRef = ref(
+            storage,
+            `figures/${auth.currentUser.uid}/${Date.now()}_${item.id}.webp`,
+          );
           await uploadBytes(fileRef, item.file, { contentType: 'image/webp' });
           const url = await getDownloadURL(fileRef);
           finalUrls.push(url);
@@ -377,6 +390,59 @@ const FigureForm: FC<FigureFormProps> = ({ mode = 'add' }) => {
           setPreviewId={setPreviewId}
           removeItem={removeItem}
         />
+
+        <fieldset className="space-y-3 pt-8 border-t border-[#333]/50">
+          <legend className="text-[10px] font-black uppercase tracking-[0.2em] text-blue-500 italic mb-3">
+            Collection visibility
+          </legend>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {([
+              {
+                value: 'private' as const,
+                label: 'Private',
+                description: 'Visible only to you',
+                icon: LockKeyhole,
+              },
+              {
+                value: 'public' as const,
+                label: 'Public',
+                description: 'Shown in the community catalog',
+                icon: Globe2,
+              },
+            ]).map((option) => {
+              const Icon = option.icon;
+              const selected = formData.visibility === option.value;
+              return (
+                <label
+                  key={option.value}
+                  className={`flex items-center gap-4 rounded-2xl border p-4 cursor-pointer transition-colors ${
+                    selected
+                      ? 'border-blue-500 bg-blue-500/10'
+                      : 'border-[#333] bg-[#121212] hover:border-gray-600'
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="visibility"
+                    value={option.value}
+                    checked={selected}
+                    onChange={handleChange}
+                    className="sr-only"
+                  />
+                  <Icon size={20} className={selected ? 'text-blue-500' : 'text-gray-600'} />
+                  <span>
+                    <span className="block text-sm font-black uppercase italic text-white">
+                      {option.label}
+                    </span>
+                    <span className="block text-[10px] font-bold uppercase tracking-wider text-gray-500">
+                      {option.description}
+                    </span>
+                  </span>
+                </label>
+              );
+            })}
+          </div>
+        </fieldset>
 
         <div className="space-y-6 pt-8 border-t border-[#333]/50 text-left">
           <div className="relative">

@@ -6,6 +6,7 @@ import {
   query, 
   orderBy, 
   onSnapshot, 
+  where,
   type QuerySnapshot, 
   type DocumentData, 
   type QueryDocumentSnapshot 
@@ -29,7 +30,11 @@ const Community: React.FC = () => {
 
   useEffect(() => {
     // Подписываемся на все фигурки
-    const q = query(collection(db, 'figures'), orderBy('createdAt', 'desc'));
+    const q = query(
+      collection(db, 'figures'),
+      where('visibility', '==', 'public'),
+      orderBy('createdAt', 'desc'),
+    );
 
     const unsubscribe = onSnapshot(q, (querySnapshot: QuerySnapshot<DocumentData>) => {
       const figuresArray: Figure[] = [];

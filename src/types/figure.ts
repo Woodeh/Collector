@@ -12,6 +12,7 @@ export interface Figure {
   conditionGrade?: string;
   hasBox?: string | boolean;
   userId?: string;
+  visibility?: 'private' | 'public';
   createdAt?: {
     seconds: number;
   };

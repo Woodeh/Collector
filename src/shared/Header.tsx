@@ -16,15 +16,16 @@ import {
   Loader2,
 } from 'lucide-react';
 import { auth, storage } from '../firebase/config';
-import { onAuthStateChanged, signOut, User } from 'firebase/auth';
+import { signOut } from 'firebase/auth';
 import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
+import { useAuth } from '../app/providers/AuthProvider';
 
 // @ts-ignore
 import faceLogo from '../assets/face.png';
 
 
 const Header: FC = () => {
-  const [user, setUser] = useState<User | null>(null);
+  const { user } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
   const [isProfileOpen, setIsProfileOpen] = useState<boolean>(false);
   const [isScanning, setIsScanning] = useState<boolean>(false);
@@ -32,13 +33,6 @@ const Header: FC = () => {
   const navigate = useNavigate();
   const profileRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    const unsubAuth = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
-    });
-    return () => unsubAuth();
-  }, []);
 
   useEffect(() => {
     const html = document.documentElement;
@@ -73,11 +67,14 @@ const Header: FC = () => {
 
   const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file) return;
+    if (!file || !auth.currentUser) return;
 
     setIsScanning(true);
     try {
-      const storageRef = ref(storage, `temp_scans/${Date.now()}_scan.jpg`);
+      const storageRef = ref(
+        storage,
+        `temp_scans/${auth.currentUser.uid}/${Date.now()}_scan.jpg`,
+      );
       await uploadBytes(storageRef, file);
       const downloadURL = await getDownloadURL(storageRef);
 

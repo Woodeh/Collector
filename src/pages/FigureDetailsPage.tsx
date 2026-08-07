@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { db, auth, storage } from '../firebase/config';
+import { db, storage } from '../firebase/config';
 import {
   doc,
   getDoc,
@@ -13,10 +13,9 @@ import {
   type DocumentData,
 } from 'firebase/firestore';
 import { ref, deleteObject } from 'firebase/storage';
-import { onAuthStateChanged } from 'firebase/auth';
-import type { User } from 'firebase/auth';
 import { motion as Motion } from 'framer-motion';
 import { Loader2 } from 'lucide-react';
+import { useAuth } from '../app/providers/AuthProvider';
 
 import Modal from '../shared/Modal';
 import ShareModal from '../features/ShareModal';
@@ -53,6 +52,7 @@ interface CharacterData {
 const FigureDetailsPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { user: currentUser } = useAuth();
   const [figure, setFigure] = useState<Figure | null>(null);
   const [characterData, setCharacterData] = useState<CharacterData | null>(null);
   const [relatedFigures, setRelatedFigures] = useState<Figure[]>([]);
@@ -63,16 +63,8 @@ const FigureDetailsPage: React.FC = () => {
   const [imageError, setImageError] = useState<boolean>(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState<boolean>(false);
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
 
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
-
-  useEffect(() => {
-    const unsub = onAuthStateChanged(auth, (user) => {
-      setCurrentUser(user);
-    });
-    return () => unsub();
-  }, []);
 
   useEffect(() => {
     const fetchFigureAndArt = async () => {
@@ -90,6 +82,7 @@ const FigureDetailsPage: React.FC = () => {
             const sameAnimeQuery = query(
               collection(db, 'figures'),
               where('anime', '==', data.anime),
+              where('visibility', '==', 'public'),
               limit(10),
             );
             const sameAnimeSnap = await getDocs(sameAnimeQuery);
@@ -99,7 +92,11 @@ const FigureDetailsPage: React.FC = () => {
           }
 
           if (finalRelated.length < 4) {
-            const randomQuery = query(collection(db, 'figures'), limit(20));
+            const randomQuery = query(
+              collection(db, 'figures'),
+              where('visibility', '==', 'public'),
+              limit(20),
+            );
             const randomSnap = await getDocs(randomQuery);
             const randomFigures = randomSnap.docs
               .map((doc) => ({ id: doc.id, ...doc.data() } as Figure))

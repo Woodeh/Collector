@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { motion as Motion, useScroll, useTransform } from 'framer-motion';
-import { db, auth } from '../firebase/config';
+import { db } from '../firebase/config';
 import { collection, query, orderBy, limit, getDocs, where } from 'firebase/firestore';
-import { onAuthStateChanged, type User } from 'firebase/auth';
 import { Loader2 } from 'lucide-react';
+import { useAuth } from '../app/providers/AuthProvider';
 
 import { HeroSection, QuickStats, SpotlightCard } from '../components/home';
 import RankSection from '../widgets/RankSection';
@@ -30,7 +30,7 @@ const HomePage: React.FC = () => {
   const [spotlight, setSpotlight] = useState<Figure | null>(null);
   const [stats, setStats] = useState<Stats>({ totalValue: 0, count: 0, topBrand: 'None', rank: { name: 'Novice', next: 5, color: 'text-gray-500', bg: 'bg-gray-500' } });
   const [loading, setLoading] = useState<boolean>(true);
-  const [user, setUser] = useState<User | null>(null);
+  const { user, initializing } = useAuth();
 
   const nickname =
     user?.displayName?.trim() ||
@@ -49,15 +49,14 @@ const HomePage: React.FC = () => {
   const statsOffset = useTransform(scrollYProgress, [0, 0.5], [0, 40]);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
-      if (currentUser) {
-        fetchData(currentUser.uid);
-        fetchWidgetStats(currentUser.uid);
-      } else setLoading(false);
-    });
-    return () => unsubscribe();
-  }, []);
+    if (initializing) return;
+    if (!user) {
+      setLoading(false);
+      return;
+    }
+    setLoading(true);
+    void Promise.all([fetchData(user.uid), fetchWidgetStats(user.uid)]);
+  }, [initializing, user]);
 
   const fetchData = async (uid: string) => {
     try {

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, FC, ChangeEvent } from 'react';
 import { motion as Motion } from 'framer-motion';
 import { auth, db, storage } from '../firebase/config';
-import { onAuthStateChanged, updateProfile, type User } from 'firebase/auth';
+import { updateProfile } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
 import { collection, onSnapshot, query, where, doc, updateDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
@@ -9,6 +9,7 @@ import { FileDown, Camera, Loader2, Award, X } from 'lucide-react';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import type { Figure } from '../types/figure';
+import { useAuth } from '../app/providers/AuthProvider';
 
 import StatsAndCharts from '../widgets/StatsAndCharts';
 import BrandsSplit from '../widgets/BrandsSplit';
@@ -38,7 +39,7 @@ interface ChartData {
 
 const Profile: FC = () => {
   const navigate = useNavigate();
-  const [user, setUser] = useState<User | null>(null);
+  const { user } = useAuth();
   const [allFigures, setAllFigures] = useState<ProfileFigure[]>([]);
   const [recentFigures, setRecentFigures] = useState<ProfileFigure[]>([]);
   const [collectionStats, setCollectionStats] = useState<Stats>({ totalValue: 0, count: 0 });
@@ -75,13 +76,8 @@ const Profile: FC = () => {
   const COLORS = ['#3b82f6', '#ec4899', '#f97316', '#8b5cf6', '#22c55e', '#eab308', '#ef4444'];
 
   useEffect(() => {
-    const unsubAuth = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
-      if (!currentUser && !auth.currentUser) {
-        navigate('/');
-      }
-      if (currentUser) {
-        const qFigures = query(collection(db, 'figures'), where('userId', '==', currentUser.uid));
+    if (!user) return;
+        const qFigures = query(collection(db, 'figures'), where('userId', '==', user.uid));
         const unsubFigures = onSnapshot(qFigures, (snap) => {
           const figuresList: ProfileFigure[] = [];
           let totalValue = 0,
@@ -132,7 +128,7 @@ const Profile: FC = () => {
 
         const qPreorders = query(
           collection(db, 'preorders'),
-          where('userId', '==', currentUser.uid),
+          where('userId', '==', user.uid),
         );
         const unsubPreorders = onSnapshot(qPreorders, (snap) => {
           let totalPreValue = 0;
@@ -145,22 +141,19 @@ const Profile: FC = () => {
           setPreorderStats({ totalValue: totalPreValue, count: snap.size });
         });
 
-        const qWish = query(collection(db, 'wishlist'), where('userId', '==', currentUser.uid));
+        const qWish = query(collection(db, 'wishlist'), where('userId', '==', user.uid));
         const unsubWish = onSnapshot(qWish, (snap) => {
           let totalWishValue = 0;
           snap.docs.forEach((doc) => (totalWishValue += Number(doc.data().price) || 0));
           setWishlistStats({ totalValue: totalWishValue, count: snap.size });
         });
 
-        return () => {
+    return () => {
           unsubFigures();
           unsubPreorders();
           unsubWish();
-        };
-      }
-    });
-    return () => unsubAuth();
-  }, [navigate]);
+    };
+  }, [user]);
 
   const handleAvatarChange = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];

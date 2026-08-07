@@ -1,0 +1,78 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return signedIn() && request.auth.uid == userId;
+    }
+
+    function isImageUpload() {
+      return request.resource != null
+        && request.resource.size < 10 * 1024 * 1024
+        && request.resource.contentType.matches('image/.*');
+    }
+
+    match /figures/{userId}/{fileName} {
+      allow read: if true;
+      allow create, update: if isOwner(userId) && isImageUpload();
+      allow delete: if isOwner(userId);
+    }
+
+    match /character_arts/{userId}/{fileName} {
+      allow read: if true;
+      allow create, update: if isOwner(userId) && isImageUpload();
+      allow delete: if isOwner(userId);
+    }
+
+    match /avatars/{userId} {
+      allow read: if true;
+      allow create, update: if isOwner(userId) && isImageUpload();
+      allow delete: if isOwner(userId);
+    }
+
+    match /wishlist/{userId}/{fileName} {
+      allow read: if isOwner(userId);
+      allow create, update: if isOwner(userId) && isImageUpload();
+      allow delete: if isOwner(userId);
+    }
+
+    match /preorders/{userId}/{fileName} {
+      allow read: if isOwner(userId);
+      allow create, update: if isOwner(userId) && isImageUpload();
+      allow delete: if isOwner(userId);
+    }
+
+    match /temp_scans/{userId}/{fileName} {
+      allow read, delete: if isOwner(userId);
+      allow create, update: if isOwner(userId) && isImageUpload();
+    }
+
+    // Read-only compatibility for files created before user-scoped paths existed.
+    match /figures/{legacyFileName} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    match /character_arts/{legacyFileName} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    match /preorders/{legacyFileName} {
+      allow read: if signedIn();
+      allow write: if false;
+    }
+
+    match /temp_scans/{legacyFileName} {
+      allow read, write: if false;
+    }
+
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

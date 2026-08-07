@@ -4,12 +4,10 @@ import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   updateProfile,
-  onAuthStateChanged,
 } from 'firebase/auth';
-// Import User as a type to prevent Vite "module does not provide export" error
-import type { User } from 'firebase/auth'; 
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { LogIn, Lock, Mail, UserPlus, Loader2 } from 'lucide-react';
+import { useAuth } from '../app/providers/AuthProvider';
 
 const LoginPage: React.FC = () => {
   const [isLogin, setIsLogin] = useState<boolean>(true);
@@ -18,13 +16,13 @@ const LoginPage: React.FC = () => {
   const [name, setName] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
   const navigate = useNavigate();
+  const location = useLocation();
+  const { user, initializing } = useAuth();
+  const destination = (location.state as { from?: { pathname?: string } } | null)?.from?.pathname || '/';
 
   useEffect(() => {
-    const unsub = onAuthStateChanged(auth, (user: User | null) => {
-      if (user) navigate('/');
-    });
-    return () => unsub();
-  }, [navigate]);
+    if (!initializing && user) navigate(destination, { replace: true });
+  }, [destination, initializing, navigate, user]);
 
   const handleAuth = async (e: FormEvent) => {
     e.preventDefault();
@@ -40,7 +38,7 @@ const LoginPage: React.FC = () => {
           await updateProfile(userCredential.user, { displayName: name });
         }
       }
-      navigate('/');
+      navigate(destination, { replace: true });
     } catch (error: any) {
       alert('Error: ' + error.message);
     } finally {

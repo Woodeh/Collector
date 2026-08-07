@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { db, auth, storage } from '../firebase/config';
+import { db, storage } from '../firebase/config';
 import {
   collection,
   addDoc,
@@ -9,11 +9,10 @@ import {
   doc,
   deleteDoc,
   where,
-  Unsubscribe,
 } from 'firebase/firestore';
-import { onAuthStateChanged, User } from 'firebase/auth';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { Loader2 } from 'lucide-react';
+import { useAuth } from '../app/providers/AuthProvider';
 
 import {
   PreOrderHeader,
@@ -50,6 +49,7 @@ export interface PreOrderFormData {
 export type Currency = 'USD' | 'KZT' | 'CNY';
 
 const PreOrdersPage: React.FC = () => {
+  const { user } = useAuth();
   const [preorders, setPreorders] = useState<PreOrder[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [showForm, setShowForm] = useState<boolean>(false);
@@ -69,28 +69,26 @@ const PreOrdersPage: React.FC = () => {
   });
 
   useEffect(() => {
-    let unsubscribeSnap: Unsubscribe | null = null;
-    const unsubscribeAuth = onAuthStateChanged(auth, (user: User | null) => {
-      if (user) {
-        const q = query(
-          collection(db, 'preorders'),
-          where('userId', '==', user.uid),
-          orderBy('createdAt', 'desc'),
-        );
-        unsubscribeSnap = onSnapshot(q, (snapshot) => {
+    if (!user) return;
+    setLoading(true);
+    const q = query(
+      collection(db, 'preorders'),
+      where('userId', '==', user.uid),
+      orderBy('createdAt', 'desc'),
+    );
+    const unsubscribeSnap = onSnapshot(
+      q,
+      (snapshot) => {
           setPreorders(snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as PreOrder)));
           setLoading(false);
-        });
-      } else {
-        setPreorders([]);
+      },
+      (error) => {
+        console.error('Pre-orders subscription failed:', error);
         setLoading(false);
-      }
-    });
-    return () => {
-      unsubscribeAuth();
-      if (unsubscribeSnap) unsubscribeSnap();
-    };
-  }, []);
+      },
+    );
+    return unsubscribeSnap;
+  }, [user]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -117,7 +115,7 @@ const PreOrdersPage: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const currentUser = auth.currentUser;
+    const currentUser = user;
     if (!currentUser) return alert('Session expired.');
 
     setSubmitting(true);
@@ -140,7 +138,10 @@ const PreOrdersPage: React.FC = () => {
 
       let screenshotUrl = '';
       if (screenshotFile) {
-        const fileRef = ref(storage, `preorders/${Date.now()}_${screenshotFile.name}`);
+        const fileRef = ref(
+          storage,
+          `preorders/${currentUser.uid}/${Date.now()}_${screenshotFile.name}`,
+        );
         await uploadBytes(fileRef, screenshotFile);
         screenshotUrl = await getDownloadURL(fileRef);
       }

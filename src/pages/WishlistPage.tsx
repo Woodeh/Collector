@@ -1,5 +1,5 @@
 import React, { useState, useEffect, ChangeEvent, FormEvent } from 'react';
-import { db, auth, storage } from '../firebase/config';
+import { db, storage } from '../firebase/config';
 import {
   collection,
   addDoc,
@@ -10,12 +10,11 @@ import {
   deleteDoc,
   updateDoc,
   where,
-  Unsubscribe,
 } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { Loader2, Heart, Plus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { onAuthStateChanged, User } from 'firebase/auth';
+import { useAuth } from '../app/providers/AuthProvider';
 
 import WishlistCard from '../entities/wishlist/WishlistCard';
 import WishlistForm from '../entities/wishlist/WishlistForm';
@@ -47,7 +46,7 @@ const WishlistPage: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [showForm, setShowForm] = useState<boolean>(false);
   const [submitting, setSubmitting] = useState<boolean>(false);
-  const [user, setUser] = useState<User | null>(null);
+  const { user } = useAuth();
   const [editingId, setEditingId] = useState<string | null>(null);
   const navigate = useNavigate();
 
@@ -56,29 +55,26 @@ const WishlistPage: React.FC = () => {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   useEffect(() => {
-    let unsubscribeSnap: Unsubscribe | undefined;
-    const unsubAuth = onAuthStateChanged(auth, (currentUser: User | null) => {
-      setUser(currentUser);
-      if (currentUser) {
-        const q = query(
-          collection(db, 'wishlist'),
-          where('userId', '==', currentUser.uid),
-          orderBy('createdAt', 'desc'),
-        );
-        unsubscribeSnap = onSnapshot(q, (snapshot) => {
+    if (!user) return;
+    setLoading(true);
+    const q = query(
+      collection(db, 'wishlist'),
+      where('userId', '==', user.uid),
+      orderBy('createdAt', 'desc'),
+    );
+    const unsubscribeSnap = onSnapshot(
+      q,
+      (snapshot) => {
           setItems(snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as WishlistItem)));
           setLoading(false);
-        });
-        return () => { if (unsubscribeSnap) unsubscribeSnap(); };
-      } else {
+      },
+      (error) => {
+        console.error('Wishlist subscription failed:', error);
         setLoading(false);
-      }
-    });
-    return () => {
-      unsubAuth();
-      if (unsubscribeSnap) unsubscribeSnap();
-    };
-  }, []);
+      },
+    );
+    return unsubscribeSnap;
+  }, [user]);
 
   const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -180,7 +176,7 @@ const WishlistPage: React.FC = () => {
     });
   };
 
-  if (loading || user === null) // Added user === null to ensure user state is resolved
+  if (loading)
     return (
       <div className="h-screen flex items-center justify-center bg-[#121212]">
         <Loader2 className="animate-spin text-pink-500" size={40} />

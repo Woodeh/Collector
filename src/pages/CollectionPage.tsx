@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { motion as Motion } from 'framer-motion';
-import { db, storage, auth } from '../firebase/config';
+import { db, storage } from '../firebase/config';
 import { 
   collection, 
   query, 
@@ -12,9 +12,9 @@ import {
 } from 'firebase/firestore';
 import { ref, deleteObject } from 'firebase/storage';
 import { Loader2, Monitor } from 'lucide-react';
-import type { User } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
 import Modal from '../shared/Modal.js';
+import { useAuth } from '../app/providers/AuthProvider';
 
 import { FigureCard, CollectionHeader, CollectionFilters } from '../components/collection';
 import type { Figure } from '../types/figure';
@@ -33,32 +33,35 @@ const Collection: React.FC = () => {
   const [filterBrand, setFilterBrand] = useState('All');
 
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   useEffect(() => {
-    const unsubscribeAuth = auth.onAuthStateChanged((user: User | null) => {
-      if (user) {
-        const q = query(
-          collection(db, 'figures'),
-          where('userId', '==', user.uid),
-          orderBy('createdAt', 'desc'),
-        );
-        
-        const unsubscribeSnap = onSnapshot(q, (snap) => {
+    if (!user) return;
+    setLoading(true);
+    const q = query(
+      collection(db, 'figures'),
+      where('userId', '==', user.uid),
+      orderBy('createdAt', 'desc'),
+    );
+
+    const unsubscribeSnap = onSnapshot(
+      q,
+      (snap) => {
           const figuresArray = snap.docs.map((doc) => ({
             id: doc.id,
             ...doc.data()
           } as Figure));
           setFigures(figuresArray);
           setLoading(false);
-        });
-        
-        return () => unsubscribeSnap();
-      } else {
-        navigate('/');
-      }
-    });
-    return () => unsubscribeAuth();
-  }, [navigate]);
+      },
+      (error) => {
+        console.error('Collection subscription failed:', error);
+        setLoading(false);
+      },
+    );
+
+    return unsubscribeSnap;
+  }, [user]);
 
   // Подготовка опций для селектов
   const animeOptions = useMemo(() => {
