@@ -178,7 +178,7 @@ const FigureDetailsPage: React.FC = () => {
       transition={{ duration: 0.5, ease: 'easeOut' }}
       className="min-h-screen bg-[#121212] p-4 md:p-8 text-[#e4e4e4] font-sans selection:bg-blue-500/30 overflow-x-hidden text-left"
     >
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-7xl mx-auto">
         <DetailsHeader
           currentUser={currentUser}
           figure={figure}
@@ -187,17 +187,27 @@ const FigureDetailsPage: React.FC = () => {
           onDelete={() => setIsDeleteModalOpen(true)}
         />
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-start">
-          <DetailsSlider
-            images={images}
-            activeImg={activeImg}
-            direction={direction}
-            nextSlide={nextSlide}
-            prevSlide={prevSlide}
-            setIsHovered={setIsHovered}
-          />
+        <div className="grid grid-cols-1 lg:grid-cols-[minmax(340px,0.85fr)_minmax(0,1.15fr)] gap-10 lg:gap-12 xl:gap-16 items-start">
+          <div className="w-full max-w-md mx-auto lg:mx-0 lg:ml-auto lg:sticky lg:top-24">
+            <DetailsSlider
+              images={images}
+              activeImg={activeImg}
+              direction={direction}
+              nextSlide={nextSlide}
+              prevSlide={prevSlide}
+              setIsHovered={setIsHovered}
+            />
 
-          <div className="flex flex-col gap-8">
+            <div className="mt-5">
+              <DetailsThumbnails
+                images={images}
+                handleManualSelect={handleManualSelect}
+                activeImg={activeImg}
+              />
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-6 min-w-0">
             <DetailsIdCard
               figure={figure}
               characterData={characterData}
@@ -206,18 +216,12 @@ const FigureDetailsPage: React.FC = () => {
               setImageError={setImageError}
             />
 
-            <FigureDnaCard figure={figure} />
-
-            <DetailsThumbnails 
-              images={images} 
-              handleManualSelect={handleManualSelect} 
-              activeImg={activeImg} 
-            />
-
             <DetailsActionButtons
               handleMarketScan={handleMarketScan}
               auctionUrl={figure.auctionUrl || null}
             />
+
+            <FigureDnaCard figure={figure} />
           </div>
         </div>
 

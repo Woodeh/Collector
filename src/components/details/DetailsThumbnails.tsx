@@ -14,7 +14,7 @@ const DetailsThumbnails: FC<DetailsThumbnailsProps> = ({
   if (!images || images.length <= 1) return null;
 
   return (
-    <div className="hidden sm:flex flex-wrap gap-4 justify-start">
+    <div className="flex gap-3 overflow-x-auto pb-2 sm:flex-wrap sm:justify-center sm:overflow-visible">
       {images.map((img, idx) => (
         <button
           key={idx}
@@ -22,7 +22,7 @@ const DetailsThumbnails: FC<DetailsThumbnailsProps> = ({
           onClick={() => handleManualSelect(idx)}
           aria-label={`Show image ${idx + 1}`}
           aria-current={activeImg === idx ? 'true' : undefined}
-          className={`w-20 aspect-[4/5] rounded-xl border-2 overflow-hidden transition-all duration-300 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[#121212] ${
+          className={`w-16 sm:w-20 shrink-0 aspect-[4/5] rounded-xl border-2 overflow-hidden transition-all duration-300 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[#121212] ${
             activeImg === idx
               ? 'border-blue-500 shadow-[0_0_20px_rgba(59,130,246,0.4)] scale-105'
               : 'border-[#333] opacity-40 hover:opacity-100 hover:scale-105'
