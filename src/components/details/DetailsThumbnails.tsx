@@ -14,7 +14,7 @@ const DetailsThumbnails: FC<DetailsThumbnailsProps> = ({
   if (!images || images.length <= 1) return null;
 
   return (
-    <div className="flex gap-3 overflow-x-auto pb-2 sm:flex-wrap sm:justify-center sm:overflow-visible">
+    <div className="flex gap-3 overflow-x-auto pb-2 sm:flex-wrap sm:justify-start sm:overflow-visible">
       {images.map((img, idx) => (
         <button
           key={idx}

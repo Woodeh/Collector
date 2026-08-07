@@ -187,8 +187,8 @@ const FigureDetailsPage: React.FC = () => {
           onDelete={() => setIsDeleteModalOpen(true)}
         />
 
-        <div className="grid grid-cols-1 lg:grid-cols-[minmax(340px,0.85fr)_minmax(0,1.15fr)] gap-10 lg:gap-12 xl:gap-16 items-start">
-          <div className="w-full max-w-md mx-auto lg:mx-0 lg:ml-auto lg:sticky lg:top-24">
+        <div className="grid grid-cols-1 lg:grid-cols-[minmax(340px,0.85fr)_minmax(0,1.15fr)] gap-10 lg:gap-12 xl:gap-16 items-start lg:items-stretch">
+          <div className="w-full min-w-0">
             <DetailsSlider
               images={images}
               activeImg={activeImg}
@@ -207,7 +207,7 @@ const FigureDetailsPage: React.FC = () => {
             </div>
           </div>
 
-          <div className="flex flex-col gap-6 min-w-0">
+          <div className="flex min-w-0 flex-col gap-6 lg:h-full lg:[&>*:first-child]:flex-1">
             <DetailsIdCard
               figure={figure}
               characterData={characterData}
@@ -222,6 +222,7 @@ const FigureDetailsPage: React.FC = () => {
             />
 
             <FigureDnaCard figure={figure} />
+
           </div>
         </div>
 

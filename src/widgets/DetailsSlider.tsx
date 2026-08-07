@@ -35,9 +35,9 @@ const DetailsSlider: FC<DetailsSliderProps> = ({
   setIsHovered,
 }) => {
   return (
-    <div className="flex flex-col items-center lg:items-end w-full" role="region" aria-label="Figure image carousel">
+    <div className="flex w-full flex-col items-stretch" role="region" aria-label="Figure image carousel">
       <div
-        className="relative w-full max-w-md aspect-[4/5] z-10"
+        className="relative z-10 aspect-[4/5] w-full"
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >

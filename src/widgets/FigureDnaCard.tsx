@@ -13,27 +13,24 @@ const FigureDnaCard: React.FC<FigureDnaCardProps> = ({ figure }) => {
   const isPublic = figure.visibility === 'public';
 
   return (
-    <section className="rounded-[2rem] border border-blue-500/20 bg-gradient-to-br from-blue-500/10 to-[#161616] p-6 shadow-2xl">
-      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
-        <div className="rounded-2xl bg-white p-3 shrink-0">
-          <QRCodeSVG value={passportUrl} size={112} level="M" title={`Figure DNA ${dnaId}`} />
+    <section className="rounded-2xl border border-blue-500/20 bg-gradient-to-br from-blue-500/10 to-[#161616] p-4 shadow-xl">
+      <div className="flex items-center gap-4">
+        <div className="shrink-0 rounded-xl bg-white p-2">
+          <QRCodeSVG value={passportUrl} size={72} level="M" title={`Figure DNA ${dnaId}`} />
         </div>
 
         <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2 text-blue-500 mb-2">
-            <Fingerprint size={18} />
-            <span className="text-[10px] font-black uppercase tracking-[0.3em]">Figure DNA</span>
+          <div className="mb-1 flex items-center gap-2 text-blue-500">
+            <Fingerprint size={15} />
+            <span className="text-[9px] font-black uppercase tracking-[0.25em]">Figure DNA</span>
           </div>
-          <p className="font-mono text-2xl font-black text-white tracking-tight">{dnaId}</p>
-          <p className="mt-2 text-xs text-gray-500 leading-relaxed">
-            Digital passport for this physical collectible. Scan the code to reopen its record.
-          </p>
-          <div className="mt-4 flex flex-wrap gap-2">
-            <span className="rounded-lg border border-white/10 bg-black/20 px-3 py-1.5 text-[9px] font-black uppercase tracking-wider text-gray-300">
+          <p className="font-mono text-lg font-black tracking-tight text-white">{dnaId}</p>
+          <div className="mt-2 flex flex-wrap gap-1.5">
+            <span className="rounded-md border border-white/10 bg-black/20 px-2 py-1 text-[8px] font-black uppercase tracking-wider text-gray-300">
               {figure.conditionGrade || 'Condition unknown'}
             </span>
-            <span className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-black/20 px-3 py-1.5 text-[9px] font-black uppercase tracking-wider text-gray-300">
-              {isPublic ? <Globe2 size={11} /> : <LockKeyhole size={11} />}
+            <span className="inline-flex items-center gap-1 rounded-md border border-white/10 bg-black/20 px-2 py-1 text-[8px] font-black uppercase tracking-wider text-gray-300">
+              {isPublic ? <Globe2 size={9} /> : <LockKeyhole size={9} />}
               {isPublic ? 'Public passport' : 'Private passport'}
             </span>
           </div>
