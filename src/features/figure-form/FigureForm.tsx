@@ -19,6 +19,8 @@ import {
   updateFigure,
 } from '../../entities/figures/api/figureRepository';
 import type { Figure } from '../../types/figure';
+import { useI18n } from '../../app/i18n/I18nProvider';
+import { brandOptions, conditionOptions, exchangeRates, shopOptions } from './options';
 
 import 'react-datepicker/dist/react-datepicker.css';
 
@@ -50,11 +52,6 @@ interface MediaItem {
   type: 'new' | 'existing';
 }
 
-interface Option {
-  value: string;
-  label: string;
-}
-
 interface FigureFormProps {
   mode?: 'add' | 'edit';
 }
@@ -62,6 +59,7 @@ interface FigureFormProps {
 // --- Component ---
 
 const FigureForm: FC<FigureFormProps> = ({ mode = 'add' }) => {
+  const { t } = useI18n();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const isEdit = mode === 'edit';
@@ -100,41 +98,6 @@ const FigureForm: FC<FigureFormProps> = ({ mode = 'add' }) => {
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
   );
-
-  const EXCHANGE_RATES: Record<string, number> = { USD: 1, KZT: 0.0022, CNY: 0.14 };
-
-  const brandOptions: Option[] = [
-    { value: 'Bandai Spirits', label: 'Bandai Spirits' },
-    { value: 'BANDAI', label: 'BANDAI' },
-    { value: 'Bandai Masterlise', label: 'Bandai Masterlise' },
-    { value: 'MegaHouse', label: 'MegaHouse' },
-    { value: 'Sega', label: 'Sega' },
-    { value: 'Taito', label: 'Taito' },
-    { value: 'FuRyu', label: 'FuRyu' },
-    { value: 'Good Smile Company', label: 'Good Smile Co.' },
-    { value: 'Kotobukiya', label: 'Kotobukiya' },
-    { value: 'Inart', label: 'Inart' },
-    { value: 'Alter', label: 'Alter' },
-    { value: 'Banpresto', label: 'Banpresto' },
-    { value: 'Ichiban Kuji', label: 'Ichiban Kuji' },
-    { value: 'Other', label: 'Other / Original' },
-  ];
-
-  const conditionOptions: Option[] = [
-    { value: 'New (Sealed)', label: 'New (Sealed)' },
-    { value: 'Like New', label: 'Like New' },
-    { value: 'Good', label: 'Good' },
-    { value: 'Minor Damage', label: 'Minor Damage' },
-    { value: 'Missing Parts', label: 'Missing Parts' },
-    { value: 'Poor', label: 'Poor Condition' },
-  ];
-
-  const shopOptions: Option[] = [
-    { value: 'Jalan Jalan Japan', label: 'Jalan Jalan Japan' },
-    { value: 'TaoBao', label: 'TaoBao' },
-    { value: 'OLX', label: 'OLX' },
-    { value: 'Other', label: 'Other' },
-  ];
 
   useEffect(() => {
     if (isEdit && id) {
@@ -266,8 +229,8 @@ const FigureForm: FC<FigureFormProps> = ({ mode = 'add' }) => {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (mediaItems.length === 0) return alert('Please upload photo');
-    if (!auth.currentUser) return alert('User not authenticated');
+    if (mediaItems.length === 0) return alert(t('form.photoRequired'));
+    if (!auth.currentUser) return alert(t('form.authRequired'));
     
     setLoading(true);
     try {
@@ -299,7 +262,7 @@ const FigureForm: FC<FigureFormProps> = ({ mode = 'add' }) => {
 
       const previewIndex = mediaItems.findIndex((i) => i.id === previewId);
       const previewUrl = finalUrls[previewIndex !== -1 ? previewIndex : 0] || '';
-      const priceInUSD = parseFloat((Number(formData.price) * (EXCHANGE_RATES[currency] ?? 1)).toFixed(2));
+      const priceInUSD = parseFloat((Number(formData.price) * (exchangeRates[currency] ?? 1)).toFixed(2));
       
       const finalData = {
         ...formData,
@@ -355,10 +318,10 @@ const FigureForm: FC<FigureFormProps> = ({ mode = 'add' }) => {
             />
           </div>
           <h3 className="text-xl font-black uppercase italic tracking-[0.2em] text-white animate-pulse text-center px-4">
-            Optimizing Visual Data
+            {t('form.optimizing')}
           </h3>
           <p className="text-[10px] text-blue-500 mt-2 font-mono uppercase tracking-widest opacity-60">
-            Applying WebP Compression Matrix...
+            {t('form.compressing')}
           </p>
         </div>
       )}
@@ -372,7 +335,7 @@ const FigureForm: FC<FigureFormProps> = ({ mode = 'add' }) => {
           ) : (
             <PlusCircle className="text-blue-500" size={28} />
           )}
-          {isEdit ? 'Edit Details' : 'Add Figure'}
+          {isEdit ? t('form.editTitle') : t('form.addTitle')}
         </h2>
       </div>
 
@@ -396,11 +359,11 @@ const FigureForm: FC<FigureFormProps> = ({ mode = 'add' }) => {
               <div className="flex items-center gap-2 text-blue-400">
                 {catalogLoading ? <Loader2 size={16} className="animate-spin" /> : <LibraryBig size={16} />}
                 <h3 className="text-[10px] font-black uppercase tracking-[0.2em]">
-                  Community catalog
+                  {t('form.catalog')}
                 </h3>
               </div>
               {catalogLoading ? (
-                <p className="mt-3 text-xs text-gray-500">Looking for matching public figures...</p>
+                <p className="mt-3 text-xs text-gray-500">{t('form.catalogSearching')}</p>
               ) : (
                 <div className="mt-3 grid gap-2">
                   {catalogMatches.map((match) => (
@@ -439,7 +402,7 @@ const FigureForm: FC<FigureFormProps> = ({ mode = 'add' }) => {
 
         <div className="mt-10 pt-8 border-t border-[#333]/50 space-y-4">
           <label className="text-[10px] font-black uppercase tracking-[0.2em] text-blue-500 italic ml-1 block">
-            Full Figure Name
+            {t('form.fullName')}
           </label>
           <div className="relative">
             <FileText
@@ -471,20 +434,20 @@ const FigureForm: FC<FigureFormProps> = ({ mode = 'add' }) => {
 
         <fieldset className="space-y-3 pt-8 border-t border-[#333]/50">
           <legend className="text-[10px] font-black uppercase tracking-[0.2em] text-blue-500 italic mb-3">
-            Collection visibility
+            {t('form.visibility')}
           </legend>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {([
               {
                 value: 'private' as const,
-                label: 'Private',
-                description: 'Visible only to you',
+                label: t('form.private'),
+                description: t('form.privateDescription'),
                 icon: LockKeyhole,
               },
               {
                 value: 'public' as const,
-                label: 'Public',
-                description: 'Shown in the community catalog',
+                label: t('form.public'),
+                description: t('form.publicDescription'),
                 icon: Globe2,
               },
             ]).map((option) => {
@@ -531,7 +494,7 @@ const FigureForm: FC<FigureFormProps> = ({ mode = 'add' }) => {
             <input
               name="auctionUrl"
               autoComplete="off"
-              placeholder="Listing URL"
+              placeholder={t('form.listingUrl')}
               className={inputBaseClass}
               onChange={handleChange}
               value={formData.auctionUrl || ''}
@@ -541,7 +504,7 @@ const FigureForm: FC<FigureFormProps> = ({ mode = 'add' }) => {
             <Zap className="absolute left-4 top-5 text-gray-600" size={18} />
             <textarea
               name="conditionNotes"
-              placeholder="Condition notes..."
+              placeholder={t('form.notes')}
               className={`${inputBaseClass} h-32 resize-none pt-4 leading-relaxed`}
               onChange={handleChange}
               value={formData.conditionNotes || ''}
@@ -557,9 +520,9 @@ const FigureForm: FC<FigureFormProps> = ({ mode = 'add' }) => {
           {loading ? (
             <Loader2 className="animate-spin" size={24} />
           ) : isEdit ? (
-            'Save Changes'
+            t('form.save')
           ) : (
-            'Add to Collection'
+            t('form.add')
           )}
         </button>
       </form>

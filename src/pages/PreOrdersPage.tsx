@@ -3,6 +3,7 @@ import { storage } from '../firebase/config';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { Loader2 } from 'lucide-react';
 import { useAuth } from '../app/providers/AuthProvider';
+import { useI18n } from '../app/i18n/I18nProvider';
 
 import {
   PreOrderHeader,
@@ -21,6 +22,7 @@ export type Currency = 'USD' | 'KZT' | 'CNY';
 
 const PreOrdersPage: React.FC = () => {
   const { user } = useAuth();
+  const { t } = useI18n();
   const [preorders, setPreorders] = useState<PreOrder[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [showForm, setShowForm] = useState<boolean>(false);
@@ -82,7 +84,7 @@ const PreOrdersPage: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const currentUser = user;
-    if (!currentUser) return alert('Session expired.');
+    if (!currentUser) return alert(t('preorders.sessionExpired'));
 
     setSubmitting(true);
     try {
@@ -133,7 +135,7 @@ const PreOrdersPage: React.FC = () => {
   };
 
   const handleDelete = async (id: string) => {
-    if (window.confirm('Delete this pre-order?')) {
+    if (window.confirm(t('preorders.deleteConfirm'))) {
       await deletePreOrder(id);
     }
   };
@@ -143,7 +145,7 @@ const PreOrdersPage: React.FC = () => {
       <div className="h-screen flex flex-col items-center justify-center bg-[#121212] gap-4">
         <Loader2 className="animate-spin text-orange-500" size={40} />
         <p className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-500">
-          Syncing with server...
+          {t('preorders.syncing')}
         </p>
       </div>
     );

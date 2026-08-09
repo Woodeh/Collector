@@ -30,7 +30,7 @@ export default defineConfig([
       '@typescript-eslint/no-unused-vars': ['warn', { varsIgnorePattern: '^[A-Z_]' }],
       '@typescript-eslint/ban-ts-comment': 'warn',
       'no-empty': 'warn',
-      'react-refresh/only-export-components': ['warn', { allowExportNames: ['useAuth'] }],
+      'react-refresh/only-export-components': ['warn', { allowExportNames: ['useAuth', 'useI18n'] }],
     },
   },
 ])

@@ -2,6 +2,7 @@ import React, { FC } from 'react';
 import { Link } from 'react-router-dom';
 import { Heart, Database, Share2, Cpu, Instagram, Github, Info } from 'lucide-react';
 import faceLogo from '../assets/face.png';
+import { useI18n } from '../app/i18n/I18nProvider';
 
 interface NavLink {
   name: string;
@@ -9,10 +10,11 @@ interface NavLink {
 }
 
 const Footer: FC = () => {
+  const { t } = useI18n();
   const currentYear: number = new Date().getFullYear();
 
   const navLinks: NavLink[] = [
-    { name: 'My Collection', path: '/collection' },
+    { name: t('nav.collection'), path: '/collection' },
     { name: 'Statistics', path: '/stats' },
     { name: 'User Profile', path: '/profile' },
   ];
@@ -32,15 +34,14 @@ const Footer: FC = () => {
               </span>
             </Link>
             <p className="text-gray-500 text-[10px] uppercase font-black tracking-[0.15em] leading-relaxed italic max-w-[220px]">
-              Your personal digital archive for anime figures. Organize, track, and showcase your
-              shelf.
+              {t('footer.description')}
             </p>
           </div>
 
           {/* NAVIGATION */}
           <div className="text-left">
             <h4 className="text-[10px] font-black text-blue-500 uppercase tracking-[0.4em] mb-8 flex items-center gap-2 italic">
-              <Database size={12} /> Navigation
+              <Database size={12} /> {t('footer.navigation')}
             </h4>
             <nav className="flex flex-col gap-4">
               {navLinks.map((link) => (
@@ -58,7 +59,7 @@ const Footer: FC = () => {
           {/* COMMUNITY */}
           <div className="text-left">
             <h4 className="text-[10px] font-black text-blue-500 uppercase tracking-[0.4em] mb-8 flex items-center gap-2 italic">
-              <Share2 size={12} /> Community
+              <Share2 size={12} /> {t('footer.community')}
             </h4>
             <nav className="flex flex-col gap-4">
               <a
@@ -86,21 +87,21 @@ const Footer: FC = () => {
           {/* SYSTEM INFO */}
           <div className="text-left">
             <h4 className="text-[10px] font-black text-blue-500 uppercase tracking-[0.4em] mb-8 flex items-center gap-2 italic">
-              <Cpu size={12} /> System
+              <Cpu size={12} /> {t('footer.system')}
             </h4>
             <div className="space-y-3 p-5 bg-[#161616] rounded-2xl border border-[#222] shadow-inner">
               <div className="flex justify-between items-center border-b border-white/5 pb-2">
                 <span className="text-[9px] text-gray-600 uppercase font-black tracking-widest">
-                  Network
+                  {t('footer.network')}
                 </span>
                 <div className="flex items-center gap-1.5">
                   <div className="w-1 h-1 bg-green-500 rounded-full" />
-                  <span className="text-[10px] text-white font-black uppercase italic">Active</span>
+                  <span className="text-[10px] text-white font-black uppercase italic">{t('footer.active')}</span>
                 </div>
               </div>
               <div className="flex justify-between items-center pt-1">
                 <span className="text-[9px] text-gray-600 uppercase font-black tracking-widest">
-                  Version
+                  {t('footer.version')}
                 </span>
                 <span className="text-[10px] text-white font-mono opacity-80">v1.2.0_STABLE</span>
               </div>
@@ -111,7 +112,7 @@ const Footer: FC = () => {
         {/* BOTTOM BAR */}
         <div className="pt-10 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-6">
           <div className="flex items-center gap-3 text-gray-600 text-[9px] font-black uppercase tracking-[0.3em] italic">
-            Developed with <Heart size={10} className="text-red-600 fill-red-600" /> for Collectors
+            {t('footer.madeFor')} <Heart size={10} className="text-red-600 fill-red-600" />
           </div>
 
           <div className="flex items-center gap-4 text-[9px] font-black text-gray-700 uppercase tracking-[0.3em]">

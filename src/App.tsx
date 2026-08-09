@@ -6,6 +6,7 @@ import ScrollToTop from './app/providers/ScrollToTop';
 import Footer from './shared/Footer';
 import { AuthProvider } from './app/providers/AuthProvider';
 import ProtectedRoute from './app/providers/ProtectedRoute';
+import { I18nProvider } from './app/i18n/I18nProvider';
 
 const Home = lazy(() => import('./pages/HomePage'));
 const Login = lazy(() => import('./pages/LoginPage'));
@@ -26,6 +27,7 @@ const RouteFallback: React.FC = () => (
 const App: FC = () => {
   return (
     <Router>
+      <I18nProvider>
       <AuthProvider>
         <ScrollToTop />
         <div className="min-h-screen flex flex-col bg-[#0d0d0f] text-[#e4e4e4]">
@@ -53,6 +55,7 @@ const App: FC = () => {
         </div>
         <Footer />
       </AuthProvider>
+      </I18nProvider>
     </Router>
   );
 };

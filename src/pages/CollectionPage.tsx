@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useMemo } from 'react';
+import { useI18n } from '../app/i18n/I18nProvider';
 import { motion as Motion } from 'framer-motion';
 import { storage } from '../firebase/config';
 import { ref, deleteObject } from 'firebase/storage';
@@ -12,6 +13,7 @@ import type { Figure } from '../types/figure';
 import { deleteFigure, subscribeToUserFigures } from '../entities/figures/api/figureRepository';
 
 const Collection: React.FC = () => {
+  const { t } = useI18n();
   const [figures, setFigures] = useState<Figure[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -193,7 +195,7 @@ const Collection: React.FC = () => {
           ) : (
             <div className="col-span-full py-32 text-center opacity-30">
               <Monitor className="mx-auto mb-4" size={48} />
-              <p className="text-xl font-black uppercase italic tracking-widest">No units found</p>
+              <p className="text-xl font-black uppercase italic tracking-widest">{t('collection.empty')}</p>
             </div>
           )}
         </div>

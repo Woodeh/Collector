@@ -19,12 +19,15 @@ import { auth, storage } from '../firebase/config';
 import { signOut } from 'firebase/auth';
 import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 import { useAuth } from '../app/providers/AuthProvider';
+import { useI18n } from '../app/i18n/I18nProvider';
+import LanguageSwitcher from './LanguageSwitcher';
 
 import faceLogo from '../assets/face.png';
 
 
 const Header: FC = () => {
   const { user } = useAuth();
+  const { t } = useI18n();
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
   const [isProfileOpen, setIsProfileOpen] = useState<boolean>(false);
   const [isScanning, setIsScanning] = useState<boolean>(false);
@@ -146,7 +149,7 @@ const Header: FC = () => {
               }`
             }
           >
-            <Home size={16} /> <span>Home</span>
+            <Home size={16} /> <span>{t('nav.home')}</span>
           </NavLink>
           <NavLink
             to="/community"
@@ -156,7 +159,7 @@ const Header: FC = () => {
               }`
             }
           >
-            <Globe size={16} /> <span>Catalog</span>
+            <Globe size={16} /> <span>{t('nav.catalog')}</span>
           </NavLink>
 
           {user && (
@@ -168,7 +171,7 @@ const Header: FC = () => {
               }`}
             >
               {isScanning ? <Loader2 size={16} className="animate-spin" /> : <Scan size={16} />}
-              <span>Scan</span>
+              <span>{t('nav.scan')}</span>
             </button>
           )}
         </div>
@@ -186,7 +189,7 @@ const Header: FC = () => {
                     }`
                   }
                 >
-                  <LayoutGrid size={16} /> <span>My collection </span>
+                  <LayoutGrid size={16} /> <span>{t('nav.collection')}</span>
                 </NavLink>
                 <NavLink
                   to="/preorders"
@@ -196,7 +199,7 @@ const Header: FC = () => {
                     }`
                   }
                 >
-                  <Clock size={16} /> <span>Pre-Orders</span>
+                  <Clock size={16} /> <span>{t('nav.preorders')}</span>
                 </NavLink>
                 <NavLink
                   to="/wishlist"
@@ -206,14 +209,14 @@ const Header: FC = () => {
                     }`
                   }
                 >
-                  <Heart size={16} /> <span>Wishlist</span>
+                  <Heart size={16} /> <span>{t('nav.wishlist')}</span>
                 </NavLink>
               </div>
 
               <div className="hidden lg:flex items-center gap-4 relative" ref={profileRef}>
                 <div className="text-right shrink-0">
                   <p className="text-[9px] text-blue-500 font-black uppercase tracking-[0.2em] italic leading-none mb-1">
-                    Identity
+                    {t('nav.identity')}
                   </p>
                   <p className="text-white text-xs font-black uppercase italic leading-none truncate max-w-[100px]">
                     {user.displayName || user.email?.split('@')[0]}
@@ -245,7 +248,7 @@ const Header: FC = () => {
                   <div className="absolute top-full right-0 mt-8 w-64 bg-[#1a1a1a]/95 backdrop-blur-xl border border-[#333] rounded-[2rem] shadow-[0_30px_60px_rgba(0,0,0,0.8)] overflow-hidden animate-in fade-in zoom-in-95 slide-in-from-top-4 duration-300 ease-out origin-top-right">
                     <div className="p-6 border-b border-[#333] bg-[#121212]/50 text-left">
                       <p className="text-[9px] text-blue-500 font-black uppercase tracking-[0.3em] italic mb-1">
-                        Collector Identity
+                        {t('nav.collectorIdentity')}
                       </p>
                       <p className="text-white font-black italic uppercase text-sm truncate">
                         {user.displayName || user.email?.split('@')[0]}
@@ -261,7 +264,7 @@ const Header: FC = () => {
                       >
                         <Settings size={18} className="group-hover:text-blue-500" />
                         <span className="text-[11px] font-black uppercase italic tracking-widest">
-                          Profile
+                          {t('nav.profile')}
                         </span>
                       </button>
                       <button
@@ -270,7 +273,7 @@ const Header: FC = () => {
                       >
                         <LogOut size={18} />
                         <span className="text-[11px] font-black uppercase italic tracking-widest">
-                          Log Out
+                          {t('nav.logout')}
                         </span>
                       </button>
                     </div>
@@ -284,11 +287,12 @@ const Header: FC = () => {
                 to="/login"
                 className="flex items-center gap-3 px-6 py-3 rounded-2xl bg-blue-600 text-white font-black uppercase italic text-[11px] tracking-widest hover:bg-blue-500 shadow-xl shadow-blue-600/20 active:scale-95 transition-all cursor-pointer"
               >
-                <LogIn size={16} /> <span>Access System</span>
+              <LogIn size={16} /> <span>{t('nav.access')}</span>
               </Link>
             </div>
           )}
 
+          <LanguageSwitcher />
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
             className="lg:hidden p-3 text-blue-500 bg-[#121212] border border-[#333] rounded-2xl hover:bg-blue-600/10 transition-all active:scale-90 cursor-pointer"
@@ -316,7 +320,7 @@ const Header: FC = () => {
               </div>
               <div className="text-left">
                 <p className="text-[10px] text-blue-500 font-bold uppercase tracking-wider mb-0.5">
-                  Account
+                  {t('nav.account')}
                 </p>
                 <p className="text-white font-black italic uppercase text-lg tracking-tighter">
                   {user.displayName || user.email?.split('@')[0]}
@@ -329,7 +333,7 @@ const Header: FC = () => {
             <MobileNavLink
               to="/"
               icon={<Home size={20} />}
-              label="Home"
+              label={t('nav.home')}
               activeColor="text-blue-500"
               onClick={closeMenu}
             />
@@ -356,28 +360,28 @@ const Header: FC = () => {
                     )}
                   </div>
                   <span className="font-bold uppercase tracking-wide text-sm">
-                    {isScanning ? 'Processing...' : 'Scan'}
+                    {isScanning ? t('scan.processing') : t('nav.scan')}
                   </span>
                 </button>
 
                 <MobileNavLink
                   to="/collection"
                   icon={<LayoutGrid size={20} />}
-                  label="My Collection"
+                  label={t('nav.collection')}
                   activeColor="text-blue-500"
                   onClick={closeMenu}
                 />
                 <MobileNavLink
                   to="/community"
                   icon={<Globe size={20} />}
-                  label="Catalog"
+                  label={t('nav.catalog')}
                   activeColor="text-blue-500"
                   onClick={closeMenu}
                 />
                 <MobileNavLink
                   to="/profile"
                   icon={<UserIcon size={20} />}
-                  label="Profile Settings"
+                  label={t('nav.profileSettings')}
                   activeColor="text-blue-500"
                   onClick={closeMenu}
                 />
@@ -385,14 +389,14 @@ const Header: FC = () => {
                 <MobileNavLink
                   to="/preorders"
                   icon={<Clock size={20} />}
-                  label="Pre-Orders"
+                  label={t('nav.preorders')}
                   activeColor="text-orange-500"
                   onClick={closeMenu}
                 />
                 <MobileNavLink
                   to="/wishlist"
                   icon={<Heart size={20} />}
-                  label="Wishlist"
+                  label={t('nav.wishlist')}
                   activeColor="text-pink-500"
                   onClick={closeMenu}
                 />
@@ -400,7 +404,7 @@ const Header: FC = () => {
                   onClick={handleLogout}
                   className="flex items-center gap-4 p-5 rounded-2xl text-red-500 font-bold uppercase tracking-widest text-xs mt-4 bg-red-500/5 border border-red-500/10 cursor-pointer"
                 >
-                  <LogOut size={20} /> Log Out
+                  <LogOut size={20} /> {t('nav.logout')}
                 </button>
               </>
             ) : (
@@ -408,7 +412,7 @@ const Header: FC = () => {
                 <MobileNavLink
                   to="/community"
                   icon={<Globe size={20} />}
-                  label="Catalog"
+                  label={t('nav.catalog')}
                   activeColor="text-blue-500"
                   onClick={closeMenu}
                 />
@@ -417,7 +421,7 @@ const Header: FC = () => {
                   onClick={closeMenu}
                   className="flex items-center gap-4 p-5 rounded-2xl bg-blue-600 text-white font-bold uppercase tracking-widest text-sm mt-4 shadow-xl shadow-blue-600/20 cursor-pointer"
                 >
-                  <LogIn size={20} /> Sign In
+                  <LogIn size={20} /> {t('nav.signIn')}
                 </Link>
               </>
             )}

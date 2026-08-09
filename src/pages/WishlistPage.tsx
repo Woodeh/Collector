@@ -4,6 +4,7 @@ import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { Loader2, Heart, Plus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../app/providers/AuthProvider';
+import { useI18n } from '../app/i18n/I18nProvider';
 
 import WishlistCard from '../entities/wishlist/WishlistCard';
 import WishlistForm from '../entities/wishlist/WishlistForm';
@@ -21,6 +22,7 @@ const WishlistPage: React.FC = () => {
   const [showForm, setShowForm] = useState<boolean>(false);
   const [submitting, setSubmitting] = useState<boolean>(false);
   const { user } = useAuth();
+  const { t } = useI18n();
   const [editingId, setEditingId] = useState<string | null>(null);
   const navigate = useNavigate();
 
@@ -119,7 +121,7 @@ const WishlistPage: React.FC = () => {
   };
 
   const handleDelete = async (id: string) => {
-    if (window.confirm('Remove this grail?')) {
+    if (window.confirm(t('wishlist.removeConfirm'))) {
       await deleteWishlistItem(id);
     }
   };
@@ -166,7 +168,7 @@ const WishlistPage: React.FC = () => {
             <div className="flex items-center gap-2">
               <Heart className="text-pink-500 fill-pink-500" size={24} />
               <h2 className="text-2xl md:text-3xl font-black uppercase italic tracking-tighter text-white">
-                Wishlist
+                {t('wishlist.title')}
               </h2>
             </div>
             <span className="bg-[#1a1a1a] px-3 py-1 rounded-full text-pink-500 text-xs font-black border border-[#333]">
@@ -177,7 +179,7 @@ const WishlistPage: React.FC = () => {
             onClick={openAddForm}
             className="bg-pink-600 hover:bg-pink-500 text-white px-6 py-3 rounded-xl font-black uppercase italic text-xs tracking-widest flex items-center gap-2 transition-all active:scale-95 shadow-lg cursor-pointer"
           >
-            <Plus size={16} /> <span>Add Target</span>
+            <Plus size={16} /> <span>{t('wishlist.add')}</span>
           </button>
         </div>
 
@@ -196,7 +198,7 @@ const WishlistPage: React.FC = () => {
         {items.length === 0 && (
           <div className="py-20 text-center opacity-10">
             <Heart size={60} className="mx-auto mb-4" />
-            <p className="font-black uppercase tracking-[0.3em] text-sm">Wishlist Empty</p>
+            <p className="font-black uppercase tracking-[0.3em] text-sm">{t('wishlist.empty')}</p>
           </div>
         )}
 

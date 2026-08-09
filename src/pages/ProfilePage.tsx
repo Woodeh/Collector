@@ -4,9 +4,7 @@ import { auth, storage } from '../firebase/config';
 import { updateProfile } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { FileDown, Camera, Loader2, Award, X } from 'lucide-react';
-import jsPDF from 'jspdf';
-import autoTable from 'jspdf-autotable';
+import { useI18n } from '../app/i18n/I18nProvider';
 import type { Figure } from '../types/figure';
 import { useAuth } from '../app/providers/AuthProvider';
 import {
@@ -46,6 +44,7 @@ interface ChartData {
 const Profile: FC = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { locale, t } = useI18n();
   const [allFigures, setAllFigures] = useState<ProfileFigure[]>([]);
   const [recentFigures, setRecentFigures] = useState<ProfileFigure[]>([]);
   const [collectionStats, setCollectionStats] = useState<Stats>({ totalValue: 0, count: 0 });
@@ -182,50 +181,11 @@ const Profile: FC = () => {
     }
   };
 
-  const generateReport = () => {
-    if (allFigures.length === 0) return alert('No data available in the vault.');
-
-    const pdfDoc = new jsPDF();
-    const timestamp = new Date().toLocaleString();
+  const generateReport = async () => {
+    if (allFigures.length === 0) return alert(t('profile.noReportData'));
     const userName = user?.displayName || user?.email?.split('@')[0] || 'Collector';
-
-    pdfDoc.setFillColor(18, 18, 18);
-    pdfDoc.rect(0, 0, 210, 40, 'F');
-
-    pdfDoc.setTextColor(59, 130, 246);
-    pdfDoc.setFontSize(22);
-    pdfDoc.text('FIGURE.COLLECTOR', 15, 22);
-
-    pdfDoc.setTextColor(150, 150, 150);
-    pdfDoc.setFontSize(9);
-    pdfDoc.text('SYSTEM GENERATED ASSET LOG // SECURE ARCHIVE', 15, 30);
-
-    pdfDoc.setFontSize(8);
-    pdfDoc.text(`GENERATED: ${timestamp}`, 140, 22);
-    pdfDoc.text(`OWNER: ${userName.toUpperCase()}`, 140, 28);
-
-    const tableData = allFigures
-      .filter((f) => f.conditionGrade?.toLowerCase().trim() !== 'pre-order')
-      .sort((a, b) => (Number(b.price) || 0) - (Number(a.price) || 0))
-      .map((f) => [
-        f.name || 'Unknown Item',
-        f.anime || 'N/A',
-        f.brand || 'Original',
-        `$${Number(f.price || 0).toLocaleString()}`,
-        f.conditionGrade || 'Standard',
-      ]);
-
-    autoTable(pdfDoc, {
-      startY: 50,
-      head: [['DESIGNATION', 'ORIGIN', 'MANUFACTURER', 'EST. VALUE', 'STATUS']],
-      body: tableData,
-      theme: 'striped',
-      headStyles: { fillColor: [59, 130, 246], textColor: 255, fontStyle: 'bold' },
-      styles: { fontSize: 8, cellPadding: 3 },
-      margin: { left: 15, right: 15 },
-    });
-
-    pdfDoc.save(`Collection_Report_${userName}_${new Date().toISOString().split('T')[0]}.pdf`);
+    const { generateCollectionReport } = await import('../features/export-collection/generateCollectionReport');
+    await generateCollectionReport({ figures: allFigures, userName, locale });
   };
 
   if (!user) return null;

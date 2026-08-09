@@ -1,6 +1,7 @@
 import React, { FC, ChangeEvent } from 'react';
 import { LayoutGrid, Search, X, SlidersHorizontal, Plus } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useI18n } from '../../app/i18n/I18nProvider';
 
 interface CollectionHeaderProps {
   processedCount: number;
@@ -17,6 +18,7 @@ const CollectionHeader: FC<CollectionHeaderProps> = ({
   showFilters,
   setShowFilters,
 }) => {
+  const { t } = useI18n();
   return (
     <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 border-b border-[#333] pb-10 text-left">
       {/* LEFT SECTION: Registry Info */}
@@ -24,16 +26,16 @@ const CollectionHeader: FC<CollectionHeaderProps> = ({
         <div className="flex items-center gap-3 text-blue-500 mb-2">
           <LayoutGrid size={20} />
           <span className="text-[10px] font-black uppercase tracking-[0.4em]">
-            Personal Registry
+            {t('collection.registry')}
           </span>
         </div>
 
         <h1 className="text-4xl md:text-6xl font-black uppercase italic tracking-tighter text-white leading-none">
-          My <span className="text-blue-500">Collection.</span>
+          {t('collection.titleBefore')} <span className="text-blue-500">{t('collection.titleAccent')}</span>
         </h1>
 
         <p className="text-gray-500 text-[10px] font-black uppercase tracking-widest italic">
-          Managing {processedCount} unique units in your sector
+          {t('collection.managing', { count: processedCount })}
         </p>
       </div>
 
@@ -49,7 +51,7 @@ const CollectionHeader: FC<CollectionHeaderProps> = ({
           />
           <input
             type="text"
-            placeholder="Search database..."
+            placeholder={t('collection.search')}
             className="w-full bg-[#1a1a1a] border border-[#333] py-4 pl-12 pr-12 rounded-2xl outline-none focus:border-blue-500 transition-all font-bold text-base text-white placeholder:text-gray-700"
             value={searchTerm}
             onChange={(e: ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
@@ -84,7 +86,7 @@ const CollectionHeader: FC<CollectionHeaderProps> = ({
           className="bg-blue-600 hover:bg-blue-500 text-white p-4 rounded-2xl font-black uppercase italic tracking-tighter flex items-center gap-2 transition-all active:scale-95 shadow-xl shadow-blue-600/20 border border-blue-400/20 cursor-pointer"
         >
           <Plus size={20} />
-          <span className="hidden sm:inline text-sm">Add Unit</span>
+          <span className="hidden sm:inline text-sm">{t('collection.add')}</span>
         </Link>
       </div>
     </div>
