@@ -1,5 +1,6 @@
 import {
   addDoc,
+  arrayUnion,
   collection,
   deleteDoc,
   doc,
@@ -19,9 +20,51 @@ import {
   type Unsubscribe,
 } from 'firebase/firestore';
 import { db } from '../../../firebase/config';
-import type { Figure } from '../../../types/figure';
+import type { Figure, FigureHistoryEvent, FigureHistoryEventType } from '../../../types/figure';
 
-export type FigurePayload = Omit<Figure, 'id' | 'createdAt' | 'updatedAt'>;
+export type FigurePayload = Omit<Figure, 'id' | 'createdAt' | 'updatedAt' | 'history'>;
+
+const createHistoryEvent = (
+  type: FigureHistoryEventType,
+  details: Pick<FigureHistoryEvent, 'from' | 'to'> = {},
+): FigureHistoryEvent => ({
+  id: globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(36).slice(2)}`,
+  type,
+  createdAt: new Date().toISOString(),
+  ...details,
+});
+
+const comparableImages = (images?: string[]) => JSON.stringify(images ?? []);
+
+const detailFields: Array<keyof FigurePayload> = [
+  'name', 'anime', 'brand', 'category', 'gender', 'auctionUrl', 'purchaseDate',
+  'conditionNotes', 'hasBox', 'purchasePlace', 'characterId', 'characterImage', 'fullDisplayName',
+];
+
+export const buildFigureHistoryEvents = (
+  previous: Figure,
+  next: FigurePayload,
+): FigureHistoryEvent[] => {
+  const events: FigureHistoryEvent[] = [];
+
+  if (Number(previous.price ?? 0) !== Number(next.price ?? 0)) {
+    events.push(createHistoryEvent('price_changed', { from: Number(previous.price ?? 0), to: Number(next.price ?? 0) }));
+  }
+  if ((previous.conditionGrade ?? '') !== (next.conditionGrade ?? '')) {
+    events.push(createHistoryEvent('condition_changed', { from: previous.conditionGrade ?? '', to: next.conditionGrade ?? '' }));
+  }
+  if ((previous.visibility ?? 'private') !== (next.visibility ?? 'private')) {
+    events.push(createHistoryEvent('visibility_changed', { from: previous.visibility ?? 'private', to: next.visibility ?? 'private' }));
+  }
+  if (comparableImages(previous.images) !== comparableImages(next.images)) {
+    events.push(createHistoryEvent('photos_changed', { from: previous.images?.length ?? 0, to: next.images?.length ?? 0 }));
+  }
+  if (detailFields.some((field) => JSON.stringify(previous[field]) !== JSON.stringify(next[field]))) {
+    events.push(createHistoryEvent('details_changed'));
+  }
+
+  return events;
+};
 
 export const normalizeFigure = (id: string, data: DocumentData): Figure | null => {
   if (typeof data.name !== 'string' || data.name.trim().length === 0) {
@@ -32,12 +75,18 @@ export const normalizeFigure = (id: string, data: DocumentData): Figure | null =
   const images = Array.isArray(data.images)
     ? data.images.filter((value): value is string => typeof value === 'string')
     : undefined;
+  const history = Array.isArray(data.history)
+    ? data.history.filter((event): event is FigureHistoryEvent =>
+        event != null && typeof event === 'object' && typeof event.id === 'string' &&
+        typeof event.type === 'string' && typeof event.createdAt === 'string')
+    : undefined;
 
   return {
     ...data,
     id,
     name: data.name.trim(),
     ...(images ? { images } : {}),
+    ...(history ? { history } : {}),
   } as Figure;
 };
 
@@ -84,12 +133,20 @@ export const figureDocument = (figureId: string) => doc(db, 'figures', figureId)
 export const createFigure = (data: FigurePayload) =>
   addDoc(collection(db, 'figures'), {
     ...data,
+    history: [createHistoryEvent('created')],
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
   });
 
-export const updateFigure = (figureId: string, data: FigurePayload) =>
-  updateDoc(figureDocument(figureId), { ...data, updatedAt: serverTimestamp() });
+export const updateFigure = async (figureId: string, data: FigurePayload) => {
+  const previous = await getFigureById(figureId);
+  const events = previous ? buildFigureHistoryEvents(previous, data) : [];
+  await updateDoc(figureDocument(figureId), {
+    ...data,
+    ...(events.length > 0 ? { history: arrayUnion(...events) } : {}),
+    updatedAt: serverTimestamp(),
+  });
+};
 
 export const deleteFigure = (figureId: string) => deleteDoc(figureDocument(figureId));
 

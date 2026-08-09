@@ -1,5 +1,6 @@
 import React, { useState, useEffect, FC, useRef, MouseEvent as ReactMouseEvent } from 'react';
 import { Trash2, Calendar, ImageIcon, Clock, Tag, MoreVertical } from 'lucide-react';
+import { useI18n } from '../../app/i18n/I18nProvider';
 
 // Интерфейс для данных предзаказа
 interface PreOrderItem {
@@ -29,6 +30,7 @@ interface PreOrderCardProps {
 }
 
 const PreOrderCard: FC<PreOrderCardProps> = ({ item, onDelete, onImageClick }) => {
+  const { t } = useI18n();
   const [showMenu, setShowMenu] = useState<boolean>(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -109,7 +111,7 @@ const PreOrderCard: FC<PreOrderCardProps> = ({ item, onDelete, onImageClick }) =
         <span>{time.hours}h</span>
         <span className="opacity-40">•</span>
         <span>{time.minutes}m</span>
-        <span className="ml-1 opacity-60 italic tracking-normal lowercase font-bold">left</span>
+        <span className="ml-1 opacity-60 italic tracking-normal lowercase font-bold">{t('preorders.left')}</span>
       </div>
     );
   };
@@ -147,7 +149,7 @@ const PreOrderCard: FC<PreOrderCardProps> = ({ item, onDelete, onImageClick }) =
                 className="w-full flex items-center gap-3 px-4 py-3 text-[11px] font-black uppercase italic tracking-widest text-red-500/70 hover:bg-red-500/10 hover:text-red-500 transition-all cursor-pointer"
               >
                 <Trash2 size={14} />
-                <span>Delete</span>
+                <span>{t('common.delete')}</span>
               </button>
             </div>
           )}
@@ -205,7 +207,7 @@ const PreOrderCard: FC<PreOrderCardProps> = ({ item, onDelete, onImageClick }) =
           {/* PRICE SECTION */}
           <div className="mt-8 pt-5 border-t border-white/5 space-y-3">
             <div className="flex justify-between items-center opacity-60">
-              <span className="text-[10px] uppercase font-black tracking-widest text-white italic">Deposit</span>
+              <span className="text-[10px] uppercase font-black tracking-widest text-white italic">{t('preorders.deposit')}</span>
               <div className="flex items-center gap-1">
                 <span className="text-xl font-black text-green-500 italic tracking-tighter">
                   {Math.round(Number(item.deposit) || 0).toLocaleString()}
@@ -216,7 +218,7 @@ const PreOrderCard: FC<PreOrderCardProps> = ({ item, onDelete, onImageClick }) =
             <div className="flex justify-between items-center">
               <div className="flex items-center gap-2 opacity-40">
                 <Tag size={14} className="text-blue-500" />
-                <span className="text-[10px] uppercase font-black tracking-widest text-white italic">Total</span>
+                <span className="text-[10px] uppercase font-black tracking-widest text-white italic">{t('preorders.total')}</span>
               </div>
               <div className="text-3xl font-black text-white italic tracking-tighter flex items-center gap-1">
                 {Math.round(Number(item.totalPrice) || 0).toLocaleString()}

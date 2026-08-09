@@ -153,8 +153,8 @@ const Collection: React.FC = () => {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onConfirm={handleConfirmDelete}
-        title="Delete Figure"
-        message={`Delete "${figureToDelete?.name}"?`}
+        title={t('details.deleteTitle')}
+        message={t('details.deleteMessage', { name: figureToDelete?.name || '' })}
       />
 
       <div className="max-w-7xl mx-auto space-y-10 relative z-10">

@@ -8,6 +8,7 @@ import {
 import { useLocation, useNavigate } from 'react-router-dom';
 import { LogIn, Lock, Mail, UserPlus, Loader2 } from 'lucide-react';
 import { useAuth } from '../app/providers/AuthProvider';
+import { useI18n } from '../app/i18n/I18nProvider';
 
 const LoginPage: React.FC = () => {
   const [isLogin, setIsLogin] = useState<boolean>(true);
@@ -18,6 +19,7 @@ const LoginPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, initializing } = useAuth();
+  const { t } = useI18n();
   const destination = (location.state as { from?: { pathname?: string } } | null)?.from?.pathname || '/';
 
   useEffect(() => {
@@ -40,7 +42,7 @@ const LoginPage: React.FC = () => {
       }
       navigate(destination, { replace: true });
     } catch (error: unknown) {
-      alert('Error: ' + (error instanceof Error ? error.message : 'Authentication failed'));
+      alert(error instanceof Error ? error.message : t('login.authFailed'));
     } finally {
       setLoading(false);
     }
@@ -55,10 +57,10 @@ const LoginPage: React.FC = () => {
             {isLogin ? <LogIn size={24} /> : <UserPlus size={24} />}
           </div>
           <h2 className="text-3xl font-black uppercase italic tracking-tighter text-white">
-            {isLogin ? 'Welcome Back' : 'Create Account'}
+            {isLogin ? t('login.welcome') : t('login.create')}
           </h2>
           <p className="text-gray-500 text-[10px] font-bold uppercase tracking-[0.2em]">
-            {isLogin ? 'Access your private archive' : 'Start your collector journey'}
+            {isLogin ? t('login.accessArchive') : t('login.startJourney')}
           </p>
         </div>
 
@@ -67,11 +69,11 @@ const LoginPage: React.FC = () => {
           {!isLogin && (
             <div className="space-y-1">
               <label className="block text-[10px] font-black uppercase tracking-widest text-gray-500 ml-4">
-                Full Name
+                {t('login.name')}
               </label>
               <input
                 type="text"
-                placeholder="Name"
+                placeholder={t('login.namePlaceholder')}
                 className="w-full bg-[#121212] border border-[#333] rounded-2xl py-4 px-5 outline-none focus:border-blue-500 transition-all font-bold text-white text-base placeholder:text-gray-800"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
@@ -83,7 +85,7 @@ const LoginPage: React.FC = () => {
           {/* Email Field */}
           <div className="space-y-1">
             <label className="block text-[10px] font-black uppercase tracking-widest text-gray-500 ml-4">
-              Email
+              {t('login.email')}
             </label>
             <div className="relative">
               <Mail className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-700" size={18} />
@@ -101,7 +103,7 @@ const LoginPage: React.FC = () => {
           {/* Password Field */}
           <div className="space-y-1">
             <label className="block text-[10px] font-black uppercase tracking-widest text-gray-500 ml-4">
-              Password
+              {t('login.password')}
             </label>
             <div className="relative">
               <Lock className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-700" size={18} />
@@ -125,9 +127,9 @@ const LoginPage: React.FC = () => {
             {loading ? (
               <Loader2 className="animate-spin" size={20} />
             ) : isLogin ? (
-              'Sign In'
+              t('login.signIn')
             ) : (
-              'Register'
+              t('login.register')
             )}
           </button>
         </form>
@@ -138,7 +140,7 @@ const LoginPage: React.FC = () => {
             onClick={() => setIsLogin(!isLogin)}
             className="text-[10px] font-black uppercase tracking-widest text-gray-500 hover:text-blue-500 transition-colors"
           >
-            {isLogin ? "Don't have an account? Sign Up" : 'Already have an account? Sign In'}
+            {isLogin ? t('login.noAccount') : t('login.hasAccount')}
           </button>
         </div>
       </div>

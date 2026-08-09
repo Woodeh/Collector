@@ -1,6 +1,7 @@
 import React, { FC, MouseEvent } from 'react';
 import { Tag, Trash2, Pencil, ExternalLink, Heart, CheckCircle } from 'lucide-react';
 import type { WishlistItem } from './model';
+import { useI18n } from '../../app/i18n/I18nProvider';
 
 // Интерфейс для данных объекта в вишлисте
 // Интерфейс пропсов компонента
@@ -12,6 +13,7 @@ interface WishlistCardProps {
 }
 
 const WishlistCard: FC<WishlistCardProps> = ({ item, onEdit, onDelete, onGotIt }) => {
+  const { t } = useI18n();
   return (
     <div className="relative group bg-[#1a1a1a] rounded-[2rem] border border-[#333] overflow-hidden hover:border-pink-500/50 transition-all duration-500 flex flex-col shadow-2xl h-full text-left">
       {/* Кнопки управления (Pencil и Trash) */}
@@ -88,7 +90,7 @@ const WishlistCard: FC<WishlistCardProps> = ({ item, onEdit, onDelete, onGotIt }
             <div className="flex items-center gap-2 opacity-40">
               <Tag size={12} className="text-pink-500" />
               <span className="text-[9px] uppercase font-black tracking-widest text-white italic">
-                Est. Price
+                {t('common.price')}
               </span>
             </div>
             <div className="text-2xl font-black text-white italic tracking-tighter flex items-center gap-1">
@@ -102,7 +104,7 @@ const WishlistCard: FC<WishlistCardProps> = ({ item, onEdit, onDelete, onGotIt }
             className="bg-green-600/10 hover:bg-green-600 text-green-500 hover:text-white px-4 py-2.5 rounded-xl transition-all flex items-center gap-2 font-black uppercase italic text-[10px] cursor-pointer border border-green-500/20 hover:border-green-600 shadow-lg active:scale-95"
           >
             <CheckCircle size={14} />
-            <span>Got it</span>
+            <span>{t('wishlist.gotIt')}</span>
           </button>
         </div>
       </div>

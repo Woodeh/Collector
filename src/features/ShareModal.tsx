@@ -2,6 +2,7 @@ import React, { useState, FC } from 'react';
 import { motion as Motion, AnimatePresence } from 'framer-motion';
 import { X, Copy, Check, Share2, QrCode, Shield, Send, MessageCircle } from 'lucide-react';
 import type { Figure } from '../types/figure';
+import { useI18n } from '../app/i18n/I18nProvider';
 
 interface ShareModalProps {
   isOpen: boolean;
@@ -11,11 +12,12 @@ interface ShareModalProps {
 
 const ShareModal: FC<ShareModalProps> = ({ isOpen, onClose, figure }) => {
   const [copied, setCopied] = useState<boolean>(false);
+  const { t } = useI18n();
 
   if (!isOpen) return null;
 
   const shareUrl: string = window.location.href;
-  const shareText: string = `Check out this asset: ${figure.name} from ${figure.anime} in my collection!`;
+  const shareText = t('share.text', { name: figure.name, anime: figure.anime || '' });
 
   const handleCopy = (): void => {
     navigator.clipboard.writeText(shareUrl);
@@ -49,7 +51,7 @@ const ShareModal: FC<ShareModalProps> = ({ isOpen, onClose, figure }) => {
             <div className="flex items-center gap-3">
               <Share2 size={18} className="text-blue-500" />
               <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white italic">
-                Generate Asset Link
+                {t('share.title')}
               </span>
             </div>
             <button
@@ -82,7 +84,7 @@ const ShareModal: FC<ShareModalProps> = ({ isOpen, onClose, figure }) => {
                   <div className="flex items-center gap-2">
                     <Shield size={10} className="text-blue-500" />
                     <span className="text-[8px] font-black text-blue-500 uppercase tracking-widest italic">
-                      Verified Asset
+                      {t('share.verified')}
                     </span>
                   </div>
                   <h3 className="text-xl font-black text-white uppercase italic tracking-tighter leading-tight line-clamp-2">
@@ -96,7 +98,7 @@ const ShareModal: FC<ShareModalProps> = ({ isOpen, onClose, figure }) => {
                 <div className="flex justify-between items-end">
                   <div className="text-left">
                     <p className="text-[8px] font-black text-gray-600 uppercase tracking-widest mb-1">
-                      Market Value
+                      {t('share.marketValue')}
                     </p>
                     <p className="text-2xl font-black text-white italic tracking-tighter">
                       <span className="text-blue-500 mr-1">$</span>
@@ -127,7 +129,7 @@ const ShareModal: FC<ShareModalProps> = ({ isOpen, onClose, figure }) => {
                   className="shrink-0 flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-[10px] font-black uppercase italic tracking-widest transition-all active:scale-95 cursor-pointer"
                 >
                   {copied ? <Check size={14} /> : <Copy size={14} />}
-                  {copied ? 'Copied' : 'Copy'}
+                  {copied ? t('share.copied') : t('share.copy')}
                 </button>
               </div>
 
@@ -149,7 +151,7 @@ const ShareModal: FC<ShareModalProps> = ({ isOpen, onClose, figure }) => {
               </div>
 
               <p className="text-[9px] font-black text-gray-600 uppercase tracking-[0.2em] text-center italic">
-                System Archive Access Link Generated // Security Protocol Level 4
+                {t('share.security')}
               </p>
             </div>
           </div>

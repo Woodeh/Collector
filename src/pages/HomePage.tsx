@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion as Motion, useScroll, useTransform } from 'framer-motion';
 import { Loader2 } from 'lucide-react';
 import { useAuth } from '../app/providers/AuthProvider';
+import { useI18n } from '../app/i18n/I18nProvider';
 
 import { HeroSection, QuickStats, SpotlightCard } from '../components/home';
 import RankSection from '../widgets/RankSection';
@@ -27,6 +28,7 @@ interface WidgetStats {
 }
 
 const HomePage: React.FC = () => {
+  const { t } = useI18n();
   const [recentFigures, setRecentFigures] = useState<Figure[]>([]);
   const [spotlight, setSpotlight] = useState<Figure | null>(null);
   const [stats, setStats] = useState<Stats>({ totalValue: 0, count: 0, topBrand: 'None', rank: { name: 'Novice', next: 5, color: 'text-gray-500', bg: 'bg-gray-500' } });
@@ -244,7 +246,7 @@ const HomePage: React.FC = () => {
           <div className="flex items-center gap-4">
             <div className="h-[2px] w-12 bg-blue-500"></div>
             <span className="text-[10px] font-black uppercase tracking-[0.3em] text-blue-500 italic">
-              Spotlight Discovery
+              {t('home.spotlight')}
             </span>
           </div>
           <SpotlightCard spotlight={spotlight} />

@@ -165,7 +165,7 @@ const Profile: FC = () => {
       window.location.reload();
     } catch (error) {
       console.error('Avatar upload failed:', error);
-      alert('System Error: Avatar synchronization failed.');
+      alert(t('profile.avatarError'));
     } finally {
       setIsUploading(false);
     }

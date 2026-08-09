@@ -9,6 +9,7 @@ import {
 } from '@dnd-kit/core';
 import { SortableContext, horizontalListSortingStrategy } from '@dnd-kit/sortable';
 import SortablePhotoItem from '../../shared/lib/SortablePhotoItem';
+import { useI18n } from '../../app/i18n/I18nProvider';
 
 interface MediaItem {
   id: string;
@@ -38,6 +39,7 @@ const PhotoUploadSection: FC<PhotoUploadSectionProps> = ({
   setPreviewId,
   removeItem,
 }) => {
+  const { t } = useI18n();
   return (
     <div className="space-y-4 pt-4 border-t border-[#333]/50">
       <label
@@ -62,7 +64,7 @@ const PhotoUploadSection: FC<PhotoUploadSectionProps> = ({
           size={24}
         />
         <span className="text-gray-500 font-black text-[9px] uppercase tracking-widest mt-2 px-4 text-center">
-          Photos (Max 5)
+          {t('form.photos')} · {t('form.photoHint')}
         </span>
         <input
           type="file"

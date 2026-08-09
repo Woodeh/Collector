@@ -285,7 +285,7 @@ const FigureForm: FC<FigureFormProps> = ({ mode = 'add' }) => {
       setEpicSuccess({ name: formData.name, img: previewUrl });
       setTimeout(() => navigate('/collection'), 3000);
     } catch (error: unknown) {
-      alert(error instanceof Error ? error.message : 'Unable to save figure');
+      alert(error instanceof Error ? error.message : t('form.saveError'));
     } finally {
       setLoading(false);
     }

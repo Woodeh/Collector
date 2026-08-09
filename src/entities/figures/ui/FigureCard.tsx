@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect, FC, MouseEvent as ReactMouseEvent }
 import { Tag, Trash2, Pencil, User, MoreVertical } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import type { Figure } from '../../../types/figure';
+import { useI18n } from '../../../app/i18n/I18nProvider';
 
 interface FigureCardProps {
   figure: Figure;
@@ -16,6 +17,7 @@ const FigureCard: FC<FigureCardProps> = ({
   onDelete, 
   isCommunity = false 
 }) => {
+  const { t } = useI18n();
   const [showMenu, setShowMenu] = useState<boolean>(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -73,7 +75,7 @@ const FigureCard: FC<FigureCardProps> = ({
                   className="w-full flex items-center gap-3 px-4 py-3 text-[11px] font-black uppercase italic tracking-widest text-gray-400 hover:bg-blue-600/10 hover:text-blue-500 transition-all border-b border-[#333]/50 last:border-0 cursor-pointer"
                 >
                   <Pencil size={14} />
-                  <span>Edit</span>
+                  <span>{t('common.edit')}</span>
                 </button>
               )}
               {onDelete && (
@@ -88,7 +90,7 @@ const FigureCard: FC<FigureCardProps> = ({
                   className="w-full flex items-center gap-3 px-4 py-3 text-[11px] font-black uppercase italic tracking-widest text-red-500/70 hover:bg-red-500/10 hover:text-red-500 transition-all cursor-pointer"
                 >
                   <Trash2 size={14} />
-                  <span>Delete</span>
+                  <span>{t('common.delete')}</span>
                 </button>
               )}
             </div>
@@ -120,7 +122,7 @@ const FigureCard: FC<FigureCardProps> = ({
                   <User size={10} className="text-white" />
                 </div>
                 <span className="text-[9px] font-black uppercase text-white tracking-tight italic">
-                  {figure.authorName || 'Anonymous'}
+                  {figure.authorName || t('common.anonymous')}
                 </span>
               </div>
             </div>
@@ -162,7 +164,7 @@ const FigureCard: FC<FigureCardProps> = ({
             <div className="flex items-center gap-2 opacity-40">
               <Tag size={14} className="text-blue-500" />
               <span className="text-[10px] uppercase font-black tracking-widest text-white italic">
-                Price
+                {t('common.price')}
               </span>
             </div>
             <div className="text-3xl font-black text-white italic tracking-tighter flex items-center gap-1">

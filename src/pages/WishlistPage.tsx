@@ -114,7 +114,7 @@ const WishlistPage: React.FC = () => {
       setImageFile(null);
     } catch (error) {
       console.error('Submit error:', error);
-      alert('Ошибка при сохранении');
+      alert(t('wishlist.saveError'));
     } finally {
       setSubmitting(false);
     }

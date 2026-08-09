@@ -1,6 +1,7 @@
 import React, { FC, ReactNode } from 'react';
 import { motion as Motion } from 'framer-motion';
 import { Layers, BarChart3, Zap, Trophy } from 'lucide-react';
+import { useI18n } from '../app/i18n/I18nProvider';
 
 // Интерфейс для структуры фичи
 interface Feature {
@@ -9,30 +10,14 @@ interface Feature {
   desc: string;
 }
 
-const features: Feature[] = [
-  {
-    icon: <Layers className="text-blue-500" size={24} />,
-    title: 'Secure Digital Vault',
-    desc: 'Detailed archiving of your collection with condition tracking and box status.',
-  },
-  {
-    icon: <BarChart3 className="text-pink-500" size={24} />,
-    title: 'Market Analytics',
-    desc: 'Real-time calculation of your total collection value and brand distribution.',
-  },
-  {
-    icon: <Zap className="text-orange-500" size={24} />,
-    title: 'Pre-order Matrix',
-    desc: 'Manage future releases, multi-currency deposits, and payment deadlines.',
-  },
-  {
-    icon: <Trophy className="text-amber-500" size={24} />,
-    title: 'Rank Progression',
-    desc: 'Level up your collector status from Novice to Mythic Overlord.',
-  },
-];
-
 const FeaturesSection: FC = () => {
+  const { t } = useI18n();
+  const features: Feature[] = [
+    { icon: <Layers className="text-blue-500" size={24} />, title: t('landing.featureVault'), desc: t('landing.featureVaultDesc') },
+    { icon: <BarChart3 className="text-pink-500" size={24} />, title: t('landing.featureAnalytics'), desc: t('landing.featureAnalyticsDesc') },
+    { icon: <Zap className="text-orange-500" size={24} />, title: t('landing.featurePreorders'), desc: t('landing.featurePreordersDesc') },
+    { icon: <Trophy className="text-amber-500" size={24} />, title: t('landing.featureRanks'), desc: t('landing.featureRanksDesc') },
+  ];
   return (
     <section className="relative py-32 px-4 z-10">
       <div className="max-w-7xl mx-auto">

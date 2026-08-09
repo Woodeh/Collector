@@ -1,4 +1,5 @@
 import React, { FC } from 'react';
+import { useI18n } from '../../app/i18n/I18nProvider';
 
 interface NextRelease {
   anime: string;
@@ -13,10 +14,11 @@ interface NextArrivalProps {
 }
 
 const NextArrival: FC<NextArrivalProps> = ({ nextRelease, navigate }) => {
+  const { t } = useI18n();
   return (
     <div className="bg-[#1a1a1a] border border-[#333] p-8 rounded-[3rem] shadow-2xl relative group overflow-hidden text-left">
       <h4 className="text-[10px] font-black text-gray-600 uppercase tracking-[0.3em] italic mb-6">
-        Next Arrival
+        {t('profile.nextArrival')}
       </h4>
       {nextRelease ? (
         <div className="space-y-6 text-left">
@@ -30,13 +32,13 @@ const NextArrival: FC<NextArrivalProps> = ({ nextRelease, navigate }) => {
           </div>
           <div className="grid grid-cols-2 gap-3 text-center text-left">
             <div className="p-3 bg-white/5 rounded-xl border border-white/5 text-left">
-              <p className="text-[7px] text-gray-500 uppercase font-bold mb-1 text-left">Release</p>
+              <p className="text-[7px] text-gray-500 uppercase font-bold mb-1 text-left">{t('profile.release')}</p>
               <p className="text-[10px] font-black text-white leading-none text-left">
                 {nextRelease.releaseDate}
               </p>
             </div>
             <div className="p-3 bg-white/5 rounded-xl border border-white/5 text-left">
-              <p className="text-[7px] text-gray-500 uppercase font-bold mb-1 text-left">Brand</p>
+              <p className="text-[7px] text-gray-500 uppercase font-bold mb-1 text-left">{t('profile.brand')}</p>
               <p className="text-[10px] font-black text-white truncate leading-none text-left">
                 {nextRelease.brand}
               </p>
@@ -47,12 +49,12 @@ const NextArrival: FC<NextArrivalProps> = ({ nextRelease, navigate }) => {
             onClick={() => navigate('/preorders')}
             className="w-full py-4 bg-orange-600 text-white rounded-2xl font-black uppercase text-[10px] tracking-widest hover:bg-orange-500 transition-all cursor-pointer shadow-lg active:scale-95 flex items-center justify-center text-center"
           >
-            Check Pre-orders
+            {t('profile.checkPreorders')}
           </button>
         </div>
       ) : (
         <p className="opacity-20 uppercase font-black italic text-xs text-center py-10">
-          Nothing pending
+          {t('profile.nothingPending')}
         </p>
       )}
     </div>

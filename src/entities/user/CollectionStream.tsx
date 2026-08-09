@@ -1,6 +1,7 @@
 import React, { useRef, useState, FC, MouseEvent } from 'react';
 import { History, ChevronLeft, ChevronRight, Info, TrendingUp, Target } from 'lucide-react';
 import type { Figure } from '../../types/figure';
+import { useI18n } from '../../app/i18n/I18nProvider';
 
 interface CollectionStreamProps {
   recentFigures: Figure[];
@@ -8,6 +9,7 @@ interface CollectionStreamProps {
 }
 
 const CollectionStream: FC<CollectionStreamProps> = ({ recentFigures, navigate }) => {
+  const { t } = useI18n();
   const scrollRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState<boolean>(false);
   const startX = useRef<number>(0);
@@ -134,7 +136,7 @@ const CollectionStream: FC<CollectionStreamProps> = ({ recentFigures, navigate }
         ) : (
           <div className="w-full py-20 flex flex-col items-center justify-center opacity-10 text-left">
             <TrendingUp size={48} className="mb-4 text-left" />
-            <p className="font-black italic uppercase tracking-widest text-left">Empty Vault</p>
+            <p className="font-black italic uppercase tracking-widest text-left">{t('profile.empty')}</p>
           </div>
         )}
         <div

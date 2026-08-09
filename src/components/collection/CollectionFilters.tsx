@@ -1,5 +1,6 @@
 import React, { FC, ChangeEvent } from 'react';
 import { ChevronDown, RotateCcw, Filter, SortAsc } from 'lucide-react';
+import { useI18n } from '../../app/i18n/I18nProvider';
 
 interface CollectionFiltersProps {
   showFilters: boolean;
@@ -26,15 +27,13 @@ const CollectionFilters: FC<CollectionFiltersProps> = ({
   brandOptions = [],
   onReset,
 }) => {
+  const { t } = useI18n();
   if (!showFilters) return null;
 
   const sortOptions = [
-    { id: 'newest', label: 'Latest' },
-    { id: 'oldest', label: 'Archive' },
-    { id: 'cheap', label: 'Price: Low' },
-    { id: 'expensive', label: 'Price: High' },
-    { id: 'az', label: 'A-Z Name' },
-    { id: 'za', label: 'Z-A Name' },
+    { id: 'newest', label: t('filters.latest') }, { id: 'oldest', label: t('filters.archive') },
+    { id: 'cheap', label: t('filters.priceLow') }, { id: 'expensive', label: t('filters.priceHigh') },
+    { id: 'az', label: t('filters.nameAz') }, { id: 'za', label: t('filters.nameZa') },
   ];
 
   return (
@@ -50,7 +49,7 @@ const CollectionFilters: FC<CollectionFiltersProps> = ({
           <div className="flex items-center gap-2">
             <SortAsc size={14} className="text-blue-500" />
             <label className="text-[10px] font-black uppercase tracking-[0.2em] text-blue-500 italic">
-              Sort Protocol
+              {t('filters.sorting')}
             </label>
           </div>
           <div className="grid grid-cols-2 gap-2">
@@ -74,7 +73,7 @@ const CollectionFilters: FC<CollectionFiltersProps> = ({
         {/* 2. SOURCE ORIGIN */}
         <div className="space-y-5 text-left">
           <label className="text-[10px] font-black uppercase tracking-[0.2em] text-blue-500 italic block">
-            Source Origin
+            {t('filters.origin')}
           </label>
           <div className="relative group">
             <select
@@ -100,7 +99,7 @@ const CollectionFilters: FC<CollectionFiltersProps> = ({
         {/* 3. MANUFACTURER */}
         <div className="space-y-5 text-left">
           <label className="text-[10px] font-black uppercase tracking-[0.2em] text-blue-500 italic block">
-            Manufacturer
+            {t('filters.manufacturer')}
           </label>
           <div className="relative group">
             <select
@@ -130,7 +129,7 @@ const CollectionFilters: FC<CollectionFiltersProps> = ({
           className="flex items-center gap-2 px-6 py-2 rounded-xl bg-transparent border border-[#333] text-gray-500 hover:text-white hover:border-red-500/50 hover:bg-red-500/5 transition-all text-[9px] font-black uppercase tracking-widest cursor-pointer italic"
         >
           <RotateCcw size={12} />
-          Reset Calibration
+          {t('filters.reset')}
         </button>
       </div>
     </div>

@@ -4,10 +4,12 @@ import { Users, Search, SlidersHorizontal } from 'lucide-react';
 import { FigureCard, CollectionFilters } from '../components/collection';
 import type { Figure } from '../types/figure';
 import { subscribeToPublicFigures } from '../entities/figures/api/figureRepository';
+import { useI18n } from '../app/i18n/I18nProvider';
 
 type SortOption = 'newest' | 'oldest' | 'cheap' | 'expensive' | 'az' | 'za';
 
 const Community: React.FC = () => {
+  const { t } = useI18n();
   const [figures, setFigures] = useState<Figure[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [searchTerm, setSearchTerm] = useState<string>('');
@@ -86,7 +88,7 @@ const Community: React.FC = () => {
         <div className="animate-pulse flex flex-col items-center gap-4">
           <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
           <p className="text-blue-500 font-black uppercase text-[10px] tracking-[0.3em]">
-            Syncing Global Database
+            {t('community.syncing')}
           </p>
         </div>
       </div>
@@ -117,14 +119,14 @@ const Community: React.FC = () => {
             <div className="flex items-center gap-3 text-blue-500 mb-2">
               <Users size={20} />
               <span className="text-[10px] font-black uppercase tracking-[0.4em]">
-                Community Network
+                {t('community.network')}
               </span>
             </div>
             <h1 className="text-4xl md:text-6xl font-black uppercase italic tracking-tighter text-white leading-none">
-              Global <span className="text-blue-500">Catalog.</span>
+              {t('community.global')} <span className="text-blue-500">{t('community.catalog')}</span>
             </h1>
             <p className="text-gray-500 text-[10px] font-black uppercase tracking-widest italic">
-              Scanning {figures.length} unique assets in public access
+              {t('community.count', { count: figures.length })}
             </p>
           </div>
 
@@ -138,7 +140,7 @@ const Community: React.FC = () => {
               />
               <input
                 type="text"
-                placeholder="Search database..."
+                placeholder={t('collection.search')}
                 className="w-full bg-[#1a1a1a] border border-[#333] py-4 pl-12 pr-4 rounded-2xl outline-none focus:border-blue-500 transition-all font-bold text-base"
                 value={searchTerm}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
@@ -181,7 +183,7 @@ const Community: React.FC = () => {
         ) : (
           <div className="py-20 text-center border border-dashed border-[#333] rounded-[3rem]">
             <p className="text-gray-600 font-black uppercase tracking-[0.3em] italic">
-              No units found in current sector
+              {t('community.empty')}
             </p>
           </div>
         )}

@@ -3,6 +3,7 @@ import { Info, Tag, DollarSign, ChevronDown, Camera, X } from 'lucide-react';
 import CharacterSearch from './CharacterSearch';
 import AnimeSearch from './AnimeSearch';
 import CustomSelect from '../../shared/Select';
+import { useI18n } from '../../app/i18n/I18nProvider';
 
 // Define the structure for a character selected from the API
 interface SelectedCharacter {
@@ -47,6 +48,7 @@ const BasicInfoSection: FC<BasicInfoSectionProps> = ({
   onCharArtFileChange,
   onCharacterSelected,
 }) => {
+  const { t } = useI18n();
   
   const handleCharFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -60,7 +62,7 @@ const BasicInfoSection: FC<BasicInfoSectionProps> = ({
   return (
     <div className="space-y-5 sm:space-y-6">
       <h3 className="text-blue-500 font-black text-[10px] sm:text-[11px] uppercase tracking-[0.25em] flex items-center gap-2 italic">
-        <Info size={14} /> Basic information
+        <Info size={14} /> {t('form.basicInfo')}
       </h3>
 
       <div className="space-y-3">
@@ -88,7 +90,7 @@ const BasicInfoSection: FC<BasicInfoSectionProps> = ({
               <Camera size={14} className="text-gray-500 group-hover:text-blue-500" />
             </div>
             <span className="text-[10px] font-black uppercase tracking-widest text-gray-500 group-hover:text-gray-300 transition-colors">
-              {formData.characterImage ? 'Change Character Art' : 'Upload Manual Art'}
+              {formData.characterImage ? t('form.characterArtChange') : t('form.characterArtUpload')}
             </span>
             <input
               type="file"
@@ -145,7 +147,7 @@ const BasicInfoSection: FC<BasicInfoSectionProps> = ({
           <input
             name="price"
             type="number"
-            placeholder={`Price *`}
+            placeholder={t('form.price')}
             className="w-full bg-[#121212] border border-[#333] h-[58px] pl-12 rounded-2xl outline-none focus:border-blue-500 font-bold text-white text-base transition-all placeholder:text-gray-700 placeholder:italic"
             onChange={handleChange}
             value={formData.price}
@@ -171,8 +173,8 @@ const BasicInfoSection: FC<BasicInfoSectionProps> = ({
 
       <CustomSelect
         options={[
-          { value: 'Male', label: 'Male' },
-          { value: 'Female', label: 'Female' },
+          { value: 'Male', label: t('form.male') },
+          { value: 'Female', label: t('form.female') },
         ]}
         value={formData.gender}
         onChange={(val: string) => handleCustomChange('gender', val)}

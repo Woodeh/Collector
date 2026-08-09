@@ -1,5 +1,21 @@
 import type { Timestamp } from 'firebase/firestore';
 
+export type FigureHistoryEventType =
+  | 'created'
+  | 'details_changed'
+  | 'price_changed'
+  | 'condition_changed'
+  | 'visibility_changed'
+  | 'photos_changed';
+
+export interface FigureHistoryEvent {
+  id: string;
+  type: FigureHistoryEventType;
+  createdAt: string;
+  from?: string | number;
+  to?: string | number;
+}
+
 export interface Figure {
   id: string;
   name: string;
@@ -27,6 +43,7 @@ export interface Figure {
   isFavorite?: boolean;
   createdAt?: Timestamp;
   updatedAt?: Timestamp;
+  history?: FigureHistoryEvent[];
 }
 
 export interface SpotlightFigure extends Figure {

@@ -2,6 +2,7 @@ import React, { FC } from 'react';
 import { ShieldCheck, Calendar, Sparkles, ShoppingCart } from 'lucide-react';
 import DatePicker from 'react-datepicker';
 import CustomSelect from '../../shared/Select';
+import { useI18n } from '../../app/i18n/I18nProvider';
 
 interface Option {
   value: string;
@@ -28,16 +29,17 @@ const SpecsSection: FC<SpecsSectionProps> = ({
   conditionOptions, 
   shopOptions 
 }) => {
+  const { t } = useI18n();
   return (
     <div className="space-y-5 sm:space-y-6">
       <h3 className="text-blue-500 font-black text-[10px] sm:text-[11px] uppercase tracking-[0.25em] flex items-center gap-2 italic mt-5 sm:mt-10">
-        <ShieldCheck size={14} /> Spec & Condition
+        <ShieldCheck size={14} /> {t('form.specs')}
       </h3>
       
       <div className="grid grid-cols-2 gap-3 sm:gap-4">
         <div className="space-y-1">
           <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-500 italic ml-1 block">
-            Purchase Date
+            {t('form.purchaseDate')}
           </label>
           <div className="relative group">
             <Calendar
@@ -62,12 +64,12 @@ const SpecsSection: FC<SpecsSectionProps> = ({
 
         <CustomSelect
           options={[
-            { value: 'Yes', label: 'Original Box' },
-            { value: 'No', label: 'No Box' },
+            { value: 'Yes', label: t('form.originalBox') },
+            { value: 'No', label: t('form.noBox') },
           ]}
           value={formData.hasBox}
           onChange={(val: string) => handleCustomChange('hasBox', val)}
-          label="Box Status"
+          label={t('form.boxStatus')}
           icon={ShieldCheck}
         />
       </div>
@@ -77,7 +79,7 @@ const SpecsSection: FC<SpecsSectionProps> = ({
         options={conditionOptions}
         value={formData.conditionGrade}
         onChange={(val: string) => handleCustomChange('conditionGrade', val)}
-        label="Condition"
+        label={t('form.condition')}
       />
 
       <CustomSelect

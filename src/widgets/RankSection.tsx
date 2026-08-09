@@ -2,12 +2,14 @@ import React, { FC } from 'react';
 import { motion as Motion } from 'framer-motion';
 import { Shield } from 'lucide-react';
 import type { RankStats } from '../types/figure';
+import { useI18n } from '../app/i18n/I18nProvider';
 
 interface RankSectionProps {
   stats: RankStats | null | undefined;
 }
 
 const RankSection: FC<RankSectionProps> = ({ stats }) => {
+  const { t } = useI18n();
   if (!stats?.rank) return null;
 
   const progressPercentage = Math.min((stats.count / stats.rank.next) * 100, 100);
@@ -24,7 +26,7 @@ const RankSection: FC<RankSectionProps> = ({ stats }) => {
         <div className="flex items-center justify-between">
           <div className="space-y-1 text-left">
             <p className="text-[10px] font-black uppercase tracking-[0.3em] text-blue-500 italic">
-              Clearance Level
+              {t('home.rankLevel')}
             </p>
             <h3
               className={`text-3xl font-black uppercase italic tracking-tighter ${stats.rank.color}`}
@@ -35,9 +37,9 @@ const RankSection: FC<RankSectionProps> = ({ stats }) => {
 
           <div className="text-right">
             <p className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-500 italic">
-              Next Tier At
+              {t('home.nextTier')}
             </p>
-            <p className="text-xl font-black text-white italic">{stats.rank.next} Units</p>
+            <p className="text-xl font-black text-white italic">{stats.rank.next} {t('home.units')}</p>
           </div>
         </div>
 
@@ -56,7 +58,7 @@ const RankSection: FC<RankSectionProps> = ({ stats }) => {
           </div>
 
           <p className="text-[9px] font-bold uppercase tracking-widest text-gray-500 text-center italic">
-            {unitsRemaining} units remaining until next protocol upgrade
+            {t('home.remaining', { count: unitsRemaining })}
           </p>
         </div>
       </div>

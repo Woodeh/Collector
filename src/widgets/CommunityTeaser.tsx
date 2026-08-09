@@ -3,6 +3,7 @@ import { motion as Motion } from 'framer-motion';
 import { Globe, Lock, ArrowRight } from 'lucide-react';
 import FigureCard from '../entities/figures/ui/FigureCard';
 import type { Figure } from '../types/figure';
+import { useI18n } from '../app/i18n/I18nProvider';
 
 interface CommunityTeaserProps {
   loading: boolean;
@@ -11,6 +12,7 @@ interface CommunityTeaserProps {
 }
 
 const CommunityTeaser: FC<CommunityTeaserProps> = ({ loading, communityFigures, onJoin }) => {
+  const { t } = useI18n();
   return (
     <section
       id="community-scan"
@@ -22,16 +24,15 @@ const CommunityTeaser: FC<CommunityTeaserProps> = ({ loading, communityFigures, 
             <div className="flex items-center gap-2 text-blue-500">
               <Globe size={18} />
               <span className="text-[10px] font-black uppercase tracking-[0.3em]">
-                Global Network
+                {t('landing.network')}
               </span>
             </div>
             <h2 className="text-4xl font-black uppercase italic tracking-tighter text-white">
-              Live Database <span className="text-blue-500">Scan.</span>
+              {t('landing.live')}
             </h2>
           </div>
           <p className="text-gray-600 text-[10px] font-black uppercase tracking-widest max-w-xs md:text-right italic">
-            Scanning real-time additions to the collective vault. Join to contribute your own
-            assets.
+            {t('landing.networkDesc')}
           </p>
         </div>
 
@@ -69,7 +70,7 @@ const CommunityTeaser: FC<CommunityTeaserProps> = ({ loading, communityFigures, 
         ) : (
           <div className="h-64 flex items-center justify-center border border-dashed border-[#333] rounded-[2rem] opacity-20">
             <p className="font-black uppercase tracking-widest text-xs italic">
-              Initialising Data Stream...
+              {t('landing.initializing')}
             </p>
           </div>
         )}
@@ -80,7 +81,7 @@ const CommunityTeaser: FC<CommunityTeaserProps> = ({ loading, communityFigures, 
             onClick={onJoin}
             className="group text-[11px] font-black uppercase tracking-[0.4em] text-blue-500 hover:text-white transition-colors flex items-center gap-2 mx-auto cursor-pointer"
           >
-            <Lock size={14} /> Join to view full database{' '}
+            <Lock size={14} /> {t('landing.join')}{' '}
             <ArrowRight size={14} className="group-hover:translate-x-2 transition-transform" />
           </button>
         </div>

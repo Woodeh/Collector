@@ -5,6 +5,7 @@ import { ref, deleteObject } from 'firebase/storage';
 import { motion as Motion } from 'framer-motion';
 import { Loader2 } from 'lucide-react';
 import { useAuth } from '../app/providers/AuthProvider';
+import { useI18n } from '../app/i18n/I18nProvider';
 
 import Modal from '../shared/Modal';
 import ShareModal from '../features/ShareModal';
@@ -17,6 +18,7 @@ import DetailsActionButtons from '../components/details/DetailsActionButtons';
 import DetailsRelated from '../widgets/DetailsRelated';
 import type { Figure } from '../types/figure';
 import FigureDnaCard from '../widgets/FigureDnaCard';
+import FigureHistoryTimeline from '../widgets/FigureHistoryTimeline';
 import {
   deleteFigure,
   getFigureById,
@@ -32,6 +34,7 @@ const FigureDetailsPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user: currentUser } = useAuth();
+  const { t } = useI18n();
   const [figure, setFigure] = useState<Figure | null>(null);
   const [characterData, setCharacterData] = useState<CharacterData | null>(null);
   const [relatedFigures, setRelatedFigures] = useState<Figure[]>([]);
@@ -155,7 +158,7 @@ const FigureDetailsPage: React.FC = () => {
       navigate('/collection');
     } catch (error) {
       console.error('Delete error:', error);
-      alert('Error during deletion protocol.');
+      alert(t('details.deleteError'));
       setLoading(false);
     }
   };
@@ -167,7 +170,13 @@ const FigureDetailsPage: React.FC = () => {
       </div>
     );
 
-  if (!figure) return null;
+  if (!figure) return <div className="min-h-[70vh] flex items-center justify-center text-gray-500">{t('details.notFound')}</div>;
+
+  const historyEvents = figure.history?.length
+    ? figure.history
+    : figure.createdAt
+      ? [{ id: `legacy-created-${figure.id}`, type: 'created' as const, createdAt: figure.createdAt.toDate().toISOString() }]
+      : [];
 
   return (
     <Motion.main
@@ -227,14 +236,15 @@ const FigureDetailsPage: React.FC = () => {
         </div>
 
         <DetailsRelated relatedFigures={relatedFigures} anime={figure.anime || ''} />
+        {currentUser?.uid === figure.userId && <FigureHistoryTimeline events={historyEvents} />}
       </div>
 
       <Modal
         isOpen={isDeleteModalOpen}
         onClose={() => setIsDeleteModalOpen(false)}
         onConfirm={handleConfirmDelete}
-        title="Initialize Deletion"
-        message={`Confirm permanent removal of "${figure.name}" from the secure vault? This action cannot be undone.`}
+        title={t('details.deleteTitle')}
+        message={t('details.deleteMessage', { name: figure.name })}
       />
 
       <ShareModal

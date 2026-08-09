@@ -2,6 +2,7 @@ import React, { FC, ChangeEvent, FormEvent } from 'react';
 import { X, Camera } from 'lucide-react';
 import AnimeSearch from '../../../features/figure-form/AnimeSearch';
 import type { Currency } from '../../../types/figure';
+import { useI18n } from '../../../app/i18n/I18nProvider';
 
 // Интерфейс для данных формы
 interface PreOrderFormData {
@@ -42,6 +43,7 @@ const PreOrderForm: FC<PreOrderFormProps> = ({
   submitting,
   resetForm,
 }) => {
+  const { t } = useI18n();
   if (!showForm) return null;
 
   return (
@@ -58,11 +60,11 @@ const PreOrderForm: FC<PreOrderFormProps> = ({
           <X size={24} />
         </button>
         <h2 className="text-2xl font-black mb-8 uppercase italic tracking-tighter text-white">
-          New Pre-Order
+          {t('preorders.new')}
         </h2>
         <form onSubmit={handleSubmit} className="space-y-5">
           <input
-            placeholder="Figure Name *"
+            placeholder={t('preorders.figureName')}
             className="w-full bg-[#121212] border border-[#333] p-4 rounded-xl outline-none focus:border-orange-500 transition-colors text-white font-bold"
             value={formData.name}
             onChange={(e: ChangeEvent<HTMLInputElement>) =>
@@ -75,7 +77,7 @@ const PreOrderForm: FC<PreOrderFormProps> = ({
             onChange={(val: string) => setFormData({ ...formData, anime: val })}
           />
           <input
-            placeholder="Brand / Manufacturer"
+            placeholder={t('preorders.brand')}
             className="w-full bg-[#121212] border border-[#333] p-4 rounded-xl outline-none focus:border-orange-500 transition-colors text-white font-bold"
             value={formData.brand}
             onChange={(e: ChangeEvent<HTMLInputElement>) =>
@@ -97,7 +99,7 @@ const PreOrderForm: FC<PreOrderFormProps> = ({
             <input
               type="number"
               step="0.01"
-              placeholder="Total Price"
+              placeholder={t('preorders.totalPrice')}
               className="bg-[#121212] border border-[#333] p-4 rounded-xl text-white font-bold outline-none focus:border-orange-500"
               value={formData.totalPrice}
               onChange={(e: ChangeEvent<HTMLInputElement>) =>
@@ -108,7 +110,7 @@ const PreOrderForm: FC<PreOrderFormProps> = ({
             <input
               type="number"
               step="0.01"
-              placeholder="Deposit Paid"
+              placeholder={t('preorders.depositPaid')}
               className="bg-[#121212] border border-[#333] p-4 rounded-xl text-white font-bold outline-none focus:border-orange-500"
               value={formData.deposit}
               onChange={(e: ChangeEvent<HTMLInputElement>) =>
@@ -127,7 +129,7 @@ const PreOrderForm: FC<PreOrderFormProps> = ({
             required
           />
           <input
-            placeholder="Est. Release"
+            placeholder={t('preorders.release')}
             className="w-full bg-[#121212] border border-[#333] p-4 rounded-xl text-white font-bold outline-none focus:border-orange-500"
             value={formData.releaseDate}
             onChange={(e: ChangeEvent<HTMLInputElement>) =>
@@ -146,7 +148,7 @@ const PreOrderForm: FC<PreOrderFormProps> = ({
               <div className="flex flex-col items-center gap-2">
                 <Camera className="text-gray-500" size={24} />
                 <span className="text-[10px] text-gray-500 font-black uppercase">
-                  Upload Screenshot
+                  {t('preorders.upload')}
                 </span>
               </div>
             )}
@@ -157,7 +159,7 @@ const PreOrderForm: FC<PreOrderFormProps> = ({
             disabled={submitting}
             className="w-full bg-orange-600 py-4 rounded-2xl font-black text-lg hover:bg-orange-500 text-white transition-all shadow-xl uppercase italic tracking-widest cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {submitting ? 'SAVING...' : 'ADD TO PRE-ORDERS'}
+            {submitting ? t('preorders.saving') : t('preorders.addToList')}
           </button>
         </form>
       </div>

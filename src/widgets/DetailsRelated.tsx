@@ -1,6 +1,7 @@
 import React, { FC } from 'react';
 import FigureCard from '../entities/figures/ui/FigureCard';
 import type { Figure } from '../types/figure';
+import { useI18n } from '../app/i18n/I18nProvider';
 
 // Интерфейс для данных фигурки (должен совпадать с тем, что принимает FigureCard)
 interface RelatedFigure {
@@ -19,6 +20,7 @@ interface DetailsRelatedProps {
 }
 
 const DetailsRelated: FC<DetailsRelatedProps> = ({ relatedFigures, anime }) => {
+  const { t } = useI18n();
   if (!relatedFigures || relatedFigures.length === 0) return null;
 
   return (
@@ -26,10 +28,10 @@ const DetailsRelated: FC<DetailsRelatedProps> = ({ relatedFigures, anime }) => {
       <div className="flex items-center justify-between mb-10">
         <div className="space-y-1">
           <p className="text-[9px] font-black text-blue-500 uppercase tracking-[0.4em] italic leading-none text-left">
-            Database Scan
+            {t('details.related')}
           </p>
           <h2 className="text-2xl font-black text-white uppercase italic tracking-tighter text-left">
-            More from {anime}
+            {t('details.related')}: {anime}
           </h2>
         </div>
         <div className="hidden md:block h-px flex-1 bg-gradient-to-r from-blue-500/50 to-transparent ml-10"></div>

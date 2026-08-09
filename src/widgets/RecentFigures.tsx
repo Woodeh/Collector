@@ -3,12 +3,14 @@ import { motion as Motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { Zap, ChevronRight, LayoutGrid } from 'lucide-react';
 import type { Figure } from '../types/figure';
+import { useI18n } from '../app/i18n/I18nProvider';
 
 interface RecentFiguresProps {
   recentFigures: Figure[];
 }
 
 const RecentFigures: FC<RecentFiguresProps> = ({ recentFigures }) => {
+  const { t } = useI18n();
   return (
     <Motion.section
       initial={{ opacity: 0 }}
@@ -18,13 +20,13 @@ const RecentFigures: FC<RecentFiguresProps> = ({ recentFigures }) => {
     >
       <div className="flex items-center justify-between border-b border-[#333] pb-6">
         <h2 className="text-xl md:text-3xl font-black uppercase italic tracking-tighter flex items-center gap-4 text-white">
-          <Zap size={24} className="text-blue-500" /> Latest Logged Units
+          <Zap size={24} className="text-blue-500" /> {t('home.recent')}
         </h2>
         <Link
           to="/collection"
           className="group bg-[#1a1a1a] border border-[#333] px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest text-blue-500 flex items-center gap-2 hover:border-blue-500 hover:text-white transition-all"
         >
-          Access Archive{' '}
+          {t('home.viewCollection')}{' '}
           <ChevronRight size={14} className="group-hover:translate-x-1 transition-transform" />
         </Link>
       </div>
@@ -75,7 +77,7 @@ const RecentFigures: FC<RecentFiguresProps> = ({ recentFigures }) => {
         {recentFigures.length === 0 && (
           <div className="col-span-full py-20 text-center border-2 border-dashed border-[#333] rounded-[2.5rem] opacity-20">
             <LayoutGrid size={48} className="mx-auto mb-4" />
-            <p className="font-black uppercase italic tracking-[0.2em]">Database Empty</p>
+            <p className="font-black uppercase italic tracking-[0.2em]">{t('home.databaseEmpty')}</p>
           </div>
         )}
       </div>

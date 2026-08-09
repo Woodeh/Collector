@@ -1,6 +1,7 @@
 import React, { useState, FC, FormEvent, ChangeEvent } from 'react';
 import { X, Camera, Link as LinkIcon, Loader2 } from 'lucide-react';
 import AnimeSearch from '../../features/figure-form/AnimeSearch';
+import { useI18n } from '../../app/i18n/I18nProvider';
 
 // Интерфейс структуры данных формы
 interface WishlistFormData {
@@ -36,6 +37,7 @@ const WishlistForm: FC<WishlistFormProps> = ({
   imagePreview,
   handleImageChange,
 }) => {
+  const { t } = useI18n();
   const [uploadMode, setUploadMode] = useState<'file' | 'url'>('file');
 
   if (!showForm) return null;
@@ -52,7 +54,7 @@ const WishlistForm: FC<WishlistFormProps> = ({
         </button>
 
         <h2 className="text-xl font-black mb-6 uppercase italic tracking-tighter text-white">
-          {isEditing ? 'Update Target' : 'New Grail Target'}
+          {isEditing ? t('wishlist.update') : t('wishlist.new')}
         </h2>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -66,7 +68,7 @@ const WishlistForm: FC<WishlistFormProps> = ({
                   : 'text-gray-500 hover:text-gray-300'
               }`}
             >
-              <Camera size={14} /> File
+              <Camera size={14} /> {t('wishlist.uploadFile')}
             </button>
             <button
               type="button"
@@ -77,7 +79,7 @@ const WishlistForm: FC<WishlistFormProps> = ({
                   : 'text-gray-500 hover:text-gray-300'
               }`}
             >
-              <LinkIcon size={14} /> URL
+              <LinkIcon size={14} /> {t('wishlist.imageUrl')}
             </button>
           </div>
 
@@ -90,7 +92,7 @@ const WishlistForm: FC<WishlistFormProps> = ({
                   <div className="flex flex-col items-center gap-2">
                     <Camera className="text-gray-500" size={24} />
                     <span className="text-[10px] text-gray-500 font-black uppercase tracking-widest">
-                      Upload from Device
+                      {t('wishlist.uploadDevice')}
                     </span>
                   </div>
                 )}
@@ -109,7 +111,7 @@ const WishlistForm: FC<WishlistFormProps> = ({
                     size={16}
                   />
                   <input
-                    placeholder="Direct Image URL (jpg, png, webp)"
+                    placeholder={t('wishlist.imageUrl')}
                     className="w-full bg-[#121212] border border-[#333] py-4 pl-12 pr-4 rounded-xl outline-none focus:border-pink-600 text-sm text-white font-bold transition-all"
                     value={formData.image || ''}
                     onChange={(e: ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, image: e.target.value })}
@@ -133,7 +135,7 @@ const WishlistForm: FC<WishlistFormProps> = ({
 
           <div className="space-y-4 pt-2">
             <input
-              placeholder="Figure Name *"
+              placeholder={t('wishlist.figureName')}
               className="w-full bg-[#121212] border border-[#333] p-4 rounded-xl outline-none focus:border-pink-600 text-sm text-white font-bold"
               value={formData.name}
               onChange={(e: ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, name: e.target.value })}
@@ -147,14 +149,14 @@ const WishlistForm: FC<WishlistFormProps> = ({
 
             <div className="grid grid-cols-2 gap-3">
               <input
-                placeholder="Brand"
+                placeholder={t('wishlist.brand')}
                 className="w-full bg-[#121212] border border-[#333] p-4 rounded-xl outline-none text-sm text-white font-bold"
                 value={formData.brand}
                 onChange={(e: ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, brand: e.target.value })}
               />
               <input
                 type="number"
-                placeholder="Price ($)"
+                placeholder={t('wishlist.price')}
                 className="w-full bg-[#121212] border border-[#333] p-4 rounded-xl outline-none text-sm text-white font-bold"
                 value={formData.price}
                 onChange={(e: ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, price: e.target.value })}
@@ -162,7 +164,7 @@ const WishlistForm: FC<WishlistFormProps> = ({
             </div>
 
             <input
-              placeholder="Store Link / Auction Link (URL)"
+              placeholder={t('wishlist.storeLink')}
               className="w-full bg-[#121212] border border-[#333] p-4 rounded-xl outline-none text-sm text-white font-bold"
               value={formData.link}
               onChange={(e: ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, link: e.target.value })}
@@ -175,12 +177,12 @@ const WishlistForm: FC<WishlistFormProps> = ({
           >
             {submitting ? (
               <div className="flex items-center justify-center gap-2">
-                <Loader2 className="animate-spin" size={16} /> <span>Syncing...</span>
+                <Loader2 className="animate-spin" size={16} /> <span>{t('wishlist.syncing')}</span>
               </div>
             ) : isEditing ? (
-              'Save Changes'
+              t('common.save')
             ) : (
-              'Initialize Target'
+              t('wishlist.initialize')
             )}
           </button>
         </form>

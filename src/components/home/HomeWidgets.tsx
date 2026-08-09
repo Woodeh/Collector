@@ -2,6 +2,7 @@ import React, { FC } from 'react';
 import { motion as Motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { Clock, Target, ChevronRight } from 'lucide-react';
+import { useI18n } from '../../app/i18n/I18nProvider';
 
 // Интерфейс для статистики, передаваемой в пропсы
 interface WidgetStats {
@@ -14,6 +15,7 @@ interface HomeWidgetsProps {
 }
 
 const HomeWidgets: FC<HomeWidgetsProps> = ({ widgetStats }) => {
+  const { t } = useI18n();
   return (
     <Motion.section
       initial={{ opacity: 0, y: 20 }}
@@ -31,13 +33,13 @@ const HomeWidgets: FC<HomeWidgetsProps> = ({ widgetStats }) => {
           </div>
           <div className="space-y-1 text-left">
             <span className="text-[9px] font-black uppercase tracking-widest text-orange-500 animate-pulse">
-              Status: Incoming Supply
+              {t('home.preorders')}
             </span>
             <h3 className="text-2xl font-black text-white uppercase italic tracking-tighter leading-none">
-              Pre-orders Log
+              {t('nav.preorders')}
             </h3>
             <p className="text-gray-500 text-[10px] font-bold uppercase tracking-widest italic">
-              {widgetStats.preorders} units pending arrival
+              {t('home.preorderCount', { count: widgetStats.preorders })}
             </p>
           </div>
         </div>
@@ -57,13 +59,13 @@ const HomeWidgets: FC<HomeWidgetsProps> = ({ widgetStats }) => {
           </div>
           <div className="text-left">
             <span className="text-[9px] font-black uppercase tracking-widest text-pink-500">
-              System Priority: High
+              {t('home.wishlist')}
             </span>
             <h3 className="text-2xl font-black text-white uppercase italic tracking-tighter leading-none">
-              Target Wishlist
+              {t('nav.wishlist')}
             </h3>
             <p className="text-gray-500 text-[10px] font-bold uppercase tracking-widest italic">
-              Monitoring {widgetStats.wishlist} desired assets
+              {t('home.wishlistCount', { count: widgetStats.wishlist })}
             </p>
           </div>
         </div>

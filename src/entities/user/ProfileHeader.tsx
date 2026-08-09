@@ -1,6 +1,7 @@
 import React, { FC, ChangeEvent } from 'react';
 import { Camera, Loader2, FileDown } from 'lucide-react';
 import { User } from 'firebase/auth';
+import { useI18n } from '../../app/i18n/I18nProvider';
 
 // Define the Rank structure based on your logic in ProfilePage
 interface RankInfo {
@@ -29,6 +30,7 @@ const ProfileHeader: FC<ProfileHeaderProps> = ({
   onRankClick,
   onGenerateReport,
 }) => {
+  const { t } = useI18n();
   return (
     <div className="flex flex-col lg:flex-row justify-between items-center lg:items-end gap-8 border-b border-[#333] pb-10 mb-4">
       <div className="flex flex-col md:flex-row items-center md:items-end gap-6 md:gap-10 w-full lg:w-auto">
@@ -73,7 +75,7 @@ const ProfileHeader: FC<ProfileHeaderProps> = ({
         <div className="text-center md:text-left space-y-4">
           <div className="space-y-1">
             <p className="text-[10px] text-blue-500 font-black uppercase tracking-[0.4em] italic opacity-60">
-              Authorized Collector
+              {t('profile.authorized')}
             </p>
             <h1 className="text-3xl md:text-5xl lg:text-6xl font-black text-white uppercase italic tracking-tighter leading-none">
               {user?.displayName || user?.email?.split('@')[0]}
@@ -112,14 +114,14 @@ const ProfileHeader: FC<ProfileHeaderProps> = ({
           className="w-full lg:w-auto flex items-center justify-center gap-3 bg-[#1a1a1a] border border-[#333] hover:border-blue-500/50 text-gray-400 hover:text-white px-5 py-3 rounded-2xl transition-all font-black uppercase text-[10px] tracking-[0.2em] italic group cursor-pointer shadow-lg"
         >
           <FileDown size={16} className="text-blue-500 group-hover:text-white transition-colors" />
-          <span>Generate Report</span>
+          <span>{t('profile.generateReport')}</span>
         </button>
 
         {/* System Tooltip */}
         <div className="absolute -top-10 left-1/2 -translate-x-1/2 px-3 py-2 bg-[#121212] border border-blue-500/30 rounded-xl opacity-0 group-hover/tooltip:opacity-100 group-hover/tooltip:-top-14 pointer-events-none transition-all duration-300 whitespace-nowrap z-[100] shadow-[0_0_20px_rgba(59,130,246,0.15)]">
           <div className="flex flex-col items-center">
             <p className="text-[8px] font-black text-blue-500 uppercase tracking-[0.2em] italic">
-              Data Export Protocol
+              {t('profile.exportHint')}
             </p>
             <p className="text-[7px] text-gray-500 uppercase font-mono mt-0.5">
               Format: PDF / Archive_Unit

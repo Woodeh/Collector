@@ -1,6 +1,7 @@
 import React, { FC } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import { Layers } from 'lucide-react';
+import { useI18n } from '../app/i18n/I18nProvider';
 
 // Типизация для данных бренда
 interface BrandDataItem {
@@ -20,6 +21,7 @@ interface ChartTooltipProps {
 }
 
 const CustomTooltip = ({ active, payload }: ChartTooltipProps) => {
+  const { t } = useI18n();
   const entry = payload?.[0];
   if (active && entry) {
     return (
@@ -28,7 +30,7 @@ const CustomTooltip = ({ active, payload }: ChartTooltipProps) => {
           {entry.name}
         </p>
         <p className="text-sm font-black text-blue-500 italic leading-none">
-          {entry.value} Units
+          {entry.value} {t('home.units')}
         </p>
       </div>
     );
@@ -43,6 +45,7 @@ interface BrandsSplitProps {
 }
 
 const BrandsSplit: FC<BrandsSplitProps> = ({ brandData, collectionStats, COLORS }) => {
+  const { t } = useI18n();
   // Ограничиваем данные топ-5 брендами для визуальной чистоты
   const topBrands = brandData.slice(0, 5);
 
@@ -84,7 +87,7 @@ const BrandsSplit: FC<BrandsSplitProps> = ({ brandData, collectionStats, COLORS 
             <p className="text-[18px] font-black text-white italic leading-none">
               {collectionStats.count}
             </p>
-            <p className="text-[7px] text-gray-600 font-black uppercase tracking-widest">Units</p>
+            <p className="text-[7px] text-gray-600 font-black uppercase tracking-widest">{t('home.units')}</p>
           </div>
         </div>
 
@@ -103,7 +106,7 @@ const BrandsSplit: FC<BrandsSplitProps> = ({ brandData, collectionStats, COLORS 
                   </p>
                 </div>
                 <p className="text-[10px] font-black text-blue-500 italic text-left">
-                  {brand.value} Units
+                  {brand.value} {t('home.units')}
                 </p>
               </div>
 

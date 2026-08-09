@@ -1,6 +1,7 @@
 import React, { FC, ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { Plus, Boxes, Activity, Shield } from 'lucide-react';
+import { useI18n } from '../../app/i18n/I18nProvider';
 
 // Интерфейс для пропсов ссылки быстрого действия
 interface QuickActionLinkProps {
@@ -30,17 +31,18 @@ const QuickActionLink: FC<QuickActionLinkProps> = ({ to, icon, label, color }) =
 };
 
 const QuickActions: FC = () => {
+  const { t } = useI18n();
   return (
     <div className="lg:col-span-5 grid grid-cols-2 gap-4">
-      <QuickActionLink to="/add" icon={<Plus size={24} />} label="Add Asset" color="blue" />
+      <QuickActionLink to="/add" icon={<Plus size={24} />} label={t('home.addFigure')} color="blue" />
       <QuickActionLink
         to="/collection"
         icon={<Boxes size={24} />}
-        label="View Vault"
+        label={t('home.viewCollection')}
         color="gray"
       />
-      <QuickActionLink to="/community" icon={<Activity size={24} />} label="Network" color="blue" />
-      <QuickActionLink to="/profile" icon={<Shield size={24} />} label="Identity" color="gray" />
+      <QuickActionLink to="/community" icon={<Activity size={24} />} label={t('home.network')} color="blue" />
+      <QuickActionLink to="/profile" icon={<Shield size={24} />} label={t('home.identity')} color="gray" />
     </div>
   );
 };

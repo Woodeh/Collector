@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, FC, ChangeEvent } from 'react';
 import { Search, Loader2, X, Bookmark } from 'lucide-react';
+import { useI18n } from '../../app/i18n/I18nProvider';
 
 // Интерфейс структуры аниме из Jikan API
 interface JikanAnime {
@@ -20,6 +21,7 @@ interface AnimeSearchProps {
 }
 
 const AnimeSearch: FC<AnimeSearchProps> = ({ value, onChange }) => {
+  const { t } = useI18n();
   const [query, setQuery] = useState<string>(value || '');
   const [results, setResults] = useState<JikanAnime[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
@@ -100,7 +102,7 @@ const AnimeSearch: FC<AnimeSearchProps> = ({ value, onChange }) => {
         <input
           ref={inputRef}
           type="text"
-          placeholder="Origin Series *"
+          placeholder={t('form.series')}
           className="w-full bg-[#121212] border border-[#333] h-[58px] pl-12 rounded-2xl outline-none focus:border-blue-500 transition-all text-white font-bold text-base placeholder:text-gray-700 placeholder:italic"
           value={query}
           onChange={handleInputChange}

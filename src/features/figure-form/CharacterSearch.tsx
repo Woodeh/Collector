@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, FC, ChangeEvent } from 'react';
 import { Loader2, User } from 'lucide-react';
+import { useI18n } from '../../app/i18n/I18nProvider';
 
 // Интерфейс структуры данных от Jikan API
 interface JikanCharacter {
@@ -26,6 +27,7 @@ interface CharacterSearchProps {
 }
 
 const CharacterSearch: FC<CharacterSearchProps> = ({ value, onChange }) => {
+  const { t } = useI18n();
   const [query, setQuery] = useState<string>(value || '');
   const [results, setResults] = useState<JikanCharacter[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
@@ -109,7 +111,7 @@ const CharacterSearch: FC<CharacterSearchProps> = ({ value, onChange }) => {
         <input
           ref={inputRef}
           type="text"
-          placeholder="Character Name (e.g. Zero Two) *"
+          placeholder={t('form.character')}
           className="w-full bg-[#121212] border border-[#333] h-[58px] pl-12 rounded-2xl outline-none focus:border-blue-500 font-bold text-white text-base placeholder:text-gray-700 transition-all"
           value={query}
           onChange={handleInputChange}
