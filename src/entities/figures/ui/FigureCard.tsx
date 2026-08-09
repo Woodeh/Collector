@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, FC, MouseEvent as ReactMouseEvent } from 'react';
-import { Tag, Trash2, Pencil, User, MoreVertical } from 'lucide-react';
+import { Tag, Trash2, Pencil, User, MoreVertical, Check } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import type { Figure } from '../../../types/figure';
 import { useI18n } from '../../../app/i18n/I18nProvider';
@@ -9,13 +9,19 @@ interface FigureCardProps {
   onEdit?: () => void;
   onDelete?: () => void;
   isCommunity?: boolean;
+  selectionMode?: boolean;
+  isSelected?: boolean;
+  onToggleSelection?: () => void;
 }
 
 const FigureCard: FC<FigureCardProps> = ({ 
   figure, 
   onEdit, 
   onDelete, 
-  isCommunity = false 
+  isCommunity = false,
+  selectionMode = false,
+  isSelected = false,
+  onToggleSelection,
 }) => {
   const { t } = useI18n();
   const [showMenu, setShowMenu] = useState<boolean>(false);
@@ -41,9 +47,14 @@ const FigureCard: FC<FigureCardProps> = ({
   };
 
   return (
-    <div className="relative group bg-[#1a1a1a] rounded-[2rem] border border-[#333] overflow-hidden hover:border-blue-500/50 transition-all duration-500 flex flex-col shadow-2xl h-full text-left font-sans">
+    <div className={`relative group bg-[#1a1a1a] rounded-[2rem] border overflow-hidden transition-all duration-500 flex flex-col shadow-2xl h-full text-left font-sans ${isSelected ? 'border-blue-500 ring-2 ring-blue-500/30' : 'border-[#333] hover:border-blue-500/50'}`}>
+      {selectionMode && (
+        <button type="button" onClick={onToggleSelection} aria-pressed={isSelected} className={`absolute left-4 top-4 z-[60] flex h-9 w-9 items-center justify-center rounded-xl border shadow-lg backdrop-blur-md ${isSelected ? 'border-blue-400 bg-blue-600 text-white' : 'border-white/20 bg-black/70 text-transparent'}`}>
+          <Check size={18} />
+        </button>
+      )}
       {/* Action Menu (Три точки) */}
-      {(onEdit || onDelete) && (
+      {!selectionMode && (onEdit || onDelete) && (
         <div
           className="absolute top-4 right-4 z-50 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-all duration-300 transform translate-y-0 md:-translate-y-2 md:group-hover:translate-y-0"
           ref={menuRef}
@@ -100,6 +111,7 @@ const FigureCard: FC<FigureCardProps> = ({
 
       <Link
         to={`/figure/${figure.id}`}
+        onClick={(event) => { if (selectionMode) { event.preventDefault(); onToggleSelection?.(); } }}
         className="flex flex-col h-full cursor-pointer relative z-10"
       >
         {/* IMAGE SECTION */}

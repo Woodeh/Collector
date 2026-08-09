@@ -23,6 +23,7 @@ import { db } from '../../../firebase/config';
 import type { Figure, FigureHistoryEvent, FigureHistoryEventType } from '../../../types/figure';
 
 export type FigurePayload = Omit<Figure, 'id' | 'createdAt' | 'updatedAt' | 'history'>;
+export type BulkFigureChanges = Partial<Pick<FigurePayload, 'visibility' | 'conditionGrade' | 'category' | 'brand'>>;
 
 const createHistoryEvent = (
   type: FigureHistoryEventType,
@@ -146,6 +147,26 @@ export const updateFigure = async (figureId: string, data: FigurePayload) => {
     ...(events.length > 0 ? { history: arrayUnion(...events) } : {}),
     updatedAt: serverTimestamp(),
   });
+};
+
+export const bulkUpdateFigures = async (figures: Figure[], changes: BulkFigureChanges) => {
+  const entries = Object.entries(changes).filter(([, value]) => value !== undefined && value !== '');
+  if (figures.length === 0 || entries.length === 0) return;
+  const cleanChanges = Object.fromEntries(entries) as BulkFigureChanges;
+
+  for (let offset = 0; offset < figures.length; offset += 450) {
+    const batch = writeBatch(db);
+    figures.slice(offset, offset + 450).forEach((figure) => {
+      const next = { ...figure, ...cleanChanges } as FigurePayload;
+      const events = buildFigureHistoryEvents(figure, next);
+      batch.update(figureDocument(figure.id), {
+        ...cleanChanges,
+        ...(events.length > 0 ? { history: arrayUnion(...events) } : {}),
+        updatedAt: serverTimestamp(),
+      });
+    });
+    await batch.commit();
+  }
 };
 
 export const deleteFigure = (figureId: string) => deleteDoc(figureDocument(figureId));

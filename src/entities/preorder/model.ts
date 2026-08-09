@@ -13,6 +13,11 @@ export interface PreOrder {
   userId: string;
   createdAt?: Timestamp;
   authorName: string;
+  sellerName?: string;
+  sellerContactUrl?: string;
+  lastContactedAt?: string;
+  nextContactAt?: string;
+  contactCount?: number;
 }
 
 export interface PreOrderFormData {
@@ -23,4 +28,7 @@ export interface PreOrderFormData {
   deposit: string | number;
   releaseDate: string;
   paymentDate: string;
+  sellerName: string;
+  sellerContactUrl: string;
+  lastContactedAt: string;
 }

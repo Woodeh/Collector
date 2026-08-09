@@ -12,10 +12,12 @@ import {
   PreOrderLightbox,
 } from '../entities/preorder';
 import type { PreOrder, PreOrderFormData } from '../entities/preorder/model';
+import PreOrderContactSummary from '../entities/preorder/PreOrderContactSummary';
 import {
   createPreOrder,
   deletePreOrder,
   subscribeToPreOrders,
+  markSellerContacted,
 } from '../entities/preorder/preOrderRepository';
 
 export type Currency = 'USD' | 'KZT' | 'CNY';
@@ -39,6 +41,7 @@ const PreOrdersPage: React.FC = () => {
     deposit: '',
     releaseDate: '',
     paymentDate: new Date().toISOString().split('T')[0] ?? '',
+    sellerName: '', sellerContactUrl: '', lastContactedAt: new Date().toISOString().split('T')[0] ?? '',
   });
 
   useEffect(() => {
@@ -75,6 +78,7 @@ const PreOrdersPage: React.FC = () => {
       deposit: '',
       releaseDate: '',
       paymentDate: new Date().toISOString().split('T')[0] ?? '',
+      sellerName: '', sellerContactUrl: '', lastContactedAt: new Date().toISOString().split('T')[0] ?? '',
     });
     setScreenshotFile(null);
     setScreenshotPreview(null);
@@ -140,6 +144,10 @@ const PreOrdersPage: React.FC = () => {
     }
   };
 
+  const handleContacted = async (item: PreOrder) => {
+    await markSellerContacted(item.id, item.contactCount);
+  };
+
   if (loading)
     return (
       <div className="h-screen flex flex-col items-center justify-center bg-[#121212] gap-4">
@@ -154,11 +162,13 @@ const PreOrdersPage: React.FC = () => {
     <div className="min-h-screen bg-[#121212] p-6 text-[#e4e4e4] overflow-x-hidden">
       <div className="max-w-7xl mx-auto">
         <PreOrderHeader onAddClick={() => setShowForm(true)} />
+        <PreOrderContactSummary preorders={preorders} />
 
         <PreOrderGrid
           preorders={preorders}
           onDelete={handleDelete}
           onImageClick={setSelectedImage}
+          onContacted={handleContacted}
         />
 
         <PreOrderForm

@@ -13,6 +13,9 @@ interface PreOrderFormData {
   deposit: string | number;
   paymentDate: string;
   releaseDate: string;
+  sellerName: string;
+  sellerContactUrl: string;
+  lastContactedAt: string;
 }
 
 // Интерфейс пропсов компонента
@@ -84,6 +87,24 @@ const PreOrderForm: FC<PreOrderFormProps> = ({
               setFormData({ ...formData, brand: e.target.value })
             }
           />
+          <input
+            placeholder={t('preorders.sellerPlaceholder')}
+            className="w-full bg-[#121212] border border-[#333] p-4 rounded-xl outline-none focus:border-orange-500 transition-colors text-white font-bold"
+            value={formData.sellerName}
+            onChange={(e: ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, sellerName: e.target.value })}
+          />
+          <input
+            type="url"
+            placeholder={t('preorders.contactUrl')}
+            className="w-full bg-[#121212] border border-[#333] p-4 rounded-xl outline-none focus:border-orange-500 transition-colors text-white font-bold"
+            value={formData.sellerContactUrl}
+            onChange={(e: ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, sellerContactUrl: e.target.value })}
+          />
+          <label className="block space-y-2 text-[10px] font-black uppercase tracking-wider text-gray-500">
+            {t('preorders.lastContact')}
+            <input type="date" className="mt-2 w-full bg-[#121212] border border-[#333] p-4 rounded-xl text-white font-bold outline-none focus:border-orange-500"
+              value={formData.lastContactedAt} onChange={(e) => setFormData({ ...formData, lastContactedAt: e.target.value })} required />
+          </label>
           <div className="relative">
             <select
               className="w-full bg-[#121212] border border-[#333] p-4 rounded-xl text-white font-bold appearance-none cursor-pointer outline-none focus:border-orange-500"

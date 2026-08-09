@@ -2,12 +2,14 @@ import React, { FC } from 'react';
 import { Link } from 'react-router-dom';
 import { Box, Target, ChevronRight, Fingerprint, ShieldCheck } from 'lucide-react';
 import type { Figure } from '../../types/figure';
+import { useI18n } from '../../app/i18n/I18nProvider';
 
 interface SpotlightCardProps {
   spotlight: Figure | null | undefined;
 }
 
 const SpotlightCard: FC<SpotlightCardProps> = ({ spotlight }) => {
+  const { t } = useI18n();
   if (!spotlight) return null;
 
   const spotlightBrand = spotlight.brand || 'Original';
@@ -46,7 +48,7 @@ const SpotlightCard: FC<SpotlightCardProps> = ({ spotlight }) => {
                 Ref_ID: {spotlight.id.slice(0, 8)}
               </div>
               <div className="px-2 py-1 bg-blue-500/20 backdrop-blur-md rounded border border-blue-500/30 text-[7px] font-black text-white uppercase tracking-widest italic flex items-center gap-1">
-                <ShieldCheck size={8} /> Verified_Asset
+                <ShieldCheck size={8} /> {t('home.verified')}
               </div>
             </div>
           </div>
@@ -58,7 +60,7 @@ const SpotlightCard: FC<SpotlightCardProps> = ({ spotlight }) => {
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-[1px] bg-blue-500" />
                   <span className="text-[9px] md:text-[10px] font-black text-blue-500 uppercase tracking-[0.4em] italic">
-                    System_Featured_Unit
+                    {t('home.featuredToday')}
                   </span>
                 </div>
                 <h2 className="text-4xl sm:text-5xl lg:text-7xl font-black text-white uppercase italic tracking-tighter leading-[0.85]">
@@ -72,7 +74,7 @@ const SpotlightCard: FC<SpotlightCardProps> = ({ spotlight }) => {
               <div className="grid grid-cols-2 gap-8 py-8 border-y border-[#333]">
                 <div className="space-y-2">
                   <p className="text-[8px] font-black text-gray-600 uppercase tracking-widest">
-                    Manufacturer
+                    {t('filters.manufacturer')}
                   </p>
                   <div className="flex items-center gap-2">
                     <Box size={14} className="text-blue-500" />
@@ -83,7 +85,7 @@ const SpotlightCard: FC<SpotlightCardProps> = ({ spotlight }) => {
                 </div>
                 <div className="space-y-2">
                   <p className="text-[8px] font-black text-gray-600 uppercase tracking-widest">
-                    Specification
+                    {t('home.specification')}
                   </p>
                   <div className="flex items-center gap-2">
                     <Fingerprint size={14} className="text-blue-500" />
@@ -97,7 +99,7 @@ const SpotlightCard: FC<SpotlightCardProps> = ({ spotlight }) => {
               <div className="flex justify-between items-end pt-4">
                 <div className="space-y-1">
                   <p className="text-gray-600 text-[9px] font-black uppercase tracking-widest italic">
-                    Current_Market_Valuation
+                    {t('home.currentValue')}
                   </p>
                   <p className="text-4xl md:text-5xl font-black text-white italic tracking-tighter leading-none">
                     <span className="text-blue-500 text-2xl mr-1">$</span>
@@ -109,7 +111,7 @@ const SpotlightCard: FC<SpotlightCardProps> = ({ spotlight }) => {
                   to={`/figure/${spotlight.id}`}
                   className="flex items-center gap-3 px-6 py-4 bg-white text-black rounded-2xl font-black uppercase italic text-[10px] tracking-widest hover:bg-blue-600 hover:text-white transition-all duration-500 shadow-xl active:scale-95"
                 >
-                  Access Archive <ChevronRight size={16} />
+                  {t('home.openFigure')} <ChevronRight size={16} />
                 </Link>
               </div>
             </div>

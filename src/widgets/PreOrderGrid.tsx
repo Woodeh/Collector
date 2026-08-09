@@ -1,36 +1,27 @@
 import React, { FC } from 'react';
 import PreOrderCard from '../entities/preorder/PreOrderCard';
-
-// Define the interface for a single preorder item
-interface PreOrderItem {
-  id: string;
-  name: string;
-  anime?: string;
-  brand?: string;
-  paymentDate: string;
-  releaseDate: string;
-  deposit: number | string;
-  totalPrice: number | string;
-  screenshot?: string;
-}
+import type { PreOrder } from '../entities/preorder/model';
+import { useI18n } from '../app/i18n/I18nProvider';
 
 // Define the interface for the component props
 interface PreOrderGridProps {
-  preorders: PreOrderItem[];
+  preorders: PreOrder[];
   onDelete: (id: string) => void;
   onImageClick: (url: string) => void;
+  onContacted: (item: PreOrder) => Promise<void>;
 }
 
-const PreOrderGrid: FC<PreOrderGridProps> = ({ preorders, onDelete, onImageClick }) => {
+const PreOrderGrid: FC<PreOrderGridProps> = ({ preorders, onDelete, onImageClick, onContacted }) => {
+  const { t } = useI18n();
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
       {preorders.length > 0 ? (
         preorders.map((item) => (
-          <PreOrderCard key={item.id} item={item} onDelete={onDelete} onImageClick={onImageClick} />
+          <PreOrderCard key={item.id} item={item} onDelete={onDelete} onImageClick={onImageClick} onContacted={onContacted} />
         ))
       ) : (
         <div className="col-span-full py-20 text-center opacity-20 italic uppercase font-black tracking-widest">
-          No active pre-orders found
+          {t('preorders.empty')}
         </div>
       )}
     </div>

@@ -14,6 +14,7 @@ import type { Figure, RankProtocol } from '../types/figure';
 import { getUserFigures } from '../entities/figures/api/figureRepository';
 import { getPreOrderCount } from '../entities/preorder/preOrderRepository';
 import { getWishlistCount } from '../entities/wishlist/wishlistRepository';
+import { selectDailyFigure } from '../entities/figures/model/dailyFigure';
 
 interface Stats {
   totalValue: number;
@@ -66,8 +67,7 @@ const HomePage: React.FC = () => {
       const allDocs = await getUserFigures(uid);
 
       if (allDocs.length > 0) {
-        const randomFigure = allDocs[Math.floor(Math.random() * allDocs.length)];
-        setSpotlight(randomFigure || null);
+        setSpotlight(selectDailyFigure(allDocs));
 
         // Расчет статистики
         const val = allDocs.reduce((acc, d) => acc + (Number(d.price) || 0), 0);
@@ -246,7 +246,7 @@ const HomePage: React.FC = () => {
           <div className="flex items-center gap-4">
             <div className="h-[2px] w-12 bg-blue-500"></div>
             <span className="text-[10px] font-black uppercase tracking-[0.3em] text-blue-500 italic">
-              {t('home.spotlight')}
+              {t('home.figureOfDay')}
             </span>
           </div>
           <SpotlightCard spotlight={spotlight} />
