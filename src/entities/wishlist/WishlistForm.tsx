@@ -44,11 +44,11 @@ const WishlistForm: FC<WishlistFormProps> = ({
 
   return (
     <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-300">
-      <div className="bg-[#1a1a1a] border border-[#333] w-full max-w-md rounded-[2rem] p-8 relative shadow-2xl overflow-y-auto max-h-[90vh] text-left">
+      <div className="bg-[#1a1a1a] border border-[#333] w-full max-w-md rounded-[2rem] p-5 sm:p-8 relative shadow-2xl overflow-y-auto max-h-[calc(100dvh-2rem)] text-left">
         <button
           type="button"
           onClick={() => setShowForm(false)}
-          className="absolute top-6 right-6 text-gray-500 hover:text-white cursor-pointer transition-colors"
+          className="absolute top-5 right-5 sm:top-6 sm:right-6 text-gray-500 hover:text-white cursor-pointer transition-colors"
         >
           <X size={20} />
         </button>

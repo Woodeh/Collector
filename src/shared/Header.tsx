@@ -111,7 +111,7 @@ const Header: FC = () => {
 
   return (
     <header className="sticky top-0 z-[100] font-sans selection:bg-blue-500/30">
-      <nav className="bg-[#1a1a1a]/80 backdrop-blur-md border-b border-[#333] p-4 px-6 md:px-8 flex items-center justify-between shadow-xl relative z-20">
+      <nav className="bg-[#1a1a1a]/90 backdrop-blur-md border-b border-[#333] px-3 py-2.5 sm:px-5 sm:py-3 xl:px-8 flex items-center justify-between shadow-xl relative z-20">
         <input
           type="file"
           accept="image/*"
@@ -125,22 +125,22 @@ const Header: FC = () => {
         <Link
           to="/"
           onClick={closeMenu}
-          className="flex items-center gap-3 group select-none shrink-0 cursor-pointer"
+          className="flex min-w-0 items-center gap-2.5 group select-none shrink cursor-pointer"
         >
-          <div className="w-10 h-10 rounded-full border border-[#333] overflow-hidden group-hover:border-blue-500/50 transition-all duration-500 group-hover:shadow-[0_0_15px_rgba(59,130,246,0.3)]">
+          <div className="h-9 w-9 shrink-0 rounded-full border border-[#333] overflow-hidden sm:h-10 sm:w-10 group-hover:border-blue-500/50 transition-all duration-500 group-hover:shadow-[0_0_15px_rgba(59,130,246,0.3)]">
             <img
               src={faceLogo}
               alt="Logo"
               className="w-full h-full object-cover transform transition-transform duration-500 group-hover:scale-110"
             />
           </div>
-          <span className="uppercase text-white tracking-tighter font-black text-xl italic leading-none">
+          <span className="truncate uppercase text-white tracking-tighter font-black text-base italic leading-none sm:text-xl">
             Figure.<span className="text-blue-500">Collector</span>
           </span>
         </Link>
 
         {/* CENTER: Navigation (Desktop) */}
-        <div className="hidden lg:flex flex-1 ml-12 gap-8 text-xs font-black uppercase tracking-[0.2em] italic items-center">
+        <div className="hidden xl:flex flex-1 ml-8 2xl:ml-12 gap-5 2xl:gap-8 text-[10px] 2xl:text-xs font-black uppercase tracking-[0.15em] 2xl:tracking-[0.2em] italic items-center">
           <NavLink
             to="/"
             className={({ isActive }) =>
@@ -180,7 +180,7 @@ const Header: FC = () => {
         <div className="flex items-center gap-4">
           {user ? (
             <>
-              <div className="hidden lg:flex gap-8 text-xs font-black uppercase tracking-[0.2em] italic items-center border-r border-[#333] pr-8 mr-4">
+              <div className="hidden xl:flex gap-5 2xl:gap-8 text-[10px] 2xl:text-xs font-black uppercase tracking-[0.15em] 2xl:tracking-[0.2em] italic items-center border-r border-[#333] pr-5 2xl:pr-8 mr-2 2xl:mr-4">
                 <NavLink
                   to="/collection"
                   className={({ isActive }) =>
@@ -213,7 +213,7 @@ const Header: FC = () => {
                 </NavLink>
               </div>
 
-              <div className="hidden lg:flex items-center gap-4 relative" ref={profileRef}>
+              <div className="hidden xl:flex items-center gap-3 relative" ref={profileRef}>
                 <div className="text-right shrink-0">
                   <p className="text-[9px] text-blue-500 font-black uppercase tracking-[0.2em] italic leading-none mb-1">
                     {t('nav.identity')}
@@ -282,7 +282,7 @@ const Header: FC = () => {
               </div>
             </>
           ) : (
-            <div className="hidden lg:block">
+            <div className="hidden xl:block">
               <Link
                 to="/login"
                 className="flex items-center gap-3 px-6 py-3 rounded-2xl bg-blue-600 text-white font-black uppercase italic text-[11px] tracking-widest hover:bg-blue-500 shadow-xl shadow-blue-600/20 active:scale-95 transition-all cursor-pointer"
@@ -292,26 +292,28 @@ const Header: FC = () => {
             </div>
           )}
 
-          <LanguageSwitcher />
+          <div className="hidden xl:block"><LanguageSwitcher /></div>
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="lg:hidden p-3 text-blue-500 bg-[#121212] border border-[#333] rounded-2xl hover:bg-blue-600/10 transition-all active:scale-90 cursor-pointer"
+            aria-label={isMenuOpen ? t('common.close') : 'Menu'}
+            aria-expanded={isMenuOpen}
+            className="xl:hidden p-2.5 text-blue-500 bg-[#121212] border border-[#333] rounded-xl hover:bg-blue-600/10 transition-all active:scale-90 cursor-pointer"
           >
-            {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            {isMenuOpen ? <X size={21} /> : <Menu size={21} />}
           </button>
         </div>
       </nav>
 
       {/* MOBILE DROPDOWN MENU */}
       <div
-        className={`lg:hidden fixed inset-0 top-[77px] bg-[#121212]/95 backdrop-blur-2xl transition-all duration-500 z-10 overflow-y-auto overscroll-contain ${
+        className={`xl:hidden fixed inset-x-0 bottom-0 top-[61px] sm:top-[65px] bg-[#121212]/97 backdrop-blur-2xl transition-all duration-300 z-10 overflow-y-auto overscroll-contain ${
           isMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none translate-y-4'
         }`}
       >
-        <div className="flex flex-col p-6 gap-2">
+        <div className="mx-auto flex w-full max-w-xl flex-col gap-1.5 p-3 pb-8 sm:p-5">
           {user && (
-            <div className="flex items-center gap-5 p-5 mb-4 bg-[#1a1a1a] border border-[#333] rounded-2xl">
-              <div className="w-12 h-12 rounded-xl bg-blue-600 flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-blue-600/20 overflow-hidden">
+            <div className="flex items-center gap-3 p-3 mb-2 bg-[#1a1a1a] border border-[#333] rounded-2xl">
+              <div className="w-10 h-10 shrink-0 rounded-xl bg-blue-600 flex items-center justify-center text-white font-bold text-lg shadow-lg shadow-blue-600/20 overflow-hidden">
                 {user.photoURL ? (
                   <img src={user.photoURL} alt="Avatar" className="w-full h-full object-cover" />
                 ) : (
@@ -322,7 +324,7 @@ const Header: FC = () => {
                 <p className="text-[10px] text-blue-500 font-bold uppercase tracking-wider mb-0.5">
                   {t('nav.account')}
                 </p>
-                <p className="text-white font-black italic uppercase text-lg tracking-tighter">
+                <p className="truncate text-white font-black italic uppercase text-sm tracking-tighter">
                   {user.displayName || user.email?.split('@')[0]}
                 </p>
               </div>
@@ -346,7 +348,7 @@ const Header: FC = () => {
                     handleScanClick();
                   }}
                   disabled={isScanning}
-                  className={`flex items-center gap-5 p-5 rounded-2xl transition-all border mb-2 cursor-pointer ${
+                  className={`flex items-center gap-4 p-3.5 rounded-xl transition-all border cursor-pointer ${
                     isScanning
                       ? 'bg-blue-500/10 border-blue-500/20 text-blue-500'
                       : 'text-gray-500 border-transparent hover:bg-[#1a1a1a] active:scale-95'
@@ -385,7 +387,7 @@ const Header: FC = () => {
                   activeColor="text-blue-500"
                   onClick={closeMenu}
                 />
-                <div className="h-px bg-[#333] my-4 mx-4 opacity-50" />
+                <div className="h-px bg-[#333] my-2 mx-3 opacity-50" />
                 <MobileNavLink
                   to="/preorders"
                   icon={<Clock size={20} />}
@@ -402,7 +404,7 @@ const Header: FC = () => {
                 />
                 <button
                   onClick={handleLogout}
-                  className="flex items-center gap-4 p-5 rounded-2xl text-red-500 font-bold uppercase tracking-widest text-xs mt-4 bg-red-500/5 border border-red-500/10 cursor-pointer"
+                  className="flex items-center gap-4 p-3.5 rounded-xl text-red-500 font-bold uppercase tracking-widest text-xs mt-2 bg-red-500/5 border border-red-500/10 cursor-pointer"
                 >
                   <LogOut size={20} /> {t('nav.logout')}
                 </button>
@@ -419,12 +421,16 @@ const Header: FC = () => {
                 <Link
                   to="/login"
                   onClick={closeMenu}
-                  className="flex items-center gap-4 p-5 rounded-2xl bg-blue-600 text-white font-bold uppercase tracking-widest text-sm mt-4 shadow-xl shadow-blue-600/20 cursor-pointer"
+                  className="flex items-center gap-4 p-3.5 rounded-xl bg-blue-600 text-white font-bold uppercase tracking-widest text-sm mt-2 shadow-xl shadow-blue-600/20 cursor-pointer"
                 >
                   <LogIn size={20} /> {t('nav.signIn')}
                 </Link>
               </>
             )}
+          </div>
+          <div className="mt-2 flex items-center justify-between rounded-2xl border border-[#333] bg-[#1a1a1a] p-3">
+            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-500">{t('language.label')}</span>
+            <LanguageSwitcher />
           </div>
         </div>
       </div>
@@ -445,7 +451,7 @@ const MobileNavLink: FC<MobileNavLinkProps> = ({ to, icon, label, activeColor, o
     to={to}
     onClick={onClick}
     className={({ isActive }) =>
-      `flex items-center gap-5 p-5 rounded-2xl transition-all border cursor-pointer
+      `flex items-center gap-4 p-3.5 rounded-xl transition-all border cursor-pointer
       ${
         isActive
           ? `bg-[#1a1a1a] border-[#333] ${activeColor}`

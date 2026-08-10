@@ -3,7 +3,7 @@ import { useI18n } from '../app/i18n/I18nProvider';
 import { motion as Motion } from 'framer-motion';
 import { storage } from '../firebase/config';
 import { ref, deleteObject } from 'firebase/storage';
-import { CheckSquare, Edit3, Loader2, Monitor, Square, X } from 'lucide-react';
+import { CheckSquare, Edit3, Monitor, Square, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import Modal from '../shared/Modal.js';
 import { useAuth } from '../app/providers/AuthProvider';
@@ -12,11 +12,13 @@ import { FigureCard, CollectionHeader, CollectionFilters } from '../components/c
 import type { Figure } from '../types/figure';
 import { bulkUpdateFigures, deleteFigure, subscribeToUserFigures, type BulkFigureChanges } from '../entities/figures/api/figureRepository';
 import BulkEditModal from '../features/bulk-edit-figures/BulkEditModal';
+import PageState from '../shared/PageState';
 
 const Collection: React.FC = () => {
   const { t } = useI18n();
   const [figures, setFigures] = useState<Figure[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [figureToDelete, setFigureToDelete] = useState<Figure | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -36,6 +38,7 @@ const Collection: React.FC = () => {
   useEffect(() => {
     if (!user) return;
     setLoading(true);
+    setLoadError(false);
     const unsubscribeSnap = subscribeToUserFigures(
       user.uid,
       (items) => {
@@ -44,6 +47,7 @@ const Collection: React.FC = () => {
       },
       (error) => {
         console.error('Collection subscription failed:', error);
+        setLoadError(true);
         setLoading(false);
       },
     );
@@ -147,19 +151,15 @@ const Collection: React.FC = () => {
     stopSelection();
   };
 
-  if (loading)
-    return (
-      <div className="h-screen flex items-center justify-center bg-[#121212]">
-        <Loader2 className="animate-spin text-blue-500" size={40} />
-      </div>
-    );
+  if (loading) return <PageState type="loading" />;
+  if (loadError) return <PageState type="error" />;
 
   return (
     <Motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, ease: 'easeOut' }}
-      className="min-h-screen bg-[#121212] p-4 md:p-8 text-[#e4e4e4] pb-24 font-sans text-left overflow-x-hidden relative"
+      className="min-h-screen bg-[#121212] p-3 sm:p-4 md:p-8 text-[#e4e4e4] pb-24 font-sans text-left overflow-x-hidden relative"
     >
       {/* Background System */}
       <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
@@ -181,7 +181,7 @@ const Collection: React.FC = () => {
       />
       <BulkEditModal isOpen={bulkModalOpen} selectedCount={selectedIds.size} onClose={() => setBulkModalOpen(false)} onApply={handleBulkApply} />
 
-      <div className="max-w-7xl mx-auto space-y-10 relative z-10">
+      <div className="max-w-7xl mx-auto space-y-6 md:space-y-10 relative z-10">
         <CollectionHeader
           processedCount={processedFigures.length}
           searchTerm={searchTerm}
@@ -216,7 +216,7 @@ const Collection: React.FC = () => {
           )}
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
+        <div className="grid grid-cols-1 min-[430px]:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 md:gap-6">
           {processedFigures.length > 0 ? (
             processedFigures.map((figure) => (
               <FigureCard

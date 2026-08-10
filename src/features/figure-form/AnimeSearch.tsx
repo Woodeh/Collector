@@ -1,19 +1,10 @@
 import React, { useState, useEffect, useRef, FC, ChangeEvent } from 'react';
 import { Search, Loader2, X, Bookmark } from 'lucide-react';
 import { useI18n } from '../../app/i18n/I18nProvider';
+import { searchAnime as requestAnime, type AnimeSearchResult } from '../../shared/api/jikanApi';
 
 // Интерфейс структуры аниме из Jikan API
-interface JikanAnime {
-  mal_id: number;
-  title: string;
-  type: string;
-  status: string;
-  images: {
-    jpg: {
-      small_image_url: string;
-    };
-  };
-}
+type JikanAnime = AnimeSearchResult;
 
 interface AnimeSearchProps {
   value: string;
@@ -26,6 +17,7 @@ const AnimeSearch: FC<AnimeSearchProps> = ({ value, onChange }) => {
   const [results, setResults] = useState<JikanAnime[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [searchError, setSearchError] = useState<boolean>(false);
   
   const wrapperRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -43,6 +35,7 @@ const AnimeSearch: FC<AnimeSearchProps> = ({ value, onChange }) => {
   }, []);
 
   useEffect(() => {
+    const controller = new AbortController();
     const searchAnime = async () => {
       if (query.length < 3 || query === lastSelectedRef.current) {
         setResults([]);
@@ -50,23 +43,23 @@ const AnimeSearch: FC<AnimeSearchProps> = ({ value, onChange }) => {
       }
 
       setLoading(true);
+      setSearchError(false);
       try {
-        const response = await fetch(
-          `https://api.jikan.moe/v4/anime?q=${encodeURIComponent(query)}&limit=6`,
-        );
-        const data = await response.json();
-        if (data.data) {
-          setResults(data.data);
-        }
+        setResults(await requestAnime(query, controller.signal));
       } catch (error) {
-        console.error('Jikan API Error:', error);
+        if (error instanceof DOMException && error.name === 'AbortError') return;
+        setResults([]);
+        setSearchError(true);
       } finally {
-        setLoading(false);
+        if (!controller.signal.aborted) setLoading(false);
       }
     };
 
     const timeoutId = setTimeout(searchAnime, 600);
-    return () => clearTimeout(timeoutId);
+    return () => {
+      clearTimeout(timeoutId);
+      controller.abort();
+    };
   }, [query]);
 
   const handleSelect = (anime: JikanAnime) => {
@@ -149,6 +142,11 @@ const AnimeSearch: FC<AnimeSearchProps> = ({ value, onChange }) => {
             ))}
           </div>
         </div>
+      )}
+      {isOpen && searchError && (
+        <p className="mt-2 px-2 text-xs font-bold text-amber-400" role="status">
+          {t('form.externalSearchUnavailable')}
+        </p>
       )}
     </div>
   );

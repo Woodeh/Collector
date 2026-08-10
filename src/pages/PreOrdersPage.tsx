@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { storage } from '../firebase/config';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { Loader2 } from 'lucide-react';
 import { useAuth } from '../app/providers/AuthProvider';
 import { useI18n } from '../app/i18n/I18nProvider';
 
@@ -19,6 +18,7 @@ import {
   subscribeToPreOrders,
   markSellerContacted,
 } from '../entities/preorder/preOrderRepository';
+import PageState from '../shared/PageState';
 
 export type Currency = 'USD' | 'KZT' | 'CNY';
 
@@ -27,6 +27,7 @@ const PreOrdersPage: React.FC = () => {
   const { t } = useI18n();
   const [preorders, setPreorders] = useState<PreOrder[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [loadError, setLoadError] = useState(false);
   const [showForm, setShowForm] = useState<boolean>(false);
   const [submitting, setSubmitting] = useState<boolean>(false);
   const [screenshotFile, setScreenshotFile] = useState<File | null>(null);
@@ -47,6 +48,7 @@ const PreOrdersPage: React.FC = () => {
   useEffect(() => {
     if (!user) return;
     setLoading(true);
+    setLoadError(false);
     const unsubscribeSnap = subscribeToPreOrders(
       user.uid,
       (snapshot) => {
@@ -55,6 +57,7 @@ const PreOrdersPage: React.FC = () => {
       },
       (error) => {
         console.error('Pre-orders subscription failed:', error);
+        setLoadError(true);
         setLoading(false);
       },
     );
@@ -148,18 +151,11 @@ const PreOrdersPage: React.FC = () => {
     await markSellerContacted(item.id, item.contactCount);
   };
 
-  if (loading)
-    return (
-      <div className="h-screen flex flex-col items-center justify-center bg-[#121212] gap-4">
-        <Loader2 className="animate-spin text-orange-500" size={40} />
-        <p className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-500">
-          {t('preorders.syncing')}
-        </p>
-      </div>
-    );
+  if (loading) return <PageState type="loading" message={t('preorders.syncing')} accentClass="text-orange-500" />;
+  if (loadError) return <PageState type="error" accentClass="text-orange-500" />;
 
   return (
-    <div className="min-h-screen bg-[#121212] p-6 text-[#e4e4e4] overflow-x-hidden">
+    <div className="min-h-screen bg-[#121212] p-3 sm:p-5 md:p-6 text-[#e4e4e4] overflow-x-hidden">
       <div className="max-w-7xl mx-auto">
         <PreOrderHeader onAddClick={() => setShowForm(true)} />
         <PreOrderContactSummary preorders={preorders} />

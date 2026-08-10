@@ -5,6 +5,7 @@ import { FigureCard, CollectionFilters } from '../components/collection';
 import type { Figure } from '../types/figure';
 import { subscribeToPublicFigures } from '../entities/figures/api/figureRepository';
 import { useI18n } from '../app/i18n/I18nProvider';
+import PageState from '../shared/PageState';
 
 type SortOption = 'newest' | 'oldest' | 'cheap' | 'expensive' | 'az' | 'za';
 
@@ -12,6 +13,7 @@ const Community: React.FC = () => {
   const { t } = useI18n();
   const [figures, setFigures] = useState<Figure[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [loadError, setLoadError] = useState(false);
   const [searchTerm, setSearchTerm] = useState<string>('');
 
   // Состояния для фильтров
@@ -29,6 +31,7 @@ const Community: React.FC = () => {
       },
       (error) => {
         console.error('Community subscription failed:', error);
+        setLoadError(true);
         setLoading(false);
       },
     );
@@ -82,17 +85,8 @@ const Community: React.FC = () => {
     });
   }, [figures, searchTerm, filterAnime, filterBrand, sortBy]);
 
-  if (loading)
-    return (
-      <div className="h-screen flex items-center justify-center bg-[#121212]">
-        <div className="animate-pulse flex flex-col items-center gap-4">
-          <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
-          <p className="text-blue-500 font-black uppercase text-[10px] tracking-[0.3em]">
-            {t('community.syncing')}
-          </p>
-        </div>
-      </div>
-    );
+  if (loading) return <PageState type="loading" message={t('community.syncing')} />;
+  if (loadError) return <PageState type="error" />;
 
   return (
     <Motion.div

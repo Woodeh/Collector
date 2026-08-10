@@ -19,6 +19,7 @@ import DetailsRelated from '../widgets/DetailsRelated';
 import type { Figure } from '../types/figure';
 import FigureDnaCard from '../widgets/FigureDnaCard';
 import FigureHistoryTimeline from '../widgets/FigureHistoryTimeline';
+import { getCharacter } from '../shared/api/jikanApi';
 import {
   deleteFigure,
   getFigureById,
@@ -67,18 +68,9 @@ const FigureDetailsPage: React.FC = () => {
             });
           } else if (data.characterId || data.name) {
             try {
-              const endpoint = data.characterId
-                ? `https://api.jikan.moe/v4/characters/${data.characterId}`
-                : `https://api.jikan.moe/v4/characters?q=${encodeURIComponent(data.name)}&limit=1`;
-
-              const res = await fetch(endpoint);
-              const resData = await res.json();
-              const char = data.characterId ? resData.data : resData.data?.[0];
+              const char = await getCharacter(data.characterId, data.name);
               if (char) {
-                setCharacterData({
-                  image: char.images.jpg.image_url,
-                  name: char.name,
-                });
+                setCharacterData(char);
               }
             } catch (e) {
               console.error('API Fetch error', e);
@@ -185,7 +177,7 @@ const FigureDetailsPage: React.FC = () => {
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, ease: 'easeOut' }}
-      className="min-h-screen bg-[#121212] p-4 md:p-8 text-[#e4e4e4] font-sans selection:bg-blue-500/30 overflow-x-hidden text-left"
+      className="min-h-screen bg-[#121212] p-3 sm:p-4 md:p-8 text-[#e4e4e4] font-sans selection:bg-blue-500/30 overflow-x-hidden text-left"
     >
       <div className="max-w-7xl mx-auto">
         <DetailsHeader

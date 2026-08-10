@@ -49,7 +49,7 @@ const FigureCard: FC<FigureCardProps> = ({
   return (
     <div className={`relative group bg-[#1a1a1a] rounded-[2rem] border overflow-hidden transition-all duration-500 flex flex-col shadow-2xl h-full text-left font-sans ${isSelected ? 'border-blue-500 ring-2 ring-blue-500/30' : 'border-[#333] hover:border-blue-500/50'}`}>
       {selectionMode && (
-        <button type="button" onClick={onToggleSelection} aria-pressed={isSelected} className={`absolute left-4 top-4 z-[60] flex h-9 w-9 items-center justify-center rounded-xl border shadow-lg backdrop-blur-md ${isSelected ? 'border-blue-400 bg-blue-600 text-white' : 'border-white/20 bg-black/70 text-transparent'}`}>
+        <button type="button" onClick={onToggleSelection} aria-label={figure.name} aria-pressed={isSelected} className={`absolute left-4 top-4 z-[60] flex h-9 w-9 items-center justify-center rounded-xl border shadow-lg backdrop-blur-md ${isSelected ? 'border-blue-400 bg-blue-600 text-white' : 'border-white/20 bg-black/70 text-transparent'}`}>
           <Check size={18} />
         </button>
       )}
@@ -62,6 +62,8 @@ const FigureCard: FC<FigureCardProps> = ({
           <button
             type="button"
             onClick={handleMenuToggle}
+            aria-label={`${t('common.edit')} / ${t('common.delete')}`}
+            aria-expanded={showMenu}
             className={`p-2 rounded-xl backdrop-blur-md border transition-all shadow-lg cursor-pointer ${
               showMenu
                 ? 'bg-blue-600 border-blue-400 text-white'
@@ -142,7 +144,7 @@ const FigureCard: FC<FigureCardProps> = ({
         </div>
 
         {/* INFO SECTION */}
-        <div className="p-6 flex-grow flex flex-col justify-between">
+        <div className="p-4 sm:p-6 flex-grow flex flex-col justify-between">
           <div className="space-y-4">
             {/* TOP INFO ROW */}
             <div className="flex justify-between items-center">
@@ -162,7 +164,7 @@ const FigureCard: FC<FigureCardProps> = ({
 
             {/* MAIN TITLE */}
             <div className="relative pl-4 border-l-[3px] border-blue-600 py-1">
-              <h3 className="text-xl font-black text-white leading-tight uppercase italic tracking-tighter group-hover:text-blue-400 transition-colors truncate">
+              <h3 className="text-lg sm:text-xl font-black text-white leading-tight uppercase italic tracking-tighter group-hover:text-blue-400 transition-colors truncate">
                 {figure.name}
               </h3>
               <p className="text-gray-500 text-[10px] font-bold uppercase tracking-widest mt-1 italic">
@@ -172,14 +174,14 @@ const FigureCard: FC<FigureCardProps> = ({
           </div>
 
           {/* PRICE BAR */}
-          <div className="mt-8 pt-5 border-t border-white/5 flex justify-between items-center">
+          <div className="mt-5 sm:mt-8 pt-4 sm:pt-5 border-t border-white/5 flex justify-between items-center">
             <div className="flex items-center gap-2 opacity-40">
               <Tag size={14} className="text-blue-500" />
               <span className="text-[10px] uppercase font-black tracking-widest text-white italic">
                 {t('common.price')}
               </span>
             </div>
-            <div className="text-3xl font-black text-white italic tracking-tighter flex items-center gap-1">
+            <div className="text-2xl sm:text-3xl font-black text-white italic tracking-tighter flex items-center gap-1">
               {Math.round(Number(figure.price) || 0).toLocaleString()}
               <span className="text-blue-500 not-italic text-xl ml-1">$</span>
             </div>

@@ -7,6 +7,7 @@ import Footer from './shared/Footer';
 import { AuthProvider } from './app/providers/AuthProvider';
 import ProtectedRoute from './app/providers/ProtectedRoute';
 import { I18nProvider } from './app/i18n/I18nProvider';
+import AppErrorBoundary from './shared/AppErrorBoundary';
 
 const Home = lazy(() => import('./pages/HomePage'));
 const Login = lazy(() => import('./pages/LoginPage'));
@@ -17,6 +18,7 @@ const Wishlist = lazy(() => import('./pages/WishlistPage'));
 const FigureForm = lazy(() => import('./features/figure-form/FigureForm'));
 const Profile = lazy(() => import('./pages/ProfilePage'));
 const Community = lazy(() => import('./pages/CommunityPage'));
+const NotFound = lazy(() => import('./pages/NotFoundPage'));
 
 const RouteFallback: React.FC = () => (
   <div className="min-h-[70vh] flex items-center justify-center bg-[#121212]">
@@ -33,8 +35,8 @@ const App: FC = () => {
         <div className="min-h-screen flex flex-col bg-[#0d0d0f] text-[#e4e4e4]">
           <Header />
 
-          <main className="w-full">
-            <Suspense fallback={<RouteFallback />}>
+          <main className="w-full flex-1" id="main-content">
+            <AppErrorBoundary><Suspense fallback={<RouteFallback />}>
               <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/login" element={<Login />} />
@@ -49,8 +51,9 @@ const App: FC = () => {
                 <Route path="/wishlist" element={<Wishlist />} />
                 <Route path="/profile" element={<Profile />} />
               </Route>
+              <Route path="*" element={<NotFound />} />
               </Routes>
-            </Suspense>
+            </Suspense></AppErrorBoundary>
           </main>
         </div>
         <Footer />

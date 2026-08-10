@@ -34,7 +34,7 @@ const DetailsHeader: FC<DetailsHeaderProps> = ({
   const isOwner = currentUser && figure && currentUser.uid === figure.userId;
 
   return (
-    <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8 text-left">
+    <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-5 sm:mb-8 text-left">
       <button
         type="button"
         onClick={() => navigate(-1)}
@@ -45,7 +45,7 @@ const DetailsHeader: FC<DetailsHeaderProps> = ({
       </button>
 
       {isOwner && (
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="grid w-full grid-cols-3 gap-2 sm:flex sm:w-auto sm:flex-wrap sm:items-center sm:gap-3">
           <button
             type="button"
             onClick={onShare}

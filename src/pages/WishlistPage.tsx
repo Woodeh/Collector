@@ -1,7 +1,7 @@
 import React, { useState, useEffect, ChangeEvent, FormEvent } from 'react';
 import { storage } from '../firebase/config';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { Loader2, Heart, Plus } from 'lucide-react';
+import { Heart, Plus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../app/providers/AuthProvider';
 import { useI18n } from '../app/i18n/I18nProvider';
@@ -15,10 +15,12 @@ import {
   subscribeToWishlist,
   updateWishlistItem,
 } from '../entities/wishlist/wishlistRepository';
+import PageState from '../shared/PageState';
 
 const WishlistPage: React.FC = () => {
   const [items, setItems] = useState<WishlistItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [loadError, setLoadError] = useState(false);
   const [showForm, setShowForm] = useState<boolean>(false);
   const [submitting, setSubmitting] = useState<boolean>(false);
   const { user } = useAuth();
@@ -33,6 +35,7 @@ const WishlistPage: React.FC = () => {
   useEffect(() => {
     if (!user) return;
     setLoading(true);
+    setLoadError(false);
     const unsubscribeSnap = subscribeToWishlist(
       user.uid,
       (snapshot) => {
@@ -41,6 +44,7 @@ const WishlistPage: React.FC = () => {
       },
       (error) => {
         console.error('Wishlist subscription failed:', error);
+        setLoadError(true);
         setLoading(false);
       },
     );
@@ -142,12 +146,8 @@ const WishlistPage: React.FC = () => {
     });
   };
 
-  if (loading)
-    return (
-      <div className="h-screen flex items-center justify-center bg-[#121212]">
-        <Loader2 className="animate-spin text-pink-500" size={40} />
-      </div>
-    );
+  if (loading) return <PageState type="loading" accentClass="text-pink-500" />;
+  if (loadError) return <PageState type="error" accentClass="text-pink-500" />;
 
   return (
     <div className="min-h-screen bg-[#121212] p-4 md:p-10 text-[#e4e4e4] font-sans overflow-x-hidden">
@@ -163,7 +163,7 @@ const WishlistPage: React.FC = () => {
       </div>
 
       <div className="max-w-7xl mx-auto text-left">
-        <div className="flex justify-between items-center mb-8 border-b border-[#333] pb-6">
+        <div className="flex flex-col items-stretch justify-between gap-4 mb-6 sm:mb-8 border-b border-[#333] pb-5 sm:flex-row sm:items-center sm:pb-6">
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
               <Heart className="text-pink-500 fill-pink-500" size={24} />
@@ -177,7 +177,7 @@ const WishlistPage: React.FC = () => {
           </div>
           <button
             onClick={openAddForm}
-            className="bg-pink-600 hover:bg-pink-500 text-white px-6 py-3 rounded-xl font-black uppercase italic text-xs tracking-widest flex items-center gap-2 transition-all active:scale-95 shadow-lg cursor-pointer"
+            className="bg-pink-600 hover:bg-pink-500 text-white px-5 sm:px-6 py-3 rounded-xl font-black uppercase italic text-xs tracking-widest flex items-center justify-center gap-2 transition-all active:scale-95 shadow-lg cursor-pointer"
           >
             <Plus size={16} /> <span>{t('wishlist.add')}</span>
           </button>

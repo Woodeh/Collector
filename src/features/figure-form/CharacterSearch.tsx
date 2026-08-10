@@ -1,17 +1,10 @@
 import React, { useState, useEffect, useRef, FC, ChangeEvent } from 'react';
 import { Loader2, User } from 'lucide-react';
 import { useI18n } from '../../app/i18n/I18nProvider';
+import { searchCharacters as requestCharacters, type CharacterSearchResult } from '../../shared/api/jikanApi';
 
 // Интерфейс структуры данных от Jikan API
-interface JikanCharacter {
-  mal_id: number;
-  name: string;
-  images: {
-    jpg: {
-      image_url: string;
-    };
-  };
-}
+type JikanCharacter = CharacterSearchResult;
 
 // Интерфейс объекта, который мы передаем наверх в onChange при выборе
 interface SelectedCharacter {
@@ -32,6 +25,7 @@ const CharacterSearch: FC<CharacterSearchProps> = ({ value, onChange }) => {
   const [results, setResults] = useState<JikanCharacter[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [searchError, setSearchError] = useState<boolean>(false);
   
   const wrapperRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -49,6 +43,7 @@ const CharacterSearch: FC<CharacterSearchProps> = ({ value, onChange }) => {
   }, []);
 
   useEffect(() => {
+    const controller = new AbortController();
     const searchCharacters = async () => {
       // query === lastSelectedRef.current предотвращает повторный поиск сразу после выбора
       if (query.length < 3 || query === lastSelectedRef.current) {
@@ -57,23 +52,23 @@ const CharacterSearch: FC<CharacterSearchProps> = ({ value, onChange }) => {
       }
 
       setLoading(true);
+      setSearchError(false);
       try {
-        const res = await fetch(
-          `https://api.jikan.moe/v4/characters?q=${encodeURIComponent(
-            query,
-          )}&limit=5&order_by=favorites&sort=desc`,
-        );
-        const data = await res.json();
-        setResults(data.data || []);
+        setResults(await requestCharacters(query, controller.signal));
       } catch (err) {
-        console.error('Search error:', err);
+        if (err instanceof DOMException && err.name === 'AbortError') return;
+        setResults([]);
+        setSearchError(true);
       } finally {
-        setLoading(false);
+        if (!controller.signal.aborted) setLoading(false);
       }
     };
 
     const timeoutId = setTimeout(searchCharacters, 500);
-    return () => clearTimeout(timeoutId);
+    return () => {
+      clearTimeout(timeoutId);
+      controller.abort();
+    };
   }, [query]);
 
   const handleSelect = (char: JikanCharacter) => {
@@ -153,6 +148,11 @@ const CharacterSearch: FC<CharacterSearchProps> = ({ value, onChange }) => {
             </button>
           ))}
         </div>
+      )}
+      {isOpen && searchError && (
+        <p className="mt-2 px-2 text-xs font-bold text-amber-400" role="status">
+          {t('form.externalSearchUnavailable')}
+        </p>
       )}
     </div>
   );

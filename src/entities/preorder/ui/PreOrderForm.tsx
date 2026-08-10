@@ -51,18 +51,18 @@ const PreOrderForm: FC<PreOrderFormProps> = ({
 
   return (
     <div className="fixed inset-0 z-[150] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md overflow-y-auto">
-      <div className="bg-[#1a1a1a] border border-[#333] w-full max-w-lg rounded-[3rem] p-10 relative my-auto animate-in zoom-in duration-300 shadow-2xl text-left">
+      <div className="bg-[#1a1a1a] border border-[#333] w-full max-w-lg rounded-[2rem] sm:rounded-[3rem] p-5 sm:p-8 md:p-10 relative my-auto animate-in zoom-in duration-300 shadow-2xl text-left">
         <button
           type="button"
           onClick={() => {
             setShowForm(false);
             resetForm();
           }}
-          className="absolute top-8 right-8 text-gray-500 hover:text-white transition-colors z-50 cursor-pointer"
+          className="absolute top-5 right-5 sm:top-8 sm:right-8 text-gray-500 hover:text-white transition-colors z-50 cursor-pointer"
         >
           <X size={24} />
         </button>
-        <h2 className="text-2xl font-black mb-8 uppercase italic tracking-tighter text-white">
+        <h2 className="pr-10 text-xl sm:text-2xl font-black mb-6 sm:mb-8 uppercase italic tracking-tighter text-white">
           {t('preorders.new')}
         </h2>
         <form onSubmit={handleSubmit} className="space-y-5">

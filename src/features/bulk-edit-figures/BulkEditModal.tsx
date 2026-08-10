@@ -39,9 +39,9 @@ const BulkEditModal = ({ isOpen, selectedCount, onClose, onApply }: BulkEditModa
 
   const inputClass = 'w-full rounded-xl border border-[#333] bg-[#121212] p-4 text-sm font-bold text-white outline-none focus:border-blue-500';
   return (
-    <div className="fixed inset-0 z-[210] flex items-center justify-center bg-black/80 p-4 backdrop-blur-md">
-      <div className="relative w-full max-w-lg rounded-[2rem] border border-[#333] bg-[#1a1a1a] p-7 shadow-2xl">
-        <button type="button" onClick={onClose} aria-label={t('common.close')} className="absolute right-6 top-6 text-gray-500 hover:text-white"><X size={20} /></button>
+    <div className="fixed inset-0 z-[210] flex items-center justify-center bg-black/80 p-3 sm:p-4 backdrop-blur-md">
+      <div className="relative max-h-[calc(100dvh-1.5rem)] w-full max-w-lg overflow-y-auto rounded-[1.5rem] sm:rounded-[2rem] border border-[#333] bg-[#1a1a1a] p-5 sm:p-7 shadow-2xl">
+        <button type="button" onClick={onClose} aria-label={t('common.close')} className="absolute right-4 top-4 sm:right-6 sm:top-6 text-gray-500 hover:text-white"><X size={20} /></button>
         <div className="mb-6 flex items-center gap-3"><Layers3 className="text-blue-500" /><div><h2 className="text-xl font-black uppercase italic text-white">{t('bulk.title')}</h2><p className="text-[10px] font-bold uppercase tracking-wider text-gray-500">{t('bulk.selected', { count: selectedCount })}</p></div></div>
         <div className="space-y-4">
           <label className="block text-[10px] font-black uppercase tracking-wider text-gray-500">{t('bulk.visibility')}<select value={visibility} onChange={(e) => setVisibility(e.target.value)} className={`${inputClass} mt-2`}><option value="">{t('bulk.keep')}</option><option value="private">{t('form.private')}</option><option value="public">{t('form.public')}</option></select></label>
