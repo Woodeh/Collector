@@ -30,7 +30,7 @@ const CollectionHeader: FC<CollectionHeaderProps> = ({
           </span>
         </div>
 
-        <h1 className="text-3xl sm:text-4xl md:text-6xl font-black uppercase italic tracking-tighter text-white leading-none">
+        <h1 className="ui-page-title uppercase italic text-white">
           {t('collection.titleBefore')} <span className="text-blue-500">{t('collection.titleAccent')}</span>
         </h1>
 
@@ -52,7 +52,7 @@ const CollectionHeader: FC<CollectionHeaderProps> = ({
           <input
             type="text"
             placeholder={t('collection.search')}
-            className="w-full bg-[#1a1a1a] border border-[#333] py-3.5 sm:py-4 pl-12 pr-12 rounded-2xl outline-none focus:border-blue-500 transition-all font-bold text-sm sm:text-base text-white placeholder:text-gray-700"
+            className="ui-control py-3.5 sm:py-4 pl-12 pr-12 text-sm sm:text-base placeholder:text-gray-700"
             value={searchTerm}
             onChange={(e: ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
           />
@@ -83,7 +83,7 @@ const CollectionHeader: FC<CollectionHeaderProps> = ({
         {/* Add Unit Button */}
         <Link
           to="/add"
-          className="bg-blue-600 hover:bg-blue-500 text-white p-3.5 sm:p-4 rounded-2xl font-black uppercase italic tracking-tighter flex items-center justify-center gap-2 transition-all active:scale-95 shadow-xl shadow-blue-600/20 border border-blue-400/20 cursor-pointer"
+          className="ui-button bg-blue-600 hover:bg-blue-500 text-white p-3.5 sm:p-4 font-black uppercase italic tracking-tighter flex items-center justify-center gap-2 shadow-xl shadow-blue-600/20 border border-blue-400/20 cursor-pointer"
         >
           <Plus size={20} />
           <span className="hidden sm:inline text-sm">{t('collection.add')}</span>

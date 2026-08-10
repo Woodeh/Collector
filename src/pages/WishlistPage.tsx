@@ -16,6 +16,8 @@ import {
   updateWishlistItem,
 } from '../entities/wishlist/wishlistRepository';
 import PageState from '../shared/PageState';
+import { useFeedback } from '../app/providers/feedbackContext';
+import { revokeObjectUrl, validateImageFile } from '../shared/lib/imageFiles';
 
 const WishlistPage: React.FC = () => {
   const [items, setItems] = useState<WishlistItem[]>([]);
@@ -25,12 +27,14 @@ const WishlistPage: React.FC = () => {
   const [submitting, setSubmitting] = useState<boolean>(false);
   const { user } = useAuth();
   const { t } = useI18n();
+  const { notify, confirm } = useFeedback();
   const [editingId, setEditingId] = useState<string | null>(null);
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState<WishlistFormData>({ name: '', anime: '', brand: '', price: '', link: '', image: '' });
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
     if (!user) return;
@@ -51,9 +55,13 @@ const WishlistPage: React.FC = () => {
     return unsubscribeSnap;
   }, [user]);
 
+  useEffect(() => () => revokeObjectUrl(imagePreview), [imagePreview]);
+
   const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      const validationError = validateImageFile(file);
+      if (validationError) { notify(t(`image.${validationError}`), 'error'); e.target.value = ''; return; }
       setImageFile(file);
       setImagePreview(URL.createObjectURL(file));
       // Очищаем текстовое поле ссылки, если выбрали файл, чтобы не было путаницы
@@ -62,6 +70,7 @@ const WishlistPage: React.FC = () => {
   };
 
   const openAddForm = () => {
+    setFormErrors({});
     setEditingId(null);
     setFormData({ name: '', anime: '', brand: '', price: '', link: '', image: '' });
     setImagePreview(null);
@@ -70,6 +79,7 @@ const WishlistPage: React.FC = () => {
   };
 
   const openEditForm = (item: WishlistItem) => {
+    setFormErrors({});
     setEditingId(item.id);
     setFormData({
       name: item.name,
@@ -87,6 +97,11 @@ const WishlistPage: React.FC = () => {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (!user) return;
+    const errors: Record<string, string> = {};
+    if (!formData.name.trim()) errors.name = t('validation.required');
+    if (formData.price !== '' && Number(formData.price) < 0) errors.price = t('validation.price');
+    setFormErrors(errors);
+    if (Object.keys(errors).length > 0) return;
     setSubmitting(true);
 
     try {
@@ -116,17 +131,23 @@ const WishlistPage: React.FC = () => {
       }
       setShowForm(false);
       setImageFile(null);
+      notify(t('common.saved'), 'success');
     } catch (error) {
       console.error('Submit error:', error);
-      alert(t('wishlist.saveError'));
+      notify(t('wishlist.saveError'), 'error');
     } finally {
       setSubmitting(false);
     }
   };
 
   const handleDelete = async (id: string) => {
-    if (window.confirm(t('wishlist.removeConfirm'))) {
+    const confirmed = await confirm({ title: t('common.delete'), message: t('wishlist.removeConfirm'), confirmLabel: t('common.delete'), danger: true });
+    if (!confirmed) return;
+    try {
       await deleteWishlistItem(id);
+      notify(t('common.deleted'), 'success');
+    } catch {
+      notify(t('common.operationError'), 'error');
     }
   };
 
@@ -150,7 +171,7 @@ const WishlistPage: React.FC = () => {
   if (loadError) return <PageState type="error" accentClass="text-pink-500" />;
 
   return (
-    <div className="min-h-screen bg-[#121212] p-4 md:p-10 text-[#e4e4e4] font-sans overflow-x-hidden">
+    <div className="app-page text-[#e4e4e4] font-sans">
       {/* Background System */}
       <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
         <div
@@ -162,12 +183,12 @@ const WishlistPage: React.FC = () => {
         />
       </div>
 
-      <div className="max-w-7xl mx-auto text-left">
+      <div className="app-container text-left">
         <div className="flex flex-col items-stretch justify-between gap-4 mb-6 sm:mb-8 border-b border-[#333] pb-5 sm:flex-row sm:items-center sm:pb-6">
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
               <Heart className="text-pink-500 fill-pink-500" size={24} />
-              <h2 className="text-2xl md:text-3xl font-black uppercase italic tracking-tighter text-white">
+              <h2 className="ui-section-title uppercase italic text-white">
                 {t('wishlist.title')}
               </h2>
             </div>
@@ -177,7 +198,7 @@ const WishlistPage: React.FC = () => {
           </div>
           <button
             onClick={openAddForm}
-            className="bg-pink-600 hover:bg-pink-500 text-white px-5 sm:px-6 py-3 rounded-xl font-black uppercase italic text-xs tracking-widest flex items-center justify-center gap-2 transition-all active:scale-95 shadow-lg cursor-pointer"
+            className="ui-button bg-pink-600 hover:bg-pink-500 text-white px-5 sm:px-6 py-3 font-black uppercase italic text-xs tracking-widest flex items-center justify-center gap-2 shadow-lg cursor-pointer"
           >
             <Plus size={16} /> <span>{t('wishlist.add')}</span>
           </button>
@@ -196,7 +217,7 @@ const WishlistPage: React.FC = () => {
         </div>
 
         {items.length === 0 && (
-          <div className="py-20 text-center opacity-10">
+          <div className="py-16 md:py-20 text-center opacity-10">
             <Heart size={60} className="mx-auto mb-4" />
             <p className="font-black uppercase tracking-[0.3em] text-sm">{t('wishlist.empty')}</p>
           </div>
@@ -212,6 +233,7 @@ const WishlistPage: React.FC = () => {
           isEditing={!!editingId}
           imagePreview={imagePreview}
           handleImageChange={handleImageChange}
+          errors={formErrors}
         />
       </div>
     </div>

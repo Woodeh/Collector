@@ -2,6 +2,7 @@ import React, { FC } from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { Star, X } from 'lucide-react';
+import { useI18n } from '../../app/i18n/I18nProvider';
 
 // Определяем интерфейс пропсов
 interface SortablePhotoItemProps {
@@ -19,6 +20,7 @@ const SortablePhotoItem: FC<SortablePhotoItemProps> = ({
   onSetPreview,
   onRemove,
 }) => {
+  const { t } = useI18n();
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id,
   });
@@ -50,6 +52,7 @@ const SortablePhotoItem: FC<SortablePhotoItemProps> = ({
       {/* Кнопка "Сделать главной" */}
       <button
         type="button"
+        aria-label={t('form.setPreview')}
         onPointerDown={(e) => e.stopPropagation()} // Предотвращаем срабатывание dnd при клике
         onClick={onSetPreview}
         className="absolute top-1.5 left-1.5 sm:top-2 sm:left-2 z-20 bg-black/70 p-1.5 rounded-lg hover:bg-blue-600 transition-colors"
@@ -60,6 +63,7 @@ const SortablePhotoItem: FC<SortablePhotoItemProps> = ({
       {/* Кнопка удаления */}
       <button
         type="button"
+        aria-label={t('form.removePhoto')}
         onPointerDown={(e) => e.stopPropagation()} // Предотвращаем срабатывание dnd при клике
         onClick={onRemove}
         className="absolute top-1.5 right-1.5 sm:top-2 sm:right-2 z-20 bg-red-600/80 p-1.5 rounded-lg text-white"

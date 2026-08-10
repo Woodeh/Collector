@@ -13,9 +13,11 @@ import type { Figure } from '../types/figure';
 import { bulkUpdateFigures, deleteFigure, subscribeToUserFigures, type BulkFigureChanges } from '../entities/figures/api/figureRepository';
 import BulkEditModal from '../features/bulk-edit-figures/BulkEditModal';
 import PageState from '../shared/PageState';
+import { useFeedback } from '../app/providers/feedbackContext';
 
 const Collection: React.FC = () => {
   const { t } = useI18n();
+  const { notify } = useFeedback();
   const [figures, setFigures] = useState<Figure[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
@@ -124,8 +126,10 @@ const Collection: React.FC = () => {
           }
         }
       }
+      notify(t('common.deleted'), 'success');
     } catch (error) {
       console.error('Delete error:', error);
+      notify(t('common.operationError'), 'error');
     } finally {
       setIsModalOpen(false);
       setFigureToDelete(null);
@@ -148,6 +152,7 @@ const Collection: React.FC = () => {
   const handleBulkApply = async (changes: BulkFigureChanges) => {
     const selectedFigures = figures.filter((figure) => selectedIds.has(figure.id));
     await bulkUpdateFigures(selectedFigures, changes);
+    notify(t('bulk.success', { count: selectedFigures.length }), 'success');
     stopSelection();
   };
 
@@ -159,7 +164,7 @@ const Collection: React.FC = () => {
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, ease: 'easeOut' }}
-      className="min-h-screen bg-[#121212] p-3 sm:p-4 md:p-8 text-[#e4e4e4] pb-24 font-sans text-left overflow-x-hidden relative"
+      className="app-page text-[#e4e4e4] font-sans text-left relative"
     >
       {/* Background System */}
       <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
@@ -181,7 +186,7 @@ const Collection: React.FC = () => {
       />
       <BulkEditModal isOpen={bulkModalOpen} selectedCount={selectedIds.size} onClose={() => setBulkModalOpen(false)} onApply={handleBulkApply} />
 
-      <div className="max-w-7xl mx-auto space-y-6 md:space-y-10 relative z-10">
+      <div className="app-container space-y-6 md:space-y-8 z-10">
         <CollectionHeader
           processedCount={processedFigures.length}
           searchTerm={searchTerm}
@@ -233,7 +238,7 @@ const Collection: React.FC = () => {
               />
             ))
           ) : (
-            <div className="col-span-full py-32 text-center opacity-30">
+            <div className="col-span-full py-16 md:py-20 text-center opacity-30">
               <Monitor className="mx-auto mb-4" size={48} />
               <p className="text-xl font-black uppercase italic tracking-widest">{t('collection.empty')}</p>
             </div>

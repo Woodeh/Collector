@@ -71,7 +71,7 @@ const PhotoUploadSection: FC<PhotoUploadSectionProps> = ({
           className="hidden"
           multiple
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleFiles(e.target.files)}
-          accept="image/*"
+          accept="image/jpeg,image/png,image/webp,image/avif"
         />
       </label>
 

@@ -54,7 +54,7 @@ const SpotlightCard: FC<SpotlightCardProps> = ({ spotlight }) => {
           </div>
 
           {/* Data Section */}
-          <div className="p-8 sm:p-10 md:p-14 flex-1 text-left flex flex-col justify-center relative">
+          <div className="p-6 sm:p-8 md:p-10 flex-1 text-left flex flex-col justify-center relative">
             <div className="relative z-10 space-y-6 md:space-y-8">
               <div className="space-y-2">
                 <div className="flex items-center gap-3">
@@ -71,7 +71,7 @@ const SpotlightCard: FC<SpotlightCardProps> = ({ spotlight }) => {
                 </p>
               </div>
 
-              <div className="grid grid-cols-2 gap-8 py-8 border-y border-[#333]">
+              <div className="grid grid-cols-2 gap-5 sm:gap-8 py-6 sm:py-8 border-y border-[#333]">
                 <div className="space-y-2">
                   <p className="text-[8px] font-black text-gray-600 uppercase tracking-widest">
                     {t('filters.manufacturer')}

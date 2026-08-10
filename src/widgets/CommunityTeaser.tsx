@@ -16,9 +16,9 @@ const CommunityTeaser: FC<CommunityTeaserProps> = ({ loading, communityFigures, 
   return (
     <section
       id="community-scan"
-      className="relative py-24 px-4 bg-[#0d0d0d]/80 backdrop-blur-sm border-y border-[#333] z-10"
+      className="relative px-3 py-16 sm:px-5 sm:py-20 md:px-8 md:py-24 bg-[#0d0d0d]/80 backdrop-blur-sm border-y border-[#333] z-10"
     >
-      <div className="max-w-7xl mx-auto space-y-12">
+      <div className="max-w-7xl mx-auto space-y-8 md:space-y-12">
         <div className="flex flex-col md:flex-row justify-between items-end gap-6 text-left">
           <div className="space-y-2">
             <div className="flex items-center gap-2 text-blue-500">

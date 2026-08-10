@@ -1,8 +1,9 @@
-import React, { FC, ChangeEvent, FormEvent } from 'react';
+import React, { FC, ChangeEvent, FormEvent, useCallback } from 'react';
 import { X, Camera } from 'lucide-react';
 import AnimeSearch from '../../../features/figure-form/AnimeSearch';
 import type { Currency } from '../../../types/figure';
 import { useI18n } from '../../../app/i18n/I18nProvider';
+import { useModalDialog } from '../../../shared/lib/useModalDialog';
 
 // Интерфейс для данных формы
 interface PreOrderFormData {
@@ -31,6 +32,7 @@ interface PreOrderFormProps {
   handleSubmit: (e: FormEvent) => void;
   submitting: boolean;
   resetForm: () => void;
+  errors: Record<string, string>;
 }
 
 const PreOrderForm: FC<PreOrderFormProps> = ({
@@ -45,40 +47,46 @@ const PreOrderForm: FC<PreOrderFormProps> = ({
   handleSubmit,
   submitting,
   resetForm,
+  errors,
 }) => {
   const { t } = useI18n();
+  const closeForm = useCallback(() => { setShowForm(false); resetForm(); }, [resetForm, setShowForm]);
+  const dialogRef = useModalDialog(showForm, closeForm);
   if (!showForm) return null;
 
   return (
-    <div className="fixed inset-0 z-[150] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md overflow-y-auto">
-      <div className="bg-[#1a1a1a] border border-[#333] w-full max-w-lg rounded-[2rem] sm:rounded-[3rem] p-5 sm:p-8 md:p-10 relative my-auto animate-in zoom-in duration-300 shadow-2xl text-left">
+    <div className="fixed inset-0 z-[150] flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-md overflow-y-auto">
+      <div ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby="preorder-form-title" tabIndex={-1} className="ui-dialog ui-accent-orange border w-full max-w-lg max-h-[calc(100dvh-1.5rem)] overflow-y-auto p-5 sm:p-7 md:p-8 relative my-auto animate-in zoom-in duration-300 shadow-2xl text-left">
         <button
           type="button"
           onClick={() => {
             setShowForm(false);
             resetForm();
           }}
+          aria-label={t('common.close')}
           className="absolute top-5 right-5 sm:top-8 sm:right-8 text-gray-500 hover:text-white transition-colors z-50 cursor-pointer"
         >
           <X size={24} />
         </button>
-        <h2 className="pr-10 text-xl sm:text-2xl font-black mb-6 sm:mb-8 uppercase italic tracking-tighter text-white">
+        <h2 id="preorder-form-title" className="pr-10 text-xl sm:text-2xl font-black mb-6 sm:mb-8 uppercase italic tracking-tighter text-white">
           {t('preorders.new')}
         </h2>
-        <form onSubmit={handleSubmit} className="space-y-5">
-          <input
+        <form onSubmit={handleSubmit} className="ui-form space-y-4 sm:space-y-5">
+          <div><input
             placeholder={t('preorders.figureName')}
-            className="w-full bg-[#121212] border border-[#333] p-4 rounded-xl outline-none focus:border-orange-500 transition-colors text-white font-bold"
+            aria-invalid={Boolean(errors.name)}
+            className={`w-full bg-[#121212] border p-4 rounded-xl outline-none focus:border-orange-500 transition-colors text-white font-bold ${errors.name ? 'border-red-500' : 'border-[#333]'}`}
             value={formData.name}
             onChange={(e: ChangeEvent<HTMLInputElement>) =>
               setFormData({ ...formData, name: e.target.value })
             }
             required
-          />
+          />{errors.name && <p className="mt-1.5 px-2 text-xs font-bold text-red-400">{errors.name}</p>}</div>
           <AnimeSearch
             value={formData.anime}
             onChange={(val: string) => setFormData({ ...formData, anime: val })}
           />
+          {errors.anime && <p className="-mt-3 px-2 text-xs font-bold text-red-400">{errors.anime}</p>}
           <input
             placeholder={t('preorders.brand')}
             className="w-full bg-[#121212] border border-[#333] p-4 rounded-xl outline-none focus:border-orange-500 transition-colors text-white font-bold"
@@ -119,6 +127,7 @@ const PreOrderForm: FC<PreOrderFormProps> = ({
           <div className="grid grid-cols-2 gap-4">
             <input
               type="number"
+              min="0"
               step="0.01"
               placeholder={t('preorders.totalPrice')}
               className="bg-[#121212] border border-[#333] p-4 rounded-xl text-white font-bold outline-none focus:border-orange-500"
@@ -130,6 +139,7 @@ const PreOrderForm: FC<PreOrderFormProps> = ({
             />
             <input
               type="number"
+              min="0"
               step="0.01"
               placeholder={t('preorders.depositPaid')}
               className="bg-[#121212] border border-[#333] p-4 rounded-xl text-white font-bold outline-none focus:border-orange-500"
@@ -140,6 +150,7 @@ const PreOrderForm: FC<PreOrderFormProps> = ({
               required
             />
           </div>
+          {(errors.totalPrice || errors.deposit) && <div className="-mt-2 grid grid-cols-2 gap-4 text-xs font-bold text-red-400"><p>{errors.totalPrice}</p><p>{errors.deposit}</p></div>}
           <input
             type="date"
             className="w-full bg-[#121212] border border-[#333] p-4 rounded-xl text-white font-bold outline-none focus:border-orange-500"
@@ -173,12 +184,12 @@ const PreOrderForm: FC<PreOrderFormProps> = ({
                 </span>
               </div>
             )}
-            <input type="file" className="hidden" onChange={handleFileChange} accept="image/*" />
+            <input type="file" className="hidden" onChange={handleFileChange} accept="image/jpeg,image/png,image/webp,image/avif" />
           </label>
           <button
             type="submit"
             disabled={submitting}
-            className="w-full bg-orange-600 py-4 rounded-2xl font-black text-lg hover:bg-orange-500 text-white transition-all shadow-xl uppercase italic tracking-widest cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            className="ui-button w-full bg-orange-600 py-4 font-black text-lg hover:bg-orange-500 text-white shadow-xl uppercase italic tracking-widest cursor-pointer"
           >
             {submitting ? t('preorders.saving') : t('preorders.addToList')}
           </button>

@@ -9,6 +9,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { LogIn, Lock, Mail, UserPlus, Loader2 } from 'lucide-react';
 import { useAuth } from '../app/providers/AuthProvider';
 import { useI18n } from '../app/i18n/I18nProvider';
+import { useFeedback } from '../app/providers/feedbackContext';
 
 const LoginPage: React.FC = () => {
   const [isLogin, setIsLogin] = useState<boolean>(true);
@@ -20,6 +21,7 @@ const LoginPage: React.FC = () => {
   const location = useLocation();
   const { user, initializing } = useAuth();
   const { t } = useI18n();
+  const { notify } = useFeedback();
   const destination = (location.state as { from?: { pathname?: string } } | null)?.from?.pathname || '/';
 
   useEffect(() => {
@@ -42,7 +44,7 @@ const LoginPage: React.FC = () => {
       }
       navigate(destination, { replace: true });
     } catch (error: unknown) {
-      alert(error instanceof Error ? error.message : t('login.authFailed'));
+      notify(error instanceof Error ? error.message : t('login.authFailed'), 'error');
     } finally {
       setLoading(false);
     }
@@ -50,7 +52,7 @@ const LoginPage: React.FC = () => {
 
   return (
     <div className="min-h-[80vh] flex items-center justify-center p-4">
-      <div className="w-full max-w-[400px] bg-[#1a1a1a] rounded-[2.5rem] border border-[#333] p-8 md:p-10 shadow-2xl">
+      <div className="w-full max-w-[400px] bg-[#1a1a1a] rounded-[2rem] sm:rounded-[2.5rem] border border-[#333] p-6 sm:p-8 md:p-9 shadow-2xl">
         {/* Header */}
         <div className="text-center mb-8 space-y-2">
           <div className="inline-flex p-3 bg-blue-500/10 rounded-2xl text-blue-500 mb-2">

@@ -4,6 +4,8 @@ import CharacterSearch from './CharacterSearch';
 import AnimeSearch from './AnimeSearch';
 import CustomSelect from '../../shared/Select';
 import { useI18n } from '../../app/i18n/I18nProvider';
+import { useFeedback } from '../../app/providers/feedbackContext';
+import { revokeObjectUrl, validateImageFile } from '../../shared/lib/imageFiles';
 
 // Define the structure for a character selected from the API
 interface SelectedCharacter {
@@ -49,12 +51,16 @@ const BasicInfoSection: FC<BasicInfoSectionProps> = ({
   onCharacterSelected,
 }) => {
   const { t } = useI18n();
+  const { notify } = useFeedback();
   
   const handleCharFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      const validationError = validateImageFile(file);
+      if (validationError) { notify(t(`image.${validationError}`), 'error'); e.target.value = ''; return; }
       onCharArtFileChange(file);
       // Create a temporary URL for preview in the form
+      revokeObjectUrl(formData.characterImage);
       handleCustomChange('characterImage', URL.createObjectURL(file));
     }
   };
@@ -95,7 +101,7 @@ const BasicInfoSection: FC<BasicInfoSectionProps> = ({
             <input
               type="file"
               className="hidden"
-              accept="image/*"
+              accept="image/jpeg,image/png,image/webp,image/avif"
               onChange={handleCharFileChange}
             />
           </label>
@@ -112,6 +118,7 @@ const BasicInfoSection: FC<BasicInfoSectionProps> = ({
               <button
                 type="button"
                 onClick={() => {
+                  revokeObjectUrl(formData.characterImage);
                   handleCustomChange('characterImage', '');
                   onCharArtFileChange(null);
                 }}

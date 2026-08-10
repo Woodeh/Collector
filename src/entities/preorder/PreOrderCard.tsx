@@ -3,6 +3,7 @@ import { Calendar, CheckCircle2, Clock, ExternalLink, ImageIcon, MoreVertical, T
 import { useI18n } from '../../app/i18n/I18nProvider';
 import { getContactCycleStatus, getLastContactDate } from './contactCycle';
 import type { PreOrder } from './model';
+import ImageWithFallback from '../../shared/ImageWithFallback';
 
 interface PreOrderCardProps {
   item: PreOrder;
@@ -55,9 +56,9 @@ const PreOrderCard: FC<PreOrderCardProps> = ({ item, onDelete, onImageClick, onC
   };
 
   return (
-    <article className={`relative flex h-full flex-col overflow-hidden rounded-[2rem] border bg-[#1a1a1a] text-left shadow-2xl transition-all ${cycle.status === 'overdue' ? 'border-red-500/40' : 'border-[#333] hover:border-orange-500/40'}`}>
+    <article className={`ui-card relative flex h-full flex-col overflow-hidden border text-left shadow-2xl transition-all ${cycle.status === 'overdue' ? 'border-red-500/40' : 'hover:border-orange-500/40'}`}>
       <div className="absolute right-4 top-4 z-50" ref={menuRef}>
-        <button type="button" onClick={handleMenuToggle} className="rounded-xl border border-white/10 bg-black/60 p-2 text-gray-400 backdrop-blur-md"><MoreVertical size={18} /></button>
+        <button type="button" onClick={handleMenuToggle} aria-label={t('common.edit')} aria-expanded={showMenu} className="rounded-xl border border-white/10 bg-black/60 p-2 text-gray-400 backdrop-blur-md"><MoreVertical size={18} /></button>
         {showMenu && (
           <div className="absolute right-0 mt-2 w-36 overflow-hidden rounded-2xl border border-[#333] bg-[#1a1a1a] shadow-2xl">
             <button type="button" onClick={() => onDelete(item.id)} className="flex w-full items-center gap-3 px-4 py-3 text-[11px] font-black uppercase text-red-500 hover:bg-red-500/10"><Trash2 size={14} />{t('common.delete')}</button>
@@ -68,13 +69,13 @@ const PreOrderCard: FC<PreOrderCardProps> = ({ item, onDelete, onImageClick, onC
       <div className="relative aspect-[10/8] overflow-hidden border-b border-[#333]/50 bg-[#121212]">
         {item.screenshot ? (
           <button type="button" className="h-full w-full cursor-zoom-in" onClick={() => onImageClick(item.screenshot!)}>
-            <img src={item.screenshot} alt={item.name} loading="lazy" className="h-full w-full object-cover transition-transform duration-700 hover:scale-105" />
+            <ImageWithFallback src={item.screenshot} alt={item.name} loading="lazy" wrapperClassName="h-full w-full" className="h-full w-full object-cover hover:scale-105" />
           </button>
         ) : <div className="flex h-full items-center justify-center"><ImageIcon className="text-gray-800" size={48} /></div>}
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/80 to-transparent" />
       </div>
 
-      <div className="flex flex-1 flex-col p-6">
+      <div className="flex flex-1 flex-col p-4 sm:p-5">
         <div className="mb-4 flex items-center justify-between gap-3">
           <span className="truncate text-[10px] font-black uppercase tracking-[0.2em] text-blue-500">{item.anime}</span>
           <span className="flex items-center gap-1 rounded-md border border-white/10 bg-white/5 px-2 py-1 text-[9px] font-black text-gray-400"><Calendar size={10} />{item.releaseDate}</span>

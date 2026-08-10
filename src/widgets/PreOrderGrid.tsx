@@ -20,7 +20,7 @@ const PreOrderGrid: FC<PreOrderGridProps> = ({ preorders, onDelete, onImageClick
           <PreOrderCard key={item.id} item={item} onDelete={onDelete} onImageClick={onImageClick} onContacted={onContacted} />
         ))
       ) : (
-        <div className="col-span-full py-20 text-center opacity-20 italic uppercase font-black tracking-widest">
+        <div className="col-span-full py-16 md:py-20 text-center opacity-20 italic uppercase font-black tracking-widest">
           {t('preorders.empty')}
         </div>
       )}

@@ -8,6 +8,7 @@ import { AuthProvider } from './app/providers/AuthProvider';
 import ProtectedRoute from './app/providers/ProtectedRoute';
 import { I18nProvider } from './app/i18n/I18nProvider';
 import AppErrorBoundary from './shared/AppErrorBoundary';
+import { FeedbackProvider } from './app/providers/FeedbackProvider';
 
 const Home = lazy(() => import('./pages/HomePage'));
 const Login = lazy(() => import('./pages/LoginPage'));
@@ -30,6 +31,7 @@ const App: FC = () => {
   return (
     <Router>
       <I18nProvider>
+      <FeedbackProvider>
       <AuthProvider>
         <ScrollToTop />
         <div className="min-h-screen flex flex-col bg-[#0d0d0f] text-[#e4e4e4]">
@@ -58,6 +60,7 @@ const App: FC = () => {
         </div>
         <Footer />
       </AuthProvider>
+      </FeedbackProvider>
       </I18nProvider>
     </Router>
   );

@@ -20,7 +20,9 @@ import {
 } from '../../entities/figures/api/figureRepository';
 import type { Figure } from '../../types/figure';
 import { useI18n } from '../../app/i18n/I18nProvider';
+import { useFeedback } from '../../app/providers/feedbackContext';
 import { brandOptions, conditionOptions, exchangeRates, shopOptions } from './options';
+import { MAX_FIGURE_PHOTOS, revokeObjectUrl, validateImageFile } from '../../shared/lib/imageFiles';
 
 import 'react-datepicker/dist/react-datepicker.css';
 
@@ -60,6 +62,7 @@ interface FigureFormProps {
 
 const FigureForm: FC<FigureFormProps> = ({ mode = 'add' }) => {
   const { t } = useI18n();
+  const { notify } = useFeedback();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const isEdit = mode === 'edit';
@@ -151,7 +154,12 @@ const FigureForm: FC<FigureFormProps> = ({ mode = 'add' }) => {
   const handleFiles = async (newFiles: FileList | null) => {
     if (!newFiles) return;
     const fileArray = Array.from(newFiles);
-    const validFiles = fileArray.filter((f) => f.type.startsWith('image/'));
+    const validationError = fileArray.map(validateImageFile).find((error) => error !== null);
+    if (validationError) { notify(t(`image.${validationError}`), 'error'); return; }
+    const remainingSlots = MAX_FIGURE_PHOTOS - mediaItems.length;
+    if (remainingSlots <= 0) { notify(t('image.maxPhotos'), 'info'); return; }
+    if (fileArray.length > remainingSlots) notify(t('image.maxPhotos'), 'info');
+    const validFiles = fileArray.slice(0, remainingSlots);
     
     setLoading(true);
     const compressionOptions = {
@@ -175,7 +183,7 @@ const FigureForm: FC<FigureFormProps> = ({ mode = 'add' }) => {
         }),
       );
       setMediaItems((prev) => {
-        const combined = [...prev, ...compressedItems].slice(0, 5);
+        const combined = [...prev, ...compressedItems].slice(0, MAX_FIGURE_PHOTOS);
         if (!previewId && combined.length > 0) setPreviewId(combined[0]!.id);
         return combined;
       });
@@ -199,6 +207,7 @@ const FigureForm: FC<FigureFormProps> = ({ mode = 'add' }) => {
 
   const removeItem = (id: string) => {
     setMediaItems((prev) => {
+      revokeObjectUrl(prev.find((item) => item.id === id)?.url);
       const filtered = prev.filter((item) => item.id !== id);
       if (previewId === id && filtered.length > 0) setPreviewId(filtered[0]!.id);
       return filtered;
@@ -229,8 +238,8 @@ const FigureForm: FC<FigureFormProps> = ({ mode = 'add' }) => {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (mediaItems.length === 0) return alert(t('form.photoRequired'));
-    if (!auth.currentUser) return alert(t('form.authRequired'));
+    if (mediaItems.length === 0) { notify(t('form.photoRequired'), 'error'); return; }
+    if (!auth.currentUser) { notify(t('form.authRequired'), 'error'); return; }
     
     setLoading(true);
     try {
@@ -285,7 +294,7 @@ const FigureForm: FC<FigureFormProps> = ({ mode = 'add' }) => {
       setEpicSuccess({ name: formData.name, img: previewUrl });
       setTimeout(() => navigate('/collection'), 3000);
     } catch (error: unknown) {
-      alert(error instanceof Error ? error.message : t('form.saveError'));
+      notify(error instanceof Error ? error.message : t('form.saveError'), 'error');
     } finally {
       setLoading(false);
     }
@@ -307,7 +316,7 @@ const FigureForm: FC<FigureFormProps> = ({ mode = 'add' }) => {
     );
 
   return (
-    <div className="w-full max-w-4xl mx-auto px-4 py-6 sm:p-6 text-[#e4e4e4] relative text-left font-sans tracking-tight">
+    <div className="w-full max-w-4xl mx-auto px-3 py-5 sm:px-5 sm:py-7 md:px-8 md:py-10 text-[#e4e4e4] relative text-left font-sans tracking-tight">
       {loading && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-[999] flex flex-col items-center justify-center animate-in fade-in duration-300">
           <div className="relative">
@@ -328,8 +337,8 @@ const FigureForm: FC<FigureFormProps> = ({ mode = 'add' }) => {
 
       <SuccessModal data={epicSuccess} />
 
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8 sm:mb-10 text-left">
-        <h2 className="text-3xl sm:text-4xl font-black flex items-center gap-4 uppercase tracking-tighter italic text-white text-left">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 sm:mb-8 text-left">
+        <h2 className="ui-section-title flex items-center gap-4 uppercase italic text-white text-left">
           {isEdit ? (
             <Edit3 className="text-blue-500" size={28} />
           ) : (
@@ -341,7 +350,7 @@ const FigureForm: FC<FigureFormProps> = ({ mode = 'add' }) => {
 
       <form
         onSubmit={handleSubmit}
-        className="bg-gradient-to-b from-[#1c1c1c] to-[#161616] p-5 sm:p-10 rounded-[2rem] sm:rounded-[3rem] border border-[#262626] space-y-8"
+        className="ui-form ui-card bg-gradient-to-b from-[#1c1c1c] to-[#161616] p-5 sm:p-7 md:p-9 border border-[#262626] space-y-7 sm:space-y-8"
       >
         <div className=""> 
           <BasicInfoSection
@@ -515,7 +524,7 @@ const FigureForm: FC<FigureFormProps> = ({ mode = 'add' }) => {
         <button
           type="submit"
           disabled={loading}
-          className="w-full py-5 sm:py-6 rounded-xl sm:rounded-[2rem] bg-blue-600 hover:bg-blue-500 text-white font-black text-lg sm:text-xl tracking-widest transition-all shadow-xl active:scale-95 uppercase italic flex items-center justify-center gap-3 disabled:opacity-50 cursor-pointer"
+          className="ui-button w-full py-5 sm:py-6 bg-blue-600 hover:bg-blue-500 text-white font-black text-lg sm:text-xl tracking-widest shadow-xl uppercase italic flex items-center justify-center gap-3 cursor-pointer"
         >
           {loading ? (
             <Loader2 className="animate-spin" size={24} />

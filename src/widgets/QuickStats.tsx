@@ -17,7 +17,7 @@ const QuickStats: FC<QuickStatsProps> = ({ stats }) => {
       {/* Subtle Site Accent Glow */}
       <div className="absolute -inset-0.5 bg-blue-500/10 rounded-[2.5rem] blur opacity-40 group-hover:opacity-100 transition duration-700" />
 
-      <div className="relative bg-[#1a1a1a] border border-[#333] p-8 md:p-10 rounded-[2.5rem] overflow-hidden shadow-2xl">
+      <div className="relative bg-[#1a1a1a] border border-[#333] p-5 sm:p-7 md:p-9 rounded-[2rem] md:rounded-[2.5rem] overflow-hidden shadow-2xl">
         {/* Background "Ghost" Icon */}
         <BarChart3
           className="absolute -bottom-10 -right-10 text-blue-500/5 rotate-[-15deg]"
@@ -40,7 +40,7 @@ const QuickStats: FC<QuickStatsProps> = ({ stats }) => {
           </div>
         </div>
 
-        <div className="space-y-12 relative z-10">
+        <div className="space-y-8 md:space-y-10 relative z-10">
           {/* TOTAL WORTH */}
           <div className="space-y-3">
             <div className="flex items-center gap-2 opacity-50">

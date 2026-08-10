@@ -75,7 +75,7 @@ const RecentFigures: FC<RecentFiguresProps> = ({ recentFigures }) => {
         ))}
 
         {recentFigures.length === 0 && (
-          <div className="col-span-full py-20 text-center border-2 border-dashed border-[#333] rounded-[2.5rem] opacity-20">
+          <div className="col-span-full py-16 md:py-20 text-center border-2 border-dashed border-[#333] rounded-[2rem] md:rounded-[2.5rem] opacity-20">
             <LayoutGrid size={48} className="mx-auto mb-4" />
             <p className="font-black uppercase italic tracking-[0.2em]">{t('home.databaseEmpty')}</p>
           </div>

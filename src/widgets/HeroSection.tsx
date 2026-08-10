@@ -15,7 +15,7 @@ interface HeroSectionProps {
 const HeroSection: FC<HeroSectionProps> = ({ titleY, opacityHero, descY, onLogin, onExplore }) => {
   const { t } = useI18n();
   return (
-    <section className="relative pt-20 pb-32 px-4 z-10">
+    <section className="relative px-3 pb-16 pt-12 sm:px-5 sm:pb-24 sm:pt-16 md:px-8 md:pb-28 md:pt-20 z-10">
       <div className="max-w-7xl mx-auto text-center space-y-8 relative">
         <Motion.div
           initial={{ opacity: 0, y: 30 }}

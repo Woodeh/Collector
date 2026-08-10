@@ -20,9 +20,9 @@ const Footer: FC = () => {
   ];
 
   return (
-    <footer className="bg-[#111] border-t border-[#222] pt-16 pb-8 px-6 mt-20 selection:bg-blue-500/30">
-      <div className="max-w-6xl mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
+    <footer className="bg-[#111] border-t border-[#222] px-3 py-10 sm:px-5 sm:py-12 md:px-8 md:py-14 selection:bg-blue-500/30">
+      <div className="max-w-7xl mx-auto">
+        <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 md:grid-cols-4 md:gap-10 mb-10 md:mb-12">
           {/* BRAND SECTION */}
           <div className="space-y-6 text-left">
             <Link to="/" className="flex items-center gap-3 select-none shrink-0 w-fit cursor-pointer">
@@ -40,7 +40,7 @@ const Footer: FC = () => {
 
           {/* NAVIGATION */}
           <div className="text-left">
-            <h4 className="text-[10px] font-black text-blue-500 uppercase tracking-[0.4em] mb-8 flex items-center gap-2 italic">
+            <h4 className="text-[10px] font-black text-blue-500 uppercase tracking-[0.4em] mb-5 md:mb-6 flex items-center gap-2 italic">
               <Database size={12} /> {t('footer.navigation')}
             </h4>
             <nav className="flex flex-col gap-4">
@@ -58,7 +58,7 @@ const Footer: FC = () => {
 
           {/* COMMUNITY */}
           <div className="text-left">
-            <h4 className="text-[10px] font-black text-blue-500 uppercase tracking-[0.4em] mb-8 flex items-center gap-2 italic">
+            <h4 className="text-[10px] font-black text-blue-500 uppercase tracking-[0.4em] mb-5 md:mb-6 flex items-center gap-2 italic">
               <Share2 size={12} /> {t('footer.community')}
             </h4>
             <nav className="flex flex-col gap-4">
@@ -86,7 +86,7 @@ const Footer: FC = () => {
 
           {/* SYSTEM INFO */}
           <div className="text-left">
-            <h4 className="text-[10px] font-black text-blue-500 uppercase tracking-[0.4em] mb-8 flex items-center gap-2 italic">
+            <h4 className="text-[10px] font-black text-blue-500 uppercase tracking-[0.4em] mb-5 md:mb-6 flex items-center gap-2 italic">
               <Cpu size={12} /> {t('footer.system')}
             </h4>
             <div className="space-y-3 p-5 bg-[#161616] rounded-2xl border border-[#222] shadow-inner">
@@ -110,7 +110,7 @@ const Footer: FC = () => {
         </div>
 
         {/* BOTTOM BAR */}
-        <div className="pt-10 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-6">
+        <div className="pt-7 md:pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4 md:gap-6">
           <div className="flex items-center gap-3 text-gray-600 text-[9px] font-black uppercase tracking-[0.3em] italic">
             {t('footer.madeFor')} <Heart size={10} className="text-red-600 fill-red-600" />
           </div>

@@ -7,6 +7,7 @@ import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { useI18n } from '../app/i18n/I18nProvider';
 import type { Figure } from '../types/figure';
 import { useAuth } from '../app/providers/AuthProvider';
+import { useFeedback } from '../app/providers/feedbackContext';
 import {
   setFavoriteFigure as persistFavoriteFigure,
   subscribeToUserFigures,
@@ -45,6 +46,7 @@ const Profile: FC = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { locale, t } = useI18n();
+  const { notify } = useFeedback();
   const [allFigures, setAllFigures] = useState<ProfileFigure[]>([]);
   const [recentFigures, setRecentFigures] = useState<ProfileFigure[]>([]);
   const [collectionStats, setCollectionStats] = useState<Stats>({ totalValue: 0, count: 0 });
@@ -165,7 +167,7 @@ const Profile: FC = () => {
       window.location.reload();
     } catch (error) {
       console.error('Avatar upload failed:', error);
-      alert(t('profile.avatarError'));
+      notify(t('profile.avatarError'), 'error');
     } finally {
       setIsUploading(false);
     }
@@ -176,16 +178,22 @@ const Profile: FC = () => {
       const currentFav = allFigures.find((f) => f.isFavorite === true);
       await persistFavoriteFigure(currentFav?.id, figureId);
       setIsSelectOpen(false);
+      notify(t('common.saved'), 'success');
     } catch (error) {
       console.error(error);
+      notify(t('common.operationError'), 'error');
     }
   };
 
   const generateReport = async () => {
-    if (allFigures.length === 0) return alert(t('profile.noReportData'));
+    if (allFigures.length === 0) { notify(t('profile.noReportData'), 'info'); return; }
     const userName = user?.displayName || user?.email?.split('@')[0] || 'Collector';
     const { generateCollectionReport } = await import('../features/export-collection/generateCollectionReport');
-    await generateCollectionReport({ figures: allFigures, userName, locale });
+    try {
+      await generateCollectionReport({ figures: allFigures, userName, locale });
+    } catch {
+      notify(t('common.operationError'), 'error');
+    }
   };
 
   if (!user) return null;
@@ -195,7 +203,7 @@ const Profile: FC = () => {
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, ease: 'easeOut' }}
-      className="min-h-screen bg-[#121212] p-4 md:p-12 pb-32 text-left font-sans relative overflow-hidden"
+      className="app-page text-left font-sans relative"
     >
       <ProfileBackground />
 
@@ -217,12 +225,12 @@ const Profile: FC = () => {
         handleSelectFavorite={handleSelectFavorite}
       />
 
-      <div className="max-w-7xl mx-auto space-y-8 relative z-10 text-left">
+      <div className="app-container space-y-6 md:space-y-8 z-10 text-left">
         <Motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, ease: 'easeOut' }}
-          className="space-y-8"
+          className="space-y-6 md:space-y-8"
         >
           <ProfileHeader
             user={user}
@@ -234,7 +242,7 @@ const Profile: FC = () => {
             onGenerateReport={generateReport}
           />
 
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 relative z-10 text-left">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 md:gap-8 relative z-10 text-left">
             <StatsAndCharts
               collectionStats={collectionStats}
               preorderStats={preorderStats}
@@ -248,7 +256,7 @@ const Profile: FC = () => {
               navigate={navigate}
             />
 
-            <div className="lg:col-span-4 space-y-8 text-left">
+            <div className="lg:col-span-4 space-y-5 md:space-y-8 text-left">
               <div className="next-arrival-widget">
                 <NextArrival nextRelease={nextRelease} navigate={navigate} />
               </div>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { storage } from '../firebase/config';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { useAuth } from '../app/providers/AuthProvider';
@@ -19,12 +19,15 @@ import {
   markSellerContacted,
 } from '../entities/preorder/preOrderRepository';
 import PageState from '../shared/PageState';
+import { useFeedback } from '../app/providers/feedbackContext';
+import { revokeObjectUrl, validateImageFile } from '../shared/lib/imageFiles';
 
 export type Currency = 'USD' | 'KZT' | 'CNY';
 
 const PreOrdersPage: React.FC = () => {
   const { user } = useAuth();
   const { t } = useI18n();
+  const { notify, confirm } = useFeedback();
   const [preorders, setPreorders] = useState<PreOrder[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [loadError, setLoadError] = useState(false);
@@ -34,6 +37,7 @@ const PreOrdersPage: React.FC = () => {
   const [screenshotPreview, setScreenshotPreview] = useState<string | null>(null);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [formCurrency, setFormCurrency] = useState<Currency>('USD');
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [formData, setFormData] = useState<PreOrderFormData>({
     name: '',
     anime: '',
@@ -64,15 +68,20 @@ const PreOrdersPage: React.FC = () => {
     return unsubscribeSnap;
   }, [user]);
 
+  useEffect(() => () => revokeObjectUrl(screenshotPreview), [screenshotPreview]);
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      const validationError = validateImageFile(file);
+      if (validationError) { notify(t(`image.${validationError}`), 'error'); e.target.value = ''; return; }
       setScreenshotFile(file);
       setScreenshotPreview(URL.createObjectURL(file));
     }
   };
 
-  const resetForm = () => {
+  const resetForm = useCallback(() => {
+    setFormErrors({});
     setFormData({
       name: '',
       anime: '',
@@ -86,12 +95,23 @@ const PreOrdersPage: React.FC = () => {
     setScreenshotFile(null);
     setScreenshotPreview(null);
     setFormCurrency('USD');
-  };
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const currentUser = user;
-    if (!currentUser) return alert(t('preorders.sessionExpired'));
+    if (!currentUser) { notify(t('preorders.sessionExpired'), 'error'); return; }
+
+    const errors: Record<string, string> = {};
+    const total = Number(formData.totalPrice);
+    const deposit = Number(formData.deposit);
+    if (!formData.name.trim()) errors.name = t('validation.required');
+    if (!formData.anime.trim()) errors.anime = t('validation.required');
+    if (formData.totalPrice === '' || total < 0) errors.totalPrice = t('validation.price');
+    if (formData.deposit === '' || deposit < 0) errors.deposit = t('validation.price');
+    else if (deposit > total) errors.deposit = t('validation.deposit');
+    setFormErrors(errors);
+    if (Object.keys(errors).length > 0) return;
 
     setSubmitting(true);
     try {
@@ -134,16 +154,22 @@ const PreOrdersPage: React.FC = () => {
 
       setShowForm(false);
       resetForm();
+      notify(t('common.saved'), 'success');
     } catch (error: unknown) {
-      alert('Error: ' + (error instanceof Error ? error.message : 'Unable to save pre-order'));
+      notify(error instanceof Error ? error.message : t('common.operationError'), 'error');
     } finally {
       setSubmitting(false);
     }
   };
 
   const handleDelete = async (id: string) => {
-    if (window.confirm(t('preorders.deleteConfirm'))) {
+    const confirmed = await confirm({ title: t('common.delete'), message: t('preorders.deleteConfirm'), confirmLabel: t('common.delete'), danger: true });
+    if (!confirmed) return;
+    try {
       await deletePreOrder(id);
+      notify(t('common.deleted'), 'success');
+    } catch {
+      notify(t('common.operationError'), 'error');
     }
   };
 
@@ -155,8 +181,8 @@ const PreOrdersPage: React.FC = () => {
   if (loadError) return <PageState type="error" accentClass="text-orange-500" />;
 
   return (
-    <div className="min-h-screen bg-[#121212] p-3 sm:p-5 md:p-6 text-[#e4e4e4] overflow-x-hidden">
-      <div className="max-w-7xl mx-auto">
+    <div className="app-page text-[#e4e4e4]">
+      <div className="app-container">
         <PreOrderHeader onAddClick={() => setShowForm(true)} />
         <PreOrderContactSummary preorders={preorders} />
 
@@ -179,6 +205,7 @@ const PreOrdersPage: React.FC = () => {
           handleSubmit={handleSubmit}
           submitting={submitting}
           resetForm={resetForm}
+          errors={formErrors}
         />
 
         <PreOrderLightbox selectedImage={selectedImage} setSelectedImage={setSelectedImage} />

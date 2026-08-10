@@ -3,6 +3,7 @@ import { Tag, Trash2, Pencil, User, MoreVertical, Check } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import type { Figure } from '../../../types/figure';
 import { useI18n } from '../../../app/i18n/I18nProvider';
+import ImageWithFallback from '../../../shared/ImageWithFallback';
 
 interface FigureCardProps {
   figure: Figure;
@@ -47,7 +48,7 @@ const FigureCard: FC<FigureCardProps> = ({
   };
 
   return (
-    <div className={`relative group bg-[#1a1a1a] rounded-[2rem] border overflow-hidden transition-all duration-500 flex flex-col shadow-2xl h-full text-left font-sans ${isSelected ? 'border-blue-500 ring-2 ring-blue-500/30' : 'border-[#333] hover:border-blue-500/50'}`}>
+    <div className={`ui-card relative group border overflow-hidden transition-[transform,border-color,box-shadow] duration-300 flex flex-col shadow-xl h-full text-left font-sans ${isSelected ? 'border-blue-500 ring-2 ring-blue-500/30' : 'hover:-translate-y-1 hover:border-blue-500/60 hover:shadow-[0_18px_45px_rgba(0,0,0,0.45)]'}`}>
       {selectionMode && (
         <button type="button" onClick={onToggleSelection} aria-label={figure.name} aria-pressed={isSelected} className={`absolute left-4 top-4 z-[60] flex h-9 w-9 items-center justify-center rounded-xl border shadow-lg backdrop-blur-md ${isSelected ? 'border-blue-400 bg-blue-600 text-white' : 'border-white/20 bg-black/70 text-transparent'}`}>
           <Check size={18} />
@@ -118,11 +119,12 @@ const FigureCard: FC<FigureCardProps> = ({
       >
         {/* IMAGE SECTION */}
         <div className="aspect-[10/12] overflow-hidden bg-[#121212] relative">
-          <img
+          <ImageWithFallback
             src={figure.previewImage || figure.image}
             alt={figure.name}
             loading="lazy"
-            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 brightness-[0.9] group-hover:brightness-100"
+            wrapperClassName="h-full w-full"
+            className="w-full h-full object-cover brightness-[0.9] group-hover:brightness-100"
           />
 
           {/* Градиент для читаемости плашки */}
@@ -144,7 +146,7 @@ const FigureCard: FC<FigureCardProps> = ({
         </div>
 
         {/* INFO SECTION */}
-        <div className="p-4 sm:p-6 flex-grow flex flex-col justify-between">
+        <div className="p-4 sm:p-5 flex-grow flex flex-col justify-between">
           <div className="space-y-4">
             {/* TOP INFO ROW */}
             <div className="flex justify-between items-center">

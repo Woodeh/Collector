@@ -37,10 +37,10 @@ const BulkEditModal = ({ isOpen, selectedCount, onClose, onApply }: BulkEditModa
     try { await onApply(changes); onClose(); } finally { setApplying(false); }
   };
 
-  const inputClass = 'w-full rounded-xl border border-[#333] bg-[#121212] p-4 text-sm font-bold text-white outline-none focus:border-blue-500';
+  const inputClass = 'ui-control p-4 text-sm';
   return (
     <div className="fixed inset-0 z-[210] flex items-center justify-center bg-black/80 p-3 sm:p-4 backdrop-blur-md">
-      <div className="relative max-h-[calc(100dvh-1.5rem)] w-full max-w-lg overflow-y-auto rounded-[1.5rem] sm:rounded-[2rem] border border-[#333] bg-[#1a1a1a] p-5 sm:p-7 shadow-2xl">
+      <div className="ui-dialog relative max-h-[calc(100dvh-1.5rem)] w-full max-w-lg overflow-y-auto border p-5 sm:p-7 shadow-2xl">
         <button type="button" onClick={onClose} aria-label={t('common.close')} className="absolute right-4 top-4 sm:right-6 sm:top-6 text-gray-500 hover:text-white"><X size={20} /></button>
         <div className="mb-6 flex items-center gap-3"><Layers3 className="text-blue-500" /><div><h2 className="text-xl font-black uppercase italic text-white">{t('bulk.title')}</h2><p className="text-[10px] font-bold uppercase tracking-wider text-gray-500">{t('bulk.selected', { count: selectedCount })}</p></div></div>
         <div className="space-y-4">
@@ -49,7 +49,7 @@ const BulkEditModal = ({ isOpen, selectedCount, onClose, onApply }: BulkEditModa
           <input value={category} onChange={(e) => setCategory(e.target.value)} placeholder={t('bulk.category')} className={inputClass} />
           <input value={brand} onChange={(e) => setBrand(e.target.value)} placeholder={t('bulk.brand')} className={inputClass} />
           {error && <p className="text-xs font-bold text-red-400">{error}</p>}
-          <button type="button" disabled={applying} onClick={handleApply} className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 p-4 text-sm font-black uppercase text-white hover:bg-blue-500 disabled:opacity-50">{applying && <Loader2 className="animate-spin" size={16} />}{applying ? t('bulk.applying') : t('bulk.apply')}</button>
+          <button type="button" disabled={applying} onClick={handleApply} className="ui-button flex w-full items-center justify-center gap-2 bg-blue-600 p-4 text-sm font-black uppercase text-white hover:bg-blue-500">{applying && <Loader2 className="animate-spin" size={16} />}{applying ? t('bulk.applying') : t('bulk.apply')}</button>
         </div>
       </div>
     </div>

@@ -6,6 +6,7 @@ import { motion as Motion } from 'framer-motion';
 import { Loader2 } from 'lucide-react';
 import { useAuth } from '../app/providers/AuthProvider';
 import { useI18n } from '../app/i18n/I18nProvider';
+import { useFeedback } from '../app/providers/feedbackContext';
 
 import Modal from '../shared/Modal';
 import ShareModal from '../features/ShareModal';
@@ -36,6 +37,7 @@ const FigureDetailsPage: React.FC = () => {
   const navigate = useNavigate();
   const { user: currentUser } = useAuth();
   const { t } = useI18n();
+  const { notify } = useFeedback();
   const [figure, setFigure] = useState<Figure | null>(null);
   const [characterData, setCharacterData] = useState<CharacterData | null>(null);
   const [relatedFigures, setRelatedFigures] = useState<Figure[]>([]);
@@ -150,7 +152,7 @@ const FigureDetailsPage: React.FC = () => {
       navigate('/collection');
     } catch (error) {
       console.error('Delete error:', error);
-      alert(t('details.deleteError'));
+      notify(t('details.deleteError'), 'error');
       setLoading(false);
     }
   };
@@ -177,9 +179,9 @@ const FigureDetailsPage: React.FC = () => {
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, ease: 'easeOut' }}
-      className="min-h-screen bg-[#121212] p-3 sm:p-4 md:p-8 text-[#e4e4e4] font-sans selection:bg-blue-500/30 overflow-x-hidden text-left"
+      className="app-page text-[#e4e4e4] font-sans selection:bg-blue-500/30 text-left"
     >
-      <div className="max-w-7xl mx-auto">
+      <div className="app-container">
         <DetailsHeader
           currentUser={currentUser}
           figure={figure}
@@ -188,7 +190,7 @@ const FigureDetailsPage: React.FC = () => {
           onDelete={() => setIsDeleteModalOpen(true)}
         />
 
-        <div className="grid grid-cols-1 lg:grid-cols-[minmax(340px,0.85fr)_minmax(0,1.15fr)] gap-10 lg:gap-12 xl:gap-16 items-start lg:items-stretch">
+        <div className="grid grid-cols-1 lg:grid-cols-[minmax(340px,0.85fr)_minmax(0,1.15fr)] gap-6 sm:gap-8 lg:gap-10 xl:gap-12 items-start lg:items-stretch">
           <div className="w-full min-w-0">
             <DetailsSlider
               images={images}

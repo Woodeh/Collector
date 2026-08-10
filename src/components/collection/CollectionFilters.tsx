@@ -37,13 +37,13 @@ const CollectionFilters: FC<CollectionFiltersProps> = ({
   ];
 
   return (
-    <div className="mb-6 md:mb-10 p-4 sm:p-6 md:p-8 bg-[#1a1a1a] border border-[#333] rounded-2xl md:rounded-[2.5rem] animate-in fade-in zoom-in duration-300 shadow-2xl relative overflow-hidden text-left">
+    <div className="p-4 sm:p-5 md:p-6 bg-[#1a1a1a] border border-[#333] rounded-2xl md:rounded-[2.5rem] animate-in fade-in zoom-in duration-300 shadow-2xl relative overflow-hidden text-left">
       {/* Background Decor */}
       <div className="absolute top-0 right-0 p-8 opacity-5 pointer-events-none">
         <Filter size={120} />
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-10 relative z-10">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 relative z-10">
         {/* 1. SORT PROTOCOL */}
         <div className="space-y-5 text-left">
           <div className="flex items-center gap-2">
@@ -122,7 +122,7 @@ const CollectionFilters: FC<CollectionFiltersProps> = ({
       </div>
 
       {/* RESET ACTION */}
-      <div className="mt-8 pt-6 border-t border-[#333] flex justify-end">
+      <div className="mt-6 pt-5 border-t border-[#333] flex justify-end">
         <button
           type="button"
           onClick={onReset}

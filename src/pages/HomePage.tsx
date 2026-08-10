@@ -167,7 +167,7 @@ const HomePage: React.FC = () => {
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, ease: 'easeOut' }}
-      className="min-h-screen bg-[#121212] text-[#e4e4e4] font-sans pb-20 selection:bg-blue-500/30 overflow-x-hidden relative"
+      className="min-h-screen bg-[#121212] text-[#e4e4e4] font-sans pb-16 md:pb-20 selection:bg-blue-500/30 overflow-x-hidden relative"
     >
       {/* PARALLAX BACKGROUND SYSTEM */}
       <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
@@ -205,13 +205,13 @@ const HomePage: React.FC = () => {
         />
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 md:py-16 space-y-24 md:space-y-32 relative">
+      <div className="app-container px-3 py-6 sm:px-5 sm:py-8 md:px-8 md:py-12 space-y-16 md:space-y-24">
         {/* HERO & STATS SECTION */}
         <Motion.section
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="flex flex-col lg:flex-row justify-between items-center lg:items-start gap-12 relative z-10"
+          className="flex flex-col lg:flex-row justify-between items-center lg:items-start gap-8 lg:gap-12 relative z-10"
         >
           <Motion.div style={{ y: heroOffset }} className="w-full lg:w-auto">
             <HeroSection user={user} />
@@ -229,7 +229,7 @@ const HomePage: React.FC = () => {
             whileInView={{ opacity: 1, y: -20 }}
             transition={{ duration: 0.8, ease: 'easeOut' }}
             viewport={{ once: true }}
-            className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch"
+            className="grid grid-cols-1 lg:grid-cols-12 gap-5 md:gap-8 items-stretch"
           >
             <RankSection stats={stats} />
             <QuickActions />
