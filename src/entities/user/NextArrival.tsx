@@ -47,7 +47,7 @@ const NextArrival: FC<NextArrivalProps> = ({ nextRelease, navigate }) => {
           <button
             type="button"
             onClick={() => navigate('/preorders')}
-            className="w-full py-4 bg-orange-600 text-white rounded-2xl font-black uppercase text-[10px] tracking-widest hover:bg-orange-500 transition-all cursor-pointer shadow-lg active:scale-95 flex items-center justify-center text-center"
+            className="ui-button w-full py-4 bg-orange-600 text-white font-black uppercase text-[10px] tracking-widest hover:bg-orange-500 shadow-lg flex items-center justify-center text-center"
           >
             {t('profile.checkPreorders')}
           </button>

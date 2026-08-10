@@ -37,7 +37,6 @@ interface FormData {
   brand: string;
   category: string;
   price: string | number;
-  gender: string;
   auctionUrl: string;
   purchaseDate: string;
   conditionGrade: string;
@@ -87,7 +86,6 @@ const FigureForm: FC<FigureFormProps> = ({ mode = 'add' }) => {
     brand: '',
     category: '',
     price: '',
-    gender: 'Male',
     auctionUrl: '',
     purchaseDate: '',
     conditionGrade: 'New (Sealed)',
@@ -121,7 +119,6 @@ const FigureForm: FC<FigureFormProps> = ({ mode = 'add' }) => {
               brand: data.brand ?? '',
               category: data.category ?? '',
               price: data.price ?? '',
-              gender: data.gender ?? 'Male',
               auctionUrl: data.auctionUrl ?? '',
               purchaseDate: data.purchaseDate ?? '',
               conditionGrade: data.conditionGrade ?? 'New (Sealed)',
@@ -302,10 +299,10 @@ const FigureForm: FC<FigureFormProps> = ({ mode = 'add' }) => {
 
   const inputBaseClass = `
     w-full bg-[#121212] border border-[#333] h-[58px] pl-12 rounded-2xl 
-    font-bold text-white text-base 
+    font-semibold text-white text-base 
     focus:border-blue-500 focus:bg-[#121212] focus:text-white
     outline-none transition-all 
-    placeholder:text-gray-700 placeholder:font-medium placeholder:italic
+    placeholder:text-gray-600 placeholder:font-normal placeholder:not-italic
   `.replace(/\s+/g, ' ').trim();
 
   if (fetching)
@@ -316,7 +313,7 @@ const FigureForm: FC<FigureFormProps> = ({ mode = 'add' }) => {
     );
 
   return (
-    <div className="w-full max-w-4xl mx-auto px-3 py-5 sm:px-5 sm:py-7 md:px-8 md:py-10 text-[#e4e4e4] relative text-left font-sans tracking-tight">
+    <div className="figure-form w-full max-w-4xl mx-auto px-3 py-5 sm:px-5 sm:py-7 md:px-8 md:py-10 text-[#e4e4e4] relative text-left font-sans">
       {loading && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-[999] flex flex-col items-center justify-center animate-in fade-in duration-300">
           <div className="relative">
@@ -326,10 +323,10 @@ const FigureForm: FC<FigureFormProps> = ({ mode = 'add' }) => {
               size={30}
             />
           </div>
-          <h3 className="text-xl font-black uppercase italic tracking-[0.2em] text-white animate-pulse text-center px-4">
+          <h3 className="text-xl font-bold tracking-tight text-white animate-pulse text-center px-4">
             {t('form.optimizing')}
           </h3>
-          <p className="text-[10px] text-blue-500 mt-2 font-mono uppercase tracking-widest opacity-60">
+          <p className="mt-2 text-xs font-semibold uppercase tracking-wider text-blue-500 opacity-70">
             {t('form.compressing')}
           </p>
         </div>
@@ -367,7 +364,7 @@ const FigureForm: FC<FigureFormProps> = ({ mode = 'add' }) => {
             <section className="my-6 rounded-2xl border border-blue-500/20 bg-blue-500/5 p-4">
               <div className="flex items-center gap-2 text-blue-400">
                 {catalogLoading ? <Loader2 size={16} className="animate-spin" /> : <LibraryBig size={16} />}
-                <h3 className="text-[10px] font-black uppercase tracking-[0.2em]">
+                <h3 className="text-xs font-extrabold uppercase tracking-[0.14em]">
                   {t('form.catalog')}
                 </h3>
               </div>
@@ -388,10 +385,10 @@ const FigureForm: FC<FigureFormProps> = ({ mode = 'add' }) => {
                         className="h-12 w-12 rounded-lg object-cover bg-[#222]"
                       />
                       <span className="min-w-0">
-                        <span className="block truncate text-sm font-black text-white">
+                        <span className="block truncate text-sm font-semibold text-white">
                           {match.fullDisplayName || match.name}
                         </span>
-                        <span className="block truncate text-[10px] uppercase tracking-wider text-gray-500">
+                        <span className="block truncate text-xs text-gray-500">
                           {[match.anime, match.brand, match.category].filter(Boolean).join(' · ')}
                         </span>
                       </span>
@@ -410,7 +407,7 @@ const FigureForm: FC<FigureFormProps> = ({ mode = 'add' }) => {
         </div>
 
         <div className="mt-10 pt-8 border-t border-[#333]/50 space-y-4">
-          <label className="text-[10px] font-black uppercase tracking-[0.2em] text-blue-500 italic ml-1 block">
+          <label className="ml-1 block text-xs font-extrabold uppercase tracking-[0.14em] text-blue-500">
             {t('form.fullName')}
           </label>
           <div className="relative">
@@ -442,7 +439,7 @@ const FigureForm: FC<FigureFormProps> = ({ mode = 'add' }) => {
         />
 
         <fieldset className="space-y-3 pt-8 border-t border-[#333]/50">
-          <legend className="text-[10px] font-black uppercase tracking-[0.2em] text-blue-500 italic mb-3">
+          <legend className="mb-3 text-xs font-extrabold uppercase tracking-[0.14em] text-blue-500">
             {t('form.visibility')}
           </legend>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -481,10 +478,10 @@ const FigureForm: FC<FigureFormProps> = ({ mode = 'add' }) => {
                   />
                   <Icon size={20} className={selected ? 'text-blue-500' : 'text-gray-600'} />
                   <span>
-                    <span className="block text-sm font-black uppercase italic text-white">
+                    <span className="block text-sm font-bold text-white">
                       {option.label}
                     </span>
-                    <span className="block text-[10px] font-bold uppercase tracking-wider text-gray-500">
+                    <span className="mt-0.5 block text-xs font-medium text-gray-500">
                       {option.description}
                     </span>
                   </span>
@@ -524,7 +521,7 @@ const FigureForm: FC<FigureFormProps> = ({ mode = 'add' }) => {
         <button
           type="submit"
           disabled={loading}
-          className="ui-button w-full py-5 sm:py-6 bg-blue-600 hover:bg-blue-500 text-white font-black text-lg sm:text-xl tracking-widest shadow-xl uppercase italic flex items-center justify-center gap-3 cursor-pointer"
+          className="ui-button w-full py-5 sm:py-6 bg-blue-600 hover:bg-blue-500 text-white font-extrabold text-base sm:text-lg tracking-[0.08em] shadow-xl uppercase flex items-center justify-center gap-3 cursor-pointer"
         >
           {loading ? (
             <Loader2 className="animate-spin" size={24} />

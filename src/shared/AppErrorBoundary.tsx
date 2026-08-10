@@ -20,7 +20,7 @@ const AppErrorBoundary = ({ children }: { children: ReactNode }) => {
         <AlertOctagon className="mx-auto text-red-500" size={48} aria-hidden="true" />
         <h1 className="mt-5 text-2xl font-black uppercase italic text-white">{t('errorBoundary.title')}</h1>
         <p className="mt-3 text-sm leading-6 text-gray-500">{t('errorBoundary.description')}</p>
-        <button type="button" onClick={() => window.location.reload()} className="mx-auto mt-6 flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-3 text-xs font-black uppercase text-white hover:bg-blue-500">
+        <button type="button" onClick={() => window.location.reload()} className="ui-button mx-auto mt-6 flex items-center gap-2 bg-blue-600 px-5 py-3 text-xs font-black uppercase text-white hover:bg-blue-500">
           <RefreshCw size={16} aria-hidden="true" /> {t('common.retry')}
         </button>
       </div>

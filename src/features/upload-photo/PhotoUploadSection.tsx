@@ -63,7 +63,7 @@ const PhotoUploadSection: FC<PhotoUploadSectionProps> = ({
           className={isDraggingOver ? 'text-blue-500 scale-110' : 'text-gray-600'}
           size={24}
         />
-        <span className="text-gray-500 font-black text-[9px] uppercase tracking-widest mt-2 px-4 text-center">
+        <span className="mt-2 px-4 text-center text-xs font-semibold text-gray-500">
           {t('form.photos')} · {t('form.photoHint')}
         </span>
         <input

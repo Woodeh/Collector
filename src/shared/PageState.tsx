@@ -19,7 +19,7 @@ const PageState = ({ type, message, accentClass = 'text-blue-500', icon: Icon, o
         <StateIcon className={`${accentClass} ${type === 'loading' ? 'animate-spin' : ''}`} size={40} aria-hidden="true" />
         <p className="text-sm font-bold text-gray-400">{message ?? (type === 'loading' ? t('common.loading') : t('common.loadError'))}</p>
         {type === 'error' && (
-          <button type="button" onClick={onRetry ?? (() => window.location.reload())} className="flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-3 text-xs font-black uppercase text-white transition hover:bg-blue-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400">
+          <button type="button" onClick={onRetry ?? (() => window.location.reload())} className="ui-button flex items-center gap-2 bg-blue-600 px-4 py-3 text-xs font-black uppercase text-white hover:bg-blue-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400">
             <RefreshCw size={15} aria-hidden="true" /> {t('common.retry')}
           </button>
         )}

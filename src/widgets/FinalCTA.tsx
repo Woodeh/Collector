@@ -25,7 +25,7 @@ const FinalCTA: FC<FinalCTAProps> = ({ onLogin }) => {
           <button
             type="button"
             onClick={onLogin}
-            className="px-6 sm:px-10 py-4 sm:py-5 bg-white text-black hover:bg-blue-600 hover:text-white rounded-2xl font-black uppercase italic tracking-widest transition-all active:scale-95 flex items-center justify-center gap-3 mx-auto cursor-pointer shadow-xl"
+            className="ui-button px-6 sm:px-10 py-4 sm:py-5 bg-blue-600 text-white hover:bg-blue-500 font-black uppercase italic tracking-widest flex items-center justify-center gap-3 mx-auto shadow-xl shadow-blue-950/30"
           >
             {t('nav.access')} <Zap size={20} fill="currentColor" />
           </button>

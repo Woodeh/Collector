@@ -107,7 +107,7 @@ const CharacterSearch: FC<CharacterSearchProps> = ({ value, onChange }) => {
           ref={inputRef}
           type="text"
           placeholder={t('form.character')}
-          className="w-full bg-[#121212] border border-[#333] h-[58px] pl-12 rounded-2xl outline-none focus:border-blue-500 font-bold text-white text-base placeholder:text-gray-700 transition-all"
+          className="w-full bg-[#121212] border border-[#333] h-[58px] pl-12 rounded-2xl outline-none focus:border-blue-500 font-semibold text-white text-base placeholder:text-gray-600 placeholder:font-normal transition-all"
           value={query}
           onChange={handleInputChange}
           onFocus={() => query.length >= 3 && setIsOpen(true)}
@@ -138,10 +138,10 @@ const CharacterSearch: FC<CharacterSearchProps> = ({ value, onChange }) => {
                 />
               </div>
               <div>
-                <p className="text-sm font-bold text-white group-hover:text-blue-400 transition-colors leading-none mb-1">
+                <p className="mb-1 text-sm font-semibold leading-none text-white transition-colors group-hover:text-blue-400">
                   {char.name}
                 </p>
-                <p className="text-[9px] text-gray-500 uppercase font-bold tracking-widest">
+                <p className="text-xs font-medium text-gray-500">
                   Character ID: {char.mal_id}
                 </p>
               </div>

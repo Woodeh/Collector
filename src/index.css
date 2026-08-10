@@ -1,12 +1,98 @@
 @import "tailwindcss";
 
+:root {
+  --font-body: "Manrope Variable", "Segoe UI", Arial, sans-serif;
+  --font-display: "Roboto Condensed Variable", "Arial Narrow", Arial, sans-serif;
+  --font-ui: var(--font-body);
+}
+
 /* Основные стили страницы */
-html, body {
+html, body, #root {
   @apply bg-[#121212] text-[#e4e4e4] antialiased overflow-x-hidden;
+  font-family: var(--font-body);
+  font-optical-sizing: auto;
+  line-height: 1.5;
+  text-rendering: optimizeLegibility;
 }
 
 button, a, input, select, textarea {
+  font: inherit;
   -webkit-tap-highlight-color: transparent;
+}
+
+/* Keep technical labels and IDs in the same typeface as the interface. */
+.font-sans,
+.font-serif,
+.font-mono {
+  font-family: var(--font-body);
+}
+
+svg text,
+.recharts-wrapper {
+  font-family: var(--font-body);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.ui-page-title,
+.ui-section-title,
+.font-display,
+.uppercase.font-black,
+.italic.font-black {
+  font-family: var(--font-display);
+  font-optical-sizing: auto;
+}
+
+p,
+li,
+label,
+input,
+select,
+textarea {
+  letter-spacing: -0.01em;
+}
+
+/* Microcopy stays compact without dropping below a readable 10px floor. */
+.text-\[6px\],
+.text-\[7px\],
+.text-\[8px\],
+.text-\[9px\] {
+  font-size: 0.625rem;
+  line-height: 0.875rem;
+}
+
+.tracking-\[0\.8em\],
+.tracking-\[1em\] {
+  letter-spacing: 0.4em;
+}
+
+/* Figure form controls must look identical whether they are native or custom. */
+.figure-form input:not([type="file"]):not([type="radio"]):not([type="checkbox"]),
+.figure-form select,
+.figure-form textarea,
+.figure-form .ui-control,
+.figure-form .ui-control span {
+  font-family: var(--font-body);
+  font-size: 1rem;
+  font-style: normal;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.25rem;
+}
+
+.figure-form input::placeholder,
+.figure-form textarea::placeholder,
+.figure-form .ui-control .text-gray-600,
+.figure-form .ui-control .text-gray-700 {
+  font-family: var(--font-body);
+  font-size: 1rem;
+  font-style: normal;
+  font-weight: 500;
+  letter-spacing: -0.01em;
 }
 
 :focus-visible {
@@ -95,16 +181,19 @@ button, a, input, select, textarea {
   transition: border-color 180ms ease, background-color 180ms ease, box-shadow 180ms ease;
 }
 
-.ui-control:hover { border-color: #474747; }
 .ui-control:focus { border-color: var(--ui-accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--ui-accent) 14%, transparent); }
 .ui-control[aria-invalid="true"] { border-color: #ef4444; }
 .ui-control:disabled { cursor: not-allowed; opacity: 0.55; }
 
 .ui-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   min-height: 3rem;
   border-radius: var(--ui-radius-control);
+  cursor: pointer;
   font-weight: 900;
-  transition: transform 160ms ease, background-color 180ms ease, border-color 180ms ease, opacity 180ms ease;
+  transition: transform 180ms ease, background-color 450ms cubic-bezier(0.22, 1, 0.36, 1), border-color 450ms cubic-bezier(0.22, 1, 0.36, 1), color 450ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 450ms cubic-bezier(0.22, 1, 0.36, 1), opacity 180ms ease;
 }
 
 .ui-button:active:not(:disabled) { transform: scale(0.98); }
@@ -124,10 +213,6 @@ button, a, input, select, textarea {
   transition: border-color 180ms ease, background-color 180ms ease, box-shadow 180ms ease;
 }
 
-.ui-form input:not([type="file"]):not([type="radio"]):not([type="checkbox"]):hover,
-.ui-form select:hover,
-.ui-form textarea:hover { border-color: #474747; }
-
 .ui-form input:not([type="file"]):not([type="radio"]):not([type="checkbox"]):focus,
 .ui-form select:focus,
 .ui-form textarea:focus {
@@ -138,6 +223,82 @@ button, a, input, select, textarea {
 @media (min-width: 640px) { .ui-page-title { font-size: 2.25rem; } }
 @media (min-width: 640px) { .ui-section-title { font-size: 1.875rem; } }
 @media (min-width: 768px) { .ui-page-title { font-size: 3.75rem; } }
+
+.figure-card-interactive {
+  isolation: isolate;
+  border-radius: 1rem;
+  transform: translateY(0);
+  box-shadow: 0 10px 24px rgb(0 0 0 / 0.26);
+}
+
+.figure-card-interactive::before {
+  position: absolute;
+  inset: 0;
+  z-index: 21;
+  border: 1px solid rgb(96 165 250 / 0.62);
+  border-radius: inherit;
+  box-shadow: inset 0 0 14px rgb(59 130 246 / 0.05);
+  clip-path: inset(0 0 100% 0 round 1rem);
+  content: '';
+  opacity: 1;
+  pointer-events: none;
+  transition: clip-path 480ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.figure-card-interactive::after {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  background:
+    radial-gradient(circle at 90% 0%, rgb(59 130 246 / 0.14), transparent 27%),
+    linear-gradient(115deg, transparent 34%, rgb(255 255 255 / 0.035) 49%, transparent 64%);
+  content: '';
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(-12%);
+  transition: opacity 220ms ease, transform 360ms ease;
+}
+
+.figure-card-accent {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  z-index: 30;
+  width: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #60a5fa, #8b5cf6, transparent);
+  box-shadow: 0 0 14px rgb(96 165 250 / 0.75);
+  pointer-events: none;
+  transform: translateX(-50%);
+  transition: width 220ms ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .ui-control:hover { border-color: #474747; }
+
+  .ui-button:hover:not(:disabled) {
+    box-shadow: 0 10px 30px rgb(0 0 0 / 0.3);
+  }
+
+  .ui-form input:not([type="file"]):not([type="radio"]):not([type="checkbox"]):hover,
+  .ui-form select:hover,
+  .ui-form textarea:hover { border-color: #474747; }
+
+  .figure-card-interactive:hover {
+    transform: translateY(-3px);
+    border-color: rgb(59 130 246 / 0.52);
+    box-shadow: 8px 16px 34px rgb(0 0 0 / 0.42), -2px 0 0 rgb(59 130 246 / 0.12);
+  }
+
+  .figure-card-interactive:hover::before { clip-path: inset(0 0 0 0 round 1rem); }
+  .figure-card-interactive:hover::after {
+    opacity: 1;
+    transform: translateX(0);
+    transition-delay: 140ms, 100ms;
+  }
+
+  .figure-card-interactive:hover .figure-card-accent { width: calc(100% - 2rem); }
+}
 
 
 .text-accent { color: rgb(var(--accent)); }

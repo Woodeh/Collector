@@ -1,5 +1,5 @@
-import React, { FC, MouseEvent } from 'react';
-import { Tag, Trash2, Pencil, ExternalLink, Heart, CheckCircle } from 'lucide-react';
+import React, { FC, MouseEvent, useEffect, useRef, useState } from 'react';
+import { Tag, Trash2, Pencil, ExternalLink, Heart, CheckCircle, MoreVertical } from 'lucide-react';
 import type { WishlistItem } from './model';
 import { useI18n } from '../../app/i18n/I18nProvider';
 import ImageWithFallback from '../../shared/ImageWithFallback';
@@ -15,32 +15,41 @@ interface WishlistCardProps {
 
 const WishlistCard: FC<WishlistCardProps> = ({ item, onEdit, onDelete, onGotIt }) => {
   const { t } = useI18n();
+  const [showMenu, setShowMenu] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!showMenu) return;
+    const closeMenu = (event: globalThis.MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) setShowMenu(false);
+    };
+    document.addEventListener('mousedown', closeMenu);
+    return () => document.removeEventListener('mousedown', closeMenu);
+  }, [showMenu]);
+
   return (
     <div className="ui-card relative group border overflow-hidden hover:border-pink-500/50 transition-all duration-500 flex flex-col shadow-2xl h-full text-left">
       {/* Кнопки управления (Pencil и Trash) */}
-      <div className="absolute top-4 right-4 z-40 flex gap-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-all duration-300 transform md:-translate-y-2 md:group-hover:translate-y-0">
+      <div ref={menuRef} className="absolute top-4 right-4 z-50 translate-y-0 opacity-100 transition-all duration-300 md:-translate-y-2 md:opacity-0 md:group-hover:translate-y-0 md:group-hover:opacity-100">
         <button
           type="button"
-          aria-label={t('common.edit')}
+          aria-label={`${t('common.edit')} / ${t('common.delete')}`}
+          aria-expanded={showMenu}
           onClick={(e: MouseEvent<HTMLButtonElement>) => {
             e.preventDefault();
-            onEdit(item);
+            e.stopPropagation();
+            setShowMenu((current) => !current);
           }}
-          className="bg-black/60 hover:bg-blue-600 text-white p-2.5 rounded-xl backdrop-blur-md border border-white/10 transition-all shadow-lg cursor-pointer"
+          className={`rounded-xl p-2.5 text-white backdrop-blur-md transition-colors shadow-lg cursor-pointer ${showMenu ? 'bg-blue-600' : 'bg-black/60 hover:bg-blue-600'}`}
         >
-          <Pencil size={14} />
+          <MoreVertical size={16} />
         </button>
-        <button
-          type="button"
-          aria-label={t('common.delete')}
-          onClick={(e: MouseEvent<HTMLButtonElement>) => {
-            e.preventDefault();
-            onDelete(item.id);
-          }}
-          className="bg-black/60 hover:bg-red-600 text-white p-2.5 rounded-xl backdrop-blur-md border border-white/10 transition-all shadow-lg cursor-pointer"
-        >
-          <Trash2 size={14} />
-        </button>
+        {showMenu && (
+          <div className="absolute right-0 mt-2 w-32 overflow-hidden rounded-2xl border border-[#333] bg-[#1a1a1a] shadow-[0_10px_40px_rgba(0,0,0,0.5)] animate-in fade-in zoom-in-95 duration-200">
+            <button type="button" onClick={(e) => { e.preventDefault(); e.stopPropagation(); setShowMenu(false); onEdit(item); }} className="flex w-full items-center gap-2 px-4 py-3 text-sm text-gray-300 transition-colors hover:bg-white/5 hover:text-white"><Pencil size={14} />{t('common.edit')}</button>
+            <button type="button" onClick={(e) => { e.preventDefault(); e.stopPropagation(); setShowMenu(false); onDelete(item.id); }} className="flex w-full items-center gap-2 px-4 py-3 text-sm text-red-500 transition-colors hover:bg-red-500/10"><Trash2 size={14} />{t('common.delete')}</button>
+          </div>
+        )}
       </div>
 
       {/* Фото секция */}
@@ -108,7 +117,7 @@ const WishlistCard: FC<WishlistCardProps> = ({ item, onEdit, onDelete, onGotIt }
 
           <button
             onClick={() => onGotIt(item)}
-            className="bg-green-600/10 hover:bg-green-600 text-green-500 hover:text-white px-4 py-2.5 rounded-xl transition-all flex items-center gap-2 font-black uppercase italic text-[10px] cursor-pointer border border-green-500/20 hover:border-green-600 shadow-lg active:scale-95"
+            className="ui-button bg-green-600/10 hover:bg-green-600 text-green-500 hover:text-white px-4 py-2.5 flex items-center gap-2 font-black uppercase italic text-[10px] border border-green-500/20 hover:border-green-600 shadow-lg"
           >
             <CheckCircle size={14} />
             <span>{t('wishlist.gotIt')}</span>

@@ -20,12 +20,13 @@ const PreOrderCard: FC<PreOrderCardProps> = ({ item, onDelete, onImageClick, onC
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    if (!showMenu) return;
     const closeMenu = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) setShowMenu(false);
     };
     document.addEventListener('mousedown', closeMenu);
     return () => document.removeEventListener('mousedown', closeMenu);
-  }, []);
+  }, [showMenu]);
 
   useEffect(() => {
     const timer = setInterval(() => setNow(new Date()), 60_000);
@@ -56,12 +57,12 @@ const PreOrderCard: FC<PreOrderCardProps> = ({ item, onDelete, onImageClick, onC
   };
 
   return (
-    <article className={`ui-card relative flex h-full flex-col overflow-hidden border text-left shadow-2xl transition-all ${cycle.status === 'overdue' ? 'border-red-500/40' : 'hover:border-orange-500/40'}`}>
-      <div className="absolute right-4 top-4 z-50" ref={menuRef}>
-        <button type="button" onClick={handleMenuToggle} aria-label={t('common.edit')} aria-expanded={showMenu} className="rounded-xl border border-white/10 bg-black/60 p-2 text-gray-400 backdrop-blur-md"><MoreVertical size={18} /></button>
+    <article className={`ui-card group relative flex h-full flex-col overflow-hidden border text-left shadow-2xl transition-all ${cycle.status === 'overdue' ? 'border-red-500/40' : 'hover:border-orange-500/40'}`}>
+      <div className="absolute right-4 top-4 z-50 translate-y-0 opacity-100 transition-all duration-300 md:-translate-y-2 md:opacity-0 md:group-hover:translate-y-0 md:group-hover:opacity-100" ref={menuRef}>
+        <button type="button" onClick={handleMenuToggle} aria-label={t('common.delete')} aria-expanded={showMenu} className={`rounded-xl p-2.5 text-white backdrop-blur-md transition-colors shadow-lg ${showMenu ? 'bg-blue-600' : 'bg-black/60 hover:bg-blue-600'}`}><MoreVertical size={16} /></button>
         {showMenu && (
-          <div className="absolute right-0 mt-2 w-36 overflow-hidden rounded-2xl border border-[#333] bg-[#1a1a1a] shadow-2xl">
-            <button type="button" onClick={() => onDelete(item.id)} className="flex w-full items-center gap-3 px-4 py-3 text-[11px] font-black uppercase text-red-500 hover:bg-red-500/10"><Trash2 size={14} />{t('common.delete')}</button>
+          <div className="absolute right-0 mt-2 w-32 overflow-hidden rounded-2xl border border-[#333] bg-[#1a1a1a] shadow-[0_10px_40px_rgba(0,0,0,0.5)] animate-in fade-in zoom-in-95 duration-200">
+            <button type="button" onClick={(event) => { event.preventDefault(); event.stopPropagation(); setShowMenu(false); onDelete(item.id); }} className="flex w-full items-center gap-2 px-4 py-3 text-sm text-red-500 transition-colors hover:bg-red-500/10"><Trash2 size={14} />{t('common.delete')}</button>
           </div>
         )}
       </div>
@@ -92,8 +93,8 @@ const PreOrderCard: FC<PreOrderCardProps> = ({ item, onDelete, onImageClick, onC
           </div>
           <p className="mt-3 text-[9px] font-bold uppercase text-gray-600">{t('preorders.contactCount', { count: item.contactCount ?? 0 })}</p>
           <div className="mt-4 flex flex-col gap-2">
-            {item.sellerContactUrl && <a href={item.sellerContactUrl} target="_blank" rel="noreferrer" className="flex items-center justify-center gap-2 rounded-xl border border-orange-500/20 bg-orange-500/10 px-3 py-2.5 text-[10px] font-black uppercase text-orange-400"><ExternalLink size={13} />{t('preorders.openContact')}</a>}
-            <button type="button" disabled={contactUpdating} onClick={handleContacted} className="flex items-center justify-center gap-2 rounded-xl bg-orange-600 px-3 py-3 text-[10px] font-black uppercase text-white transition hover:bg-orange-500 disabled:opacity-50"><CheckCircle2 size={14} />{t('preorders.contactedToday')}</button>
+            {item.sellerContactUrl && <a href={item.sellerContactUrl} target="_blank" rel="noreferrer" className="ui-button flex items-center justify-center gap-2 border border-orange-500/20 bg-orange-500/10 px-3 py-2.5 text-[10px] font-black uppercase text-orange-400 hover:border-orange-500/40 hover:bg-orange-500/15"><ExternalLink size={13} />{t('preorders.openContact')}</a>}
+            <button type="button" disabled={contactUpdating} onClick={handleContacted} className="ui-button flex items-center justify-center gap-2 bg-orange-600 px-3 py-3 text-[10px] font-black uppercase text-white hover:bg-orange-500 disabled:opacity-50"><CheckCircle2 size={14} />{t('preorders.contactedToday')}</button>
           </div>
         </div>
 

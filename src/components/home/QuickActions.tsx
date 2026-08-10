@@ -20,9 +20,9 @@ const QuickActionLink: FC<QuickActionLinkProps> = ({ to, icon, label, color }) =
   return (
     <Link
       to={to}
-      className={`flex flex-col items-center justify-center rounded-[2rem] border transition-all duration-500 group ${colorClasses} shadow-lg py-6`}
+      className={`group flex flex-col items-center justify-center rounded-[2rem] border py-6 shadow-lg transition-[background-color,border-color,color,box-shadow] duration-500 ease-out ${colorClasses}`}
     >
-      <div className="mb-2 transition-transform duration-500 group-hover:scale-110 group-hover:-rotate-6">
+      <div className="mb-2 transition-transform duration-500 ease-out group-hover:scale-110 group-hover:-rotate-6">
         {icon}
       </div>
       <span className="text-[9px] font-black uppercase tracking-[0.2em] italic">{label}</span>

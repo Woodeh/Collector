@@ -126,7 +126,7 @@ const ShareModal: FC<ShareModalProps> = ({ isOpen, onClose, figure }) => {
                 </span>
                 <button
                   onClick={handleCopy}
-                  className="shrink-0 flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-[10px] font-black uppercase italic tracking-widest transition-all active:scale-95 cursor-pointer"
+                  className="ui-button shrink-0 flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-[10px] font-black uppercase italic tracking-widest"
                 >
                   {copied ? <Check size={14} /> : <Copy size={14} />}
                   {copied ? t('share.copied') : t('share.copy')}
@@ -137,14 +137,14 @@ const ShareModal: FC<ShareModalProps> = ({ isOpen, onClose, figure }) => {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <button
                   onClick={shareToTelegram}
-                  className="flex items-center justify-center gap-2 px-4 py-3 bg-[#0088cc]/10 border border-[#0088cc]/30 text-[#0088cc] hover:bg-[#0088cc] hover:text-white rounded-xl text-[10px] font-black uppercase italic tracking-widest transition-all active:scale-95 cursor-pointer shadow-lg shadow-[#0088cc]/5"
+                  className="ui-button flex items-center justify-center gap-2 px-4 py-3 bg-[#0088cc]/10 border border-[#0088cc]/30 text-[#0088cc] hover:bg-[#0088cc] hover:text-white text-[10px] font-black uppercase italic tracking-widest shadow-lg shadow-[#0088cc]/5"
                 >
                   <Send size={14} /> Telegram
                 </button>
 
                 <button
                   onClick={shareToWhatsApp}
-                  className="flex items-center justify-center gap-2 px-4 py-3 bg-[#25d366]/10 border border-[#25d366]/30 text-[#25d366] hover:bg-[#25d366] hover:text-white rounded-xl text-[10px] font-black uppercase italic tracking-widest transition-all active:scale-95 cursor-pointer shadow-lg shadow-[#25d366]/5"
+                  className="ui-button flex items-center justify-center gap-2 px-4 py-3 bg-[#25d366]/10 border border-[#25d366]/30 text-[#25d366] hover:bg-[#25d366] hover:text-white text-[10px] font-black uppercase italic tracking-widest shadow-lg shadow-[#25d366]/5"
                 >
                   <MessageCircle size={14} /> WhatsApp
                 </button>

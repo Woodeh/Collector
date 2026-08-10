@@ -38,7 +38,7 @@ const createHistoryEvent = (
 const comparableImages = (images?: string[]) => JSON.stringify(images ?? []);
 
 const detailFields: Array<keyof FigurePayload> = [
-  'name', 'anime', 'brand', 'category', 'gender', 'auctionUrl', 'purchaseDate',
+  'name', 'anime', 'brand', 'category', 'auctionUrl', 'purchaseDate',
   'conditionNotes', 'hasBox', 'purchasePlace', 'characterId', 'characterImage', 'fullDisplayName',
 ];
 

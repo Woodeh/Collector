@@ -43,7 +43,7 @@ const CustomSelect: FC<CustomSelectProps> = ({
   return (
     <div className="relative w-full group" ref={dropdownRef}>
       {label && (
-        <label className="text-gray-500 font-bold text-[10px] uppercase tracking-[0.2em] px-1 mb-2 block italic">
+        <label className="mb-2 block px-1 text-xs font-semibold text-gray-500">
           {label}
         </label>
       )}
@@ -58,8 +58,8 @@ const CustomSelect: FC<CustomSelectProps> = ({
         <div className="flex items-center gap-3 min-w-0">
           {Icon && <Icon size={18} className={isOpen ? 'text-blue-500' : 'text-gray-500'} />}
           <span
-            className={`truncate text-sm font-bold ${
-              !selectedOption ? 'text-gray-700 italic' : 'text-white'
+            className={`truncate text-base font-semibold ${
+              !selectedOption ? 'text-gray-600' : 'text-white'
             }`}
           >
             {selectedOption ? selectedOption.label : 'Select Option'}
@@ -89,7 +89,7 @@ const CustomSelect: FC<CustomSelectProps> = ({
                   value === option.value ? 'bg-blue-600/5 text-blue-500' : 'text-gray-400'
                 } cursor-pointer`}
               >
-                <span className="font-bold text-sm">{option.label}</span>
+                <span className="text-sm font-semibold">{option.label}</span>
                 {value === option.value && (
                   <div className="w-1.5 h-1.5 rounded-full bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.5)]" />
                 )}

@@ -109,7 +109,7 @@ const SpotlightCard: FC<SpotlightCardProps> = ({ spotlight }) => {
 
                 <Link
                   to={`/figure/${spotlight.id}`}
-                  className="flex items-center gap-3 px-6 py-4 bg-white text-black rounded-2xl font-black uppercase italic text-[10px] tracking-widest hover:bg-blue-600 hover:text-white transition-all duration-500 shadow-xl active:scale-95"
+                  className="ui-button flex items-center gap-3 px-6 py-4 bg-blue-600 text-white hover:bg-blue-500 font-black uppercase italic text-[10px] tracking-widest shadow-xl shadow-blue-950/30"
                 >
                   {t('home.openFigure')} <ChevronRight size={16} />
                 </Link>

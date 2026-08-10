@@ -32,13 +32,13 @@ const SpecsSection: FC<SpecsSectionProps> = ({
   const { t } = useI18n();
   return (
     <div className="space-y-5 sm:space-y-6">
-      <h3 className="text-blue-500 font-black text-[10px] sm:text-[11px] uppercase tracking-[0.25em] flex items-center gap-2 italic mt-5 sm:mt-10">
+      <h3 className="mt-5 flex items-center gap-2 text-xs font-extrabold uppercase tracking-[0.14em] text-blue-500 sm:mt-10">
         <ShieldCheck size={14} /> {t('form.specs')}
       </h3>
       
       <div className="grid grid-cols-2 gap-3 sm:gap-4">
         <div className="space-y-1">
-          <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-500 italic ml-1 block">
+          <label className="ml-1 block text-xs font-semibold text-gray-500">
             {t('form.purchaseDate')}
           </label>
           <div className="relative group">
@@ -57,7 +57,7 @@ const SpecsSection: FC<SpecsSectionProps> = ({
               dateFormat="yyyy-MM-dd"
               placeholderText="Date"
               wrapperClassName="w-full"
-              className="w-full bg-[#121212] border border-[#333] h-[58px] pl-12 rounded-2xl text-white font-bold text-base outline-none focus:border-blue-500 transition-all placeholder:text-gray-700 placeholder:font-medium placeholder:italic cursor-pointer"
+              className="w-full bg-[#121212] border border-[#333] h-[58px] pl-12 rounded-2xl text-white font-semibold text-base outline-none focus:border-blue-500 transition-all placeholder:text-gray-600 placeholder:font-normal cursor-pointer"
             />
           </div>
         </div>

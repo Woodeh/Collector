@@ -27,14 +27,14 @@ const HeroSection: FC<HeroSectionProps> = ({ user }) => {
         <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start pt-4">
           <Link
             to="/add"
-            className="bg-blue-600 hover:bg-blue-500 text-white px-8 md:px-10 py-4 md:py-5 rounded-xl md:rounded-2xl font-black uppercase italic tracking-widest transition-all active:scale-95 shadow-xl flex items-center justify-center gap-3"
+            className="ui-button bg-blue-600 hover:bg-blue-500 text-white px-8 md:px-10 py-4 md:py-5 font-black uppercase italic tracking-widest shadow-[0_0_30px_rgba(37,99,235,0.22)] hover:shadow-[0_0_36px_rgba(59,130,246,0.4)] flex items-center justify-center gap-3"
           >
             <PlusCircle size={20} /> {t('home.addFigure')}
           </Link>
 
           <Link
             to="/collection"
-            className="bg-[#1a1a1a] border border-[#333] hover:border-white/20 text-white px-8 md:px-10 py-4 md:py-5 rounded-xl md:rounded-2xl font-black uppercase italic tracking-widest transition-all text-center"
+            className="ui-button bg-[#1a1a1a] border border-[#333] hover:border-white hover:bg-white hover:text-black text-white px-8 md:px-10 py-4 md:py-5 font-black uppercase italic tracking-widest text-center"
           >
             {t('home.viewCollection')}
           </Link>

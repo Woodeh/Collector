@@ -50,7 +50,7 @@ const HeroSection: FC<HeroSectionProps> = ({ titleY, opacityHero, descY, onLogin
           <button
             type="button"
             onClick={onLogin}
-            className="w-full sm:w-auto px-10 py-5 bg-blue-600 hover:bg-blue-500 rounded-2xl font-black uppercase italic tracking-widest text-white transition-all active:scale-95 shadow-[0_0_30px_rgba(37,99,235,0.3)] flex items-center justify-center gap-3 cursor-pointer"
+            className="ui-button w-full sm:w-auto px-10 py-5 bg-blue-600 hover:bg-blue-500 font-black uppercase italic tracking-widest text-white shadow-[0_0_30px_rgba(37,99,235,0.3)] hover:shadow-[0_0_36px_rgba(59,130,246,0.42)] flex items-center justify-center gap-3"
           >
             {t('landing.start')} <ChevronRight size={20} />
           </button>
@@ -58,7 +58,7 @@ const HeroSection: FC<HeroSectionProps> = ({ titleY, opacityHero, descY, onLogin
           <button
             type="button"
             onClick={onExplore}
-            className="w-full sm:w-auto px-10 py-5 bg-[#1a1a1a] border border-[#333] hover:border-gray-600 rounded-2xl font-black uppercase italic tracking-widest text-gray-400 transition-all flex items-center justify-center gap-3 cursor-pointer"
+            className="ui-button w-full sm:w-auto px-10 py-5 bg-[#1a1a1a] border border-[#333] hover:border-white hover:bg-white font-black uppercase italic tracking-widest text-gray-400 hover:text-black flex items-center justify-center gap-3"
           >
             {t('landing.explore')}
           </button>

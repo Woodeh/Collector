@@ -48,7 +48,8 @@ const FigureCard: FC<FigureCardProps> = ({
   };
 
   return (
-    <div className={`ui-card relative group border overflow-hidden transition-[transform,border-color,box-shadow] duration-300 flex flex-col shadow-xl h-full text-left font-sans ${isSelected ? 'border-blue-500 ring-2 ring-blue-500/30' : 'hover:-translate-y-1 hover:border-blue-500/60 hover:shadow-[0_18px_45px_rgba(0,0,0,0.45)]'}`}>
+    <div className={`ui-card figure-card-interactive relative group border overflow-hidden transition-[transform,border-color,box-shadow] duration-300 flex flex-col h-full text-left font-sans ${isSelected ? 'border-blue-500 ring-2 ring-blue-500/30' : ''}`}>
+      <span className="figure-card-accent" aria-hidden="true" />
       {selectionMode && (
         <button type="button" onClick={onToggleSelection} aria-label={figure.name} aria-pressed={isSelected} className={`absolute left-4 top-4 z-[60] flex h-9 w-9 items-center justify-center rounded-xl border shadow-lg backdrop-blur-md ${isSelected ? 'border-blue-400 bg-blue-600 text-white' : 'border-white/20 bg-black/70 text-transparent'}`}>
           <Check size={18} />
@@ -149,19 +150,10 @@ const FigureCard: FC<FigureCardProps> = ({
         <div className="p-4 sm:p-5 flex-grow flex flex-col justify-between">
           <div className="space-y-4">
             {/* TOP INFO ROW */}
-            <div className="flex justify-between items-center">
+            <div className="flex items-center">
               <span className="text-[10px] text-blue-500 font-black uppercase tracking-[0.25em] italic truncate max-w-[80%]">
                 {figure.anime}
               </span>
-              <div
-                className={`px-2 py-0.5 rounded-md text-[9px] font-black border ${
-                  figure.gender === 'Female'
-                    ? 'border-pink-500/30 text-pink-500'
-                    : 'border-blue-500/30 text-blue-500'
-                }`}
-              >
-                {figure.gender === 'Female' ? 'F' : 'M'}
-              </div>
             </div>
 
             {/* MAIN TITLE */}
@@ -175,19 +167,20 @@ const FigureCard: FC<FigureCardProps> = ({
             </div>
           </div>
 
-          {/* PRICE BAR */}
-          <div className="mt-5 sm:mt-8 pt-4 sm:pt-5 border-t border-white/5 flex justify-between items-center">
-            <div className="flex items-center gap-2 opacity-40">
-              <Tag size={14} className="text-blue-500" />
-              <span className="text-[10px] uppercase font-black tracking-widest text-white italic">
-                {t('common.price')}
-              </span>
+          {!isCommunity && (
+            <div className="mt-5 sm:mt-8 pt-4 sm:pt-5 border-t border-white/5 flex justify-between items-center">
+              <div className="flex items-center gap-2 opacity-40">
+                <Tag size={14} className="text-blue-500" />
+                <span className="text-[10px] uppercase font-black tracking-widest text-white italic">
+                  {t('common.price')}
+                </span>
+              </div>
+              <div className="text-2xl sm:text-3xl font-black text-white italic tracking-tighter flex items-center gap-1">
+                {Math.round(Number(figure.price) || 0).toLocaleString()}
+                <span className="text-blue-500 not-italic text-xl ml-1">$</span>
+              </div>
             </div>
-            <div className="text-2xl sm:text-3xl font-black text-white italic tracking-tighter flex items-center gap-1">
-              {Math.round(Number(figure.price) || 0).toLocaleString()}
-              <span className="text-blue-500 not-italic text-xl ml-1">$</span>
-            </div>
-          </div>
+          )}
         </div>
       </Link>
     </div>

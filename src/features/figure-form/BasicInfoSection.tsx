@@ -26,7 +26,6 @@ interface FormData {
   anime: string;
   brand: string;
   price: string | number;
-  gender: string;
 }
 
 interface BasicInfoSectionProps {
@@ -67,7 +66,7 @@ const BasicInfoSection: FC<BasicInfoSectionProps> = ({
 
   return (
     <div className="space-y-5 sm:space-y-6">
-      <h3 className="text-blue-500 font-black text-[10px] sm:text-[11px] uppercase tracking-[0.25em] flex items-center gap-2 italic">
+      <h3 className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-[0.14em] text-blue-500">
         <Info size={14} /> {t('form.basicInfo')}
       </h3>
 
@@ -95,7 +94,7 @@ const BasicInfoSection: FC<BasicInfoSectionProps> = ({
             <div className="w-8 h-8 rounded-lg bg-[#1a1a1a] border border-[#333] flex items-center justify-center group-hover:border-blue-500 transition-colors">
               <Camera size={14} className="text-gray-500 group-hover:text-blue-500" />
             </div>
-            <span className="text-[10px] font-black uppercase tracking-widest text-gray-500 group-hover:text-gray-300 transition-colors">
+            <span className="text-xs font-semibold text-gray-500 transition-colors group-hover:text-gray-300">
               {formData.characterImage ? t('form.characterArtChange') : t('form.characterArtUpload')}
             </span>
             <input
@@ -155,7 +154,7 @@ const BasicInfoSection: FC<BasicInfoSectionProps> = ({
             name="price"
             type="number"
             placeholder={t('form.price')}
-            className="w-full bg-[#121212] border border-[#333] h-[58px] pl-12 rounded-2xl outline-none focus:border-blue-500 font-bold text-white text-base transition-all placeholder:text-gray-700 placeholder:italic"
+            className="w-full bg-[#121212] border border-[#333] h-[58px] pl-12 rounded-2xl outline-none focus:border-blue-500 font-semibold text-white text-base transition-all placeholder:text-gray-600 placeholder:font-normal"
             onChange={handleChange}
             value={formData.price}
             required
@@ -165,7 +164,7 @@ const BasicInfoSection: FC<BasicInfoSectionProps> = ({
           <select
             value={currency}
             onChange={(e: ChangeEvent<HTMLSelectElement>) => setCurrency(e.target.value)}
-            className="w-full h-[58px] bg-[#121212] border border-[#333] px-4 rounded-2xl text-white font-bold text-base appearance-none outline-none cursor-pointer hover:bg-[#181818] transition-all focus:border-blue-500 pr-10"
+            className="w-full h-[58px] bg-[#121212] border border-[#333] px-4 rounded-2xl text-white font-semibold text-base appearance-none outline-none cursor-pointer hover:bg-[#181818] transition-all focus:border-blue-500 pr-10"
           >
             <option value="USD">USD</option>
             <option value="KZT">KZT</option>
@@ -178,14 +177,6 @@ const BasicInfoSection: FC<BasicInfoSectionProps> = ({
         </div>
       </div>
 
-      <CustomSelect
-        options={[
-          { value: 'Male', label: t('form.male') },
-          { value: 'Female', label: t('form.female') },
-        ]}
-        value={formData.gender}
-        onChange={(val: string) => handleCustomChange('gender', val)}
-      />
     </div>
   );
 };

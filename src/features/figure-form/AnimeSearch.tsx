@@ -96,7 +96,7 @@ const AnimeSearch: FC<AnimeSearchProps> = ({ value, onChange }) => {
           ref={inputRef}
           type="text"
           placeholder={t('form.series')}
-          className="w-full bg-[#121212] border border-[#333] h-[58px] pl-12 rounded-2xl outline-none focus:border-blue-500 transition-all text-white font-bold text-base placeholder:text-gray-700 placeholder:italic"
+          className="w-full bg-[#121212] border border-[#333] h-[58px] pl-12 rounded-2xl outline-none focus:border-blue-500 transition-all text-white font-semibold text-base placeholder:text-gray-600 placeholder:font-normal"
           value={query}
           onChange={handleInputChange}
           onFocus={() => setIsOpen(true)}
@@ -131,10 +131,10 @@ const AnimeSearch: FC<AnimeSearchProps> = ({ value, onChange }) => {
                   alt=""
                 />
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm font-bold text-white truncate group-hover:text-blue-400 transition-colors">
+                  <p className="text-sm font-semibold text-white truncate group-hover:text-blue-400 transition-colors">
                     {anime.title}
                   </p>
-                  <p className="text-[11px] text-gray-500 mt-1 uppercase tracking-wider">
+                  <p className="mt-1 text-xs text-gray-500">
                     {anime.type} • {anime.status}
                   </p>
                 </div>
