@@ -124,7 +124,7 @@ const PreOrderForm: FC<PreOrderFormProps> = ({
               <option value="CNY">CNY (¥)</option>
             </select>
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 min-[420px]:grid-cols-2">
             <input
               type="number"
               min="0"
@@ -150,7 +150,7 @@ const PreOrderForm: FC<PreOrderFormProps> = ({
               required
             />
           </div>
-          {(errors.totalPrice || errors.deposit) && <div className="-mt-2 grid grid-cols-2 gap-4 text-xs font-bold text-red-400"><p>{errors.totalPrice}</p><p>{errors.deposit}</p></div>}
+          {(errors.totalPrice || errors.deposit) && <div className="-mt-2 grid grid-cols-1 gap-2 text-xs font-bold text-red-400 min-[420px]:grid-cols-2 min-[420px]:gap-4"><p>{errors.totalPrice}</p><p>{errors.deposit}</p></div>}
           <input
             type="date"
             className="w-full bg-[#121212] border border-[#333] p-4 rounded-xl text-white font-bold outline-none focus:border-orange-500"

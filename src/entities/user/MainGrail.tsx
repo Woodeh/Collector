@@ -11,7 +11,7 @@ interface MainGrailProps {
 const MainGrail: FC<MainGrailProps> = ({ favoriteFigure, setIsSelectOpen, navigate }) => {
   return (
     <div className="lg:col-span-4 relative group/container text-left">
-      <div className="bg-[#1a1a1a] border border-[#333] rounded-[3rem] shadow-3xl h-full overflow-hidden flex flex-col relative z-10 transition-all duration-500 group hover:border-blue-500/30">
+      <div className="group relative z-10 flex min-h-[30rem] h-full flex-col overflow-hidden rounded-[2rem] border border-[#333] bg-[#1a1a1a] shadow-3xl transition-all duration-500 hover:border-blue-500/30 sm:rounded-[3rem]">
         <button
           type="button"
           onClick={() => setIsSelectOpen(true)}
@@ -36,11 +36,11 @@ const MainGrail: FC<MainGrailProps> = ({ favoriteFigure, setIsSelectOpen, naviga
                 className="w-full h-full object-cover transition-all duration-1000 grayscale-[0.2] group-hover:grayscale-0 group-hover:scale-105"
                 alt="favorite"
               />
-              <div className="absolute inset-x-0 bottom-0 p-8 bg-gradient-to-t from-black via-black/70 to-transparent text-left pointer-events-none">
+              <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black via-black/70 to-transparent p-5 text-left sm:p-8">
                 <p className="text-blue-500 font-black uppercase text-[10px] tracking-[0.4em] mb-1 italic leading-none">
                   {favoriteFigure.anime}
                 </p>
-                <h3 className="text-4xl font-black text-white uppercase italic tracking-tighter leading-none mb-4 text-left">
+                <h3 className="mb-4 text-left text-3xl font-black uppercase italic leading-none tracking-tighter text-white sm:text-4xl">
                   {favoriteFigure.name}
                 </h3>
                 <div className="flex items-center gap-3 text-left">

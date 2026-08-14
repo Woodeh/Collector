@@ -48,7 +48,7 @@ const WishlistForm: FC<WishlistFormProps> = ({
   if (!showForm) return null;
 
   return (
-    <div className="fixed inset-0 z-[200] flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-300">
+    <div className="fixed inset-0 z-[200] flex items-center justify-center overflow-y-auto overscroll-contain bg-black/80 p-3 backdrop-blur-md animate-in fade-in duration-300 sm:p-4">
       <div ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby="wishlist-form-title" tabIndex={-1} className="ui-dialog ui-accent-pink border w-full max-w-md p-5 sm:p-7 relative shadow-2xl overflow-y-auto max-h-[calc(100dvh-2rem)] text-left">
         <button
           type="button"
@@ -158,7 +158,7 @@ const WishlistForm: FC<WishlistFormProps> = ({
               onChange={(val: string) => setFormData({ ...formData, anime: val })}
             />
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 gap-3 min-[420px]:grid-cols-2">
               <input
                 placeholder={t('wishlist.brand')}
                 className="w-full bg-[#121212] border border-[#333] p-4 rounded-xl outline-none text-sm text-white font-bold"

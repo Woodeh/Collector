@@ -79,14 +79,14 @@ const RankModal: FC<RankModalProps> = ({ isOpen, onClose, count }) => {
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-[150] flex items-center justify-center p-4 bg-black/90 backdrop-blur-md">
+        <div className="fixed inset-0 z-[150] flex items-center justify-center overflow-y-auto overscroll-contain bg-black/90 p-3 backdrop-blur-md sm:p-4">
           <Motion.div
             initial={{ opacity: 0, scale: 0.9, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
-            className="bg-[#1a1a1a] border border-[#333] w-full max-w-lg rounded-[2.5rem] overflow-hidden shadow-2xl relative"
+            className="relative my-auto max-h-[calc(100dvh-1.5rem)] w-full max-w-lg overflow-hidden rounded-[2rem] border border-[#333] bg-[#1a1a1a] shadow-2xl sm:rounded-[2.5rem]"
           >
-            <div className="p-8 border-b border-[#333] bg-[#121212]/50 flex justify-between items-center">
+            <div className="flex items-center justify-between gap-3 border-b border-[#333] bg-[#121212]/50 p-5 sm:p-8">
               <div className="flex items-center gap-4">
                 <div className="p-3 bg-blue-500/10 rounded-2xl text-blue-500">
                   <Award size={24} />
@@ -95,7 +95,7 @@ const RankModal: FC<RankModalProps> = ({ isOpen, onClose, count }) => {
                   <p className="text-[10px] text-blue-500 font-black uppercase tracking-[0.3em] italic mb-1">
                     System Protocol
                   </p>
-                  <h3 className="text-2xl font-black text-white uppercase italic tracking-tighter">
+                  <h3 className="text-xl font-black text-white uppercase italic tracking-tighter sm:text-2xl">
                     Collector Ranks
                   </h3>
                 </div>
@@ -109,7 +109,7 @@ const RankModal: FC<RankModalProps> = ({ isOpen, onClose, count }) => {
               </button>
             </div>
 
-            <div className="p-8 space-y-6 max-h-[60vh] overflow-y-auto custom-scrollbar">
+            <div className="max-h-[calc(100dvh-8.5rem)] space-y-4 overflow-y-auto p-4 custom-scrollbar sm:max-h-[60dvh] sm:space-y-6 sm:p-8">
               {ranks.map((r) => (
                 <div
                   key={r.name}

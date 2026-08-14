@@ -21,17 +21,17 @@ const GrailModal: FC<GrailModalProps> = ({
   if (!isSelectOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[500] flex items-center justify-center p-6 bg-black/90 backdrop-blur-xl animate-in fade-in duration-300">
-      <div className="bg-[#1a1a1a] border border-[#333] w-full max-w-2xl rounded-[3rem] p-8 relative shadow-2xl max-h-[80vh] flex flex-col text-left">
+    <div className="fixed inset-0 z-[500] flex items-center justify-center overflow-y-auto overscroll-contain bg-black/90 p-3 backdrop-blur-xl animate-in fade-in duration-300 sm:p-6">
+      <div className="relative my-auto flex max-h-[calc(100dvh-1.5rem)] w-full max-w-2xl flex-col rounded-[2rem] border border-[#333] bg-[#1a1a1a] p-5 text-left shadow-2xl sm:max-h-[80dvh] sm:rounded-[3rem] sm:p-8">
         <button
           type="button"
           onClick={() => setIsSelectOpen(false)}
-          className="absolute top-8 right-8 text-gray-500 hover:text-white cursor-pointer transition-colors"
+          className="absolute right-5 top-5 text-gray-500 hover:text-white cursor-pointer transition-colors sm:right-8 sm:top-8"
         >
           <X size={24} />
         </button>
 
-        <h2 className="text-2xl font-black uppercase italic tracking-tighter text-white mb-6 text-left">
+        <h2 className="mb-6 pr-10 text-left text-xl font-black uppercase italic tracking-tighter text-white sm:text-2xl">
           Select Main Grail
         </h2>
 

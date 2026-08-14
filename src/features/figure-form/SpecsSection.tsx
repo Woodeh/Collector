@@ -36,7 +36,7 @@ const SpecsSection: FC<SpecsSectionProps> = ({
         <ShieldCheck size={14} /> {t('form.specs')}
       </h3>
       
-      <div className="grid grid-cols-2 gap-3 sm:gap-4">
+      <div className="grid grid-cols-1 gap-3 min-[420px]:grid-cols-2 sm:gap-4">
         <div className="space-y-1">
           <label className="ml-1 block text-xs font-semibold text-gray-500">
             {t('form.purchaseDate')}

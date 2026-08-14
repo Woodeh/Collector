@@ -39,15 +39,15 @@ const ShareModal: FC<ShareModalProps> = ({ isOpen, onClose, figure }) => {
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/90 backdrop-blur-md">
+      <div className="fixed inset-0 z-[200] flex items-center justify-center overflow-y-auto overscroll-contain bg-black/90 p-3 backdrop-blur-md sm:p-4">
         <Motion.div
           initial={{ opacity: 0, scale: 0.9, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.9, y: 20 }}
-          className="relative w-full max-w-lg bg-[#121212] border border-[#333] rounded-[2.5rem] overflow-hidden shadow-[0_0_50px_rgba(59,130,246,0.15)]"
+          className="relative my-auto max-h-[calc(100dvh-1.5rem)] w-full max-w-lg overflow-y-auto rounded-[2rem] border border-[#333] bg-[#121212] shadow-[0_0_50px_rgba(59,130,246,0.15)] sm:rounded-[2.5rem]"
         >
           {/* Header */}
-          <div className="p-6 border-b border-[#333] flex justify-between items-center bg-[#1a1a1a]">
+          <div className="flex items-center justify-between border-b border-[#333] bg-[#1a1a1a] p-5 sm:p-6">
             <div className="flex items-center gap-3">
               <Share2 size={18} className="text-blue-500" />
               <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white italic">

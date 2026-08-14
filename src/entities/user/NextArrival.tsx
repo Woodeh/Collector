@@ -16,7 +16,7 @@ interface NextArrivalProps {
 const NextArrival: FC<NextArrivalProps> = ({ nextRelease, navigate }) => {
   const { t } = useI18n();
   return (
-    <div className="bg-[#1a1a1a] border border-[#333] p-8 rounded-[3rem] shadow-2xl relative group overflow-hidden text-left">
+    <div className="group relative overflow-hidden rounded-[2rem] border border-[#333] bg-[#1a1a1a] p-5 text-left shadow-2xl sm:rounded-[3rem] sm:p-8">
       <h4 className="text-[10px] font-black text-gray-600 uppercase tracking-[0.3em] italic mb-6">
         {t('profile.nextArrival')}
       </h4>
@@ -30,7 +30,7 @@ const NextArrival: FC<NextArrivalProps> = ({ nextRelease, navigate }) => {
               {nextRelease.name}
             </h3>
           </div>
-          <div className="grid grid-cols-2 gap-3 text-center text-left">
+          <div className="grid grid-cols-1 gap-3 text-left min-[380px]:grid-cols-2">
             <div className="p-3 bg-white/5 rounded-xl border border-white/5 text-left">
               <p className="text-[7px] text-gray-500 uppercase font-bold mb-1 text-left">{t('profile.release')}</p>
               <p className="text-[10px] font-black text-white leading-none text-left">

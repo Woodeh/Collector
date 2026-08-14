@@ -52,16 +52,28 @@ const FigureDetailsPage: React.FC = () => {
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
+    let cancelled = false;
+
     const fetchFigureAndArt = async () => {
-      if (!id) return;
+      if (!id) {
+        setFigure(null);
+        setLoading(false);
+        return;
+      }
       setLoading(true);
-      setImageError(false); 
+      setImageError(false);
+      setFigure(null);
+      setCharacterData(null);
+      setRelatedFigures([]);
+      setActiveImg(0);
       try {
         const data = await getFigureById(id);
-        if (data) {
+        if (!cancelled && data) {
           setFigure(data);
 
-          setRelatedFigures(await getRelatedPublicFigures(id, data.anime));
+          const related = await getRelatedPublicFigures(id, data.anime);
+          if (cancelled) return;
+          setRelatedFigures(related);
 
           if (data.characterImage) {
             setCharacterData({
@@ -71,7 +83,7 @@ const FigureDetailsPage: React.FC = () => {
           } else if (data.characterId || data.name) {
             try {
               const char = await getCharacter(data.characterId, data.name);
-              if (char) {
+              if (!cancelled && char) {
                 setCharacterData(char);
               }
             } catch (e) {
@@ -82,10 +94,13 @@ const FigureDetailsPage: React.FC = () => {
       } catch (error) {
         console.error('Fetch error:', error);
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     };
-    fetchFigureAndArt();
+    void fetchFigureAndArt();
+    return () => {
+      cancelled = true;
+    };
   }, [id]);
 
   const images = useMemo(() => {
@@ -117,20 +132,23 @@ const FigureDetailsPage: React.FC = () => {
 
   const nextSlide = (e?: React.MouseEvent) => {
     if (e && e.stopPropagation) e.stopPropagation();
+    if (images.length === 0) return;
     setDirection(1);
     setActiveImg((prev) => (prev + 1) % images.length);
   };
 
   const prevSlide = (e?: React.MouseEvent) => {
     if (e && e.stopPropagation) e.stopPropagation();
+    if (images.length === 0) return;
     setDirection(-1);
     setActiveImg((prev) => (prev - 1 + images.length) % images.length);
   };
 
   const handleMarketScan = () => {
     const currentImgUrl = images[activeImg];
+    if (!currentImgUrl) return;
     const lensUrl = `https://lens.google.com/uploadbyurl?url=${encodeURIComponent(currentImgUrl || '')}`;
-    window.open(lensUrl, '_blank');
+    window.open(lensUrl, '_blank', 'noopener,noreferrer');
   };
 
   const handleConfirmDelete = async () => {
@@ -159,7 +177,7 @@ const FigureDetailsPage: React.FC = () => {
 
   if (loading)
     return (
-      <div className="h-screen flex items-center justify-center bg-[#121212]">
+      <div className="min-h-[100dvh] flex items-center justify-center bg-[#121212]">
         <Loader2 className="animate-spin text-blue-500" size={40} />
       </div>
     );

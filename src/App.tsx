@@ -34,7 +34,7 @@ const App: FC = () => {
       <FeedbackProvider>
       <AuthProvider>
         <ScrollToTop />
-        <div className="min-h-screen flex flex-col bg-[#0d0d0f] text-[#e4e4e4]">
+        <div className="flex min-h-[100dvh] flex-col bg-[#0d0d0f] text-[#e4e4e4]">
           <Header />
 
           <main className="w-full flex-1" id="main-content">
@@ -57,8 +57,8 @@ const App: FC = () => {
               </Routes>
             </Suspense></AppErrorBoundary>
           </main>
+          <Footer />
         </div>
-        <Footer />
       </AuthProvider>
       </FeedbackProvider>
       </I18nProvider>

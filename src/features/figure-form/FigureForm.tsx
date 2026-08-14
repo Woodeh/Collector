@@ -307,7 +307,7 @@ const FigureForm: FC<FigureFormProps> = ({ mode = 'add' }) => {
 
   if (fetching)
     return (
-      <div className="h-screen flex items-center justify-center bg-[#121212]">
+      <div className="min-h-[100dvh] flex items-center justify-center bg-[#121212]">
         <Loader2 className="animate-spin text-blue-500" size={40} />
       </div>
     );

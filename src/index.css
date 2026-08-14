@@ -15,6 +15,14 @@ html, body, #root {
   text-rendering: optimizeLegibility;
 }
 
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+img, video, canvas, svg {
+  max-width: 100%;
+}
+
 button, a, input, select, textarea {
   font: inherit;
   -webkit-tap-highlight-color: transparent;
@@ -102,9 +110,10 @@ textarea {
 
 .app-page {
   min-height: 100vh;
+  min-height: 100dvh;
   overflow-x: hidden;
   background: #121212;
-  padding: 1.25rem 0.75rem 5rem;
+  padding: 1.25rem max(0.75rem, env(safe-area-inset-right)) calc(5rem + env(safe-area-inset-bottom)) max(0.75rem, env(safe-area-inset-left));
 }
 
 .app-container {

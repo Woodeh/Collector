@@ -20,12 +20,12 @@ const QuickActionLink: FC<QuickActionLinkProps> = ({ to, icon, label, color }) =
   return (
     <Link
       to={to}
-      className={`group flex flex-col items-center justify-center rounded-[2rem] border py-6 shadow-lg transition-[background-color,border-color,color,box-shadow] duration-500 ease-out ${colorClasses}`}
+      className={`group flex min-w-0 flex-col items-center justify-center rounded-[2rem] border px-2 py-6 text-center shadow-lg transition-[background-color,border-color,color,box-shadow] duration-500 ease-out ${colorClasses}`}
     >
       <div className="mb-2 transition-transform duration-500 ease-out group-hover:scale-110 group-hover:-rotate-6">
         {icon}
       </div>
-      <span className="text-[9px] font-black uppercase tracking-[0.2em] italic">{label}</span>
+      <span className="max-w-full break-words text-[9px] font-black uppercase tracking-[0.12em] italic sm:tracking-[0.2em]">{label}</span>
     </Link>
   );
 };
@@ -33,7 +33,7 @@ const QuickActionLink: FC<QuickActionLinkProps> = ({ to, icon, label, color }) =
 const QuickActions: FC = () => {
   const { t } = useI18n();
   return (
-    <div className="lg:col-span-5 grid grid-cols-2 gap-4">
+    <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:col-span-5">
       <QuickActionLink to="/add" icon={<Plus size={24} />} label={t('home.addFigure')} color="blue" />
       <QuickActionLink
         to="/collection"

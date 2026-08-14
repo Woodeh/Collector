@@ -116,8 +116,24 @@ const PreOrdersPage: React.FC = () => {
     setSubmitting(true);
     try {
       const cachedStr = localStorage.getItem('kzt_rate_data');
-      const cached = cachedStr ? JSON.parse(cachedStr) : { rate: 450 };
-      const kztRate = cached.rate;
+      let kztRate = 450;
+      if (cachedStr) {
+        try {
+          const cached: unknown = JSON.parse(cachedStr);
+          if (
+            cached &&
+            typeof cached === 'object' &&
+            'rate' in cached &&
+            typeof cached.rate === 'number' &&
+            Number.isFinite(cached.rate) &&
+            cached.rate > 0
+          ) {
+            kztRate = cached.rate;
+          }
+        } catch {
+          localStorage.removeItem('kzt_rate_data');
+        }
+      }
       const cnyRate = 7.2;
 
       let finalPrice = Number(formData.totalPrice);

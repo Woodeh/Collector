@@ -45,7 +45,7 @@ const DetailsHeader: FC<DetailsHeaderProps> = ({
       </button>
 
       {isOwner && (
-        <div className="grid w-full grid-cols-3 gap-2 sm:flex sm:w-auto sm:flex-wrap sm:items-center sm:gap-3">
+        <div className="grid w-full grid-cols-1 gap-2 min-[420px]:grid-cols-3 sm:flex sm:w-auto sm:flex-wrap sm:items-center sm:gap-3">
           <button
             type="button"
             onClick={onShare}

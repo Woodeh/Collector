@@ -155,7 +155,7 @@ const HomePage: React.FC = () => {
 
   if (loading)
     return (
-      <div className="h-screen flex items-center justify-center bg-[#121212]">
+      <div className="min-h-[100dvh] flex items-center justify-center bg-[#121212]">
         <Loader2 className="animate-spin text-blue-500" size={40} />
       </div>
     );
@@ -167,7 +167,7 @@ const HomePage: React.FC = () => {
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, ease: 'easeOut' }}
-      className="min-h-screen bg-[#121212] text-[#e4e4e4] font-sans pb-16 md:pb-20 selection:bg-blue-500/30 overflow-x-hidden relative"
+      className="relative min-h-[100dvh] overflow-x-hidden bg-[#121212] pb-16 font-sans text-[#e4e4e4] selection:bg-blue-500/30 md:pb-20"
     >
       {/* PARALLAX BACKGROUND SYSTEM */}
       <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">

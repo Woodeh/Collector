@@ -29,10 +29,10 @@ const DetailsIdCard: FC<DetailsIdCardProps> = ({
   return (
     <div className="relative bg-[#1a1a1a] border border-[#333] rounded-[2rem] overflow-hidden shadow-2xl transition-all hover:border-blue-500/30 text-left">
       <div className="absolute top-0 left-0 w-full h-1 bg-blue-500/50"></div>
-      <div className="p-6 md:p-8">
-        <div className="flex justify-between items-center mb-8 border-b border-[#333] pb-4">
-          <div className="space-y-0.5 text-left">
-            <p className="text-[9px] font-black text-blue-500 uppercase tracking-[0.4em] italic leading-none">
+      <div className="p-5 sm:p-6 md:p-8">
+        <div className="mb-8 flex min-w-0 items-center justify-between gap-3 border-b border-[#333] pb-4">
+          <div className="min-w-0 space-y-0.5 text-left">
+            <p className="truncate text-[9px] font-black text-blue-500 uppercase tracking-[0.25em] italic leading-none sm:tracking-[0.4em]">
               Security Protocol: Active
             </p>
             <h2 className="text-sm font-black text-white uppercase italic tracking-tighter leading-none">
@@ -97,7 +97,7 @@ const DetailsIdCard: FC<DetailsIdCardProps> = ({
                 {figure.fullDisplayName || figure.name}
               </h3>
             </div>
-            <div className="grid grid-cols-2 gap-x-6 gap-y-6">
+            <div className="grid grid-cols-1 gap-5 min-[380px]:grid-cols-2 min-[380px]:gap-x-6 min-[380px]:gap-y-6">
               <div className="space-y-1.5 text-left">
                 <p className="text-[9px] font-black text-gray-500 uppercase tracking-[0.3em] leading-none">
                   Origin
@@ -155,13 +155,13 @@ const DetailsIdCard: FC<DetailsIdCardProps> = ({
         </div>
       </div>
 
-      <div className="h-10 w-full bg-[#121212] flex items-center px-8 justify-between border-t border-[#333]">
+      <div className="flex h-10 w-full items-center justify-between gap-4 overflow-hidden border-t border-[#333] bg-[#121212] px-5 sm:px-8">
         <div className="flex gap-1.5 h-4 opacity-30">
           {[...Array(14)].map((_, i) => (
             <div key={i} className={`bg-white ${i % 3 === 0 ? 'w-2' : 'w-[1px]'} h-full`}></div>
           ))}
         </div>
-        <p className="text-[8px] font-mono text-white/20 uppercase tracking-[0.8em]">
+        <p className="hidden shrink-0 text-[8px] font-mono text-white/20 uppercase tracking-[0.4em] min-[460px]:block sm:tracking-[0.8em]">
           ID-CRYPT-SECURE-VAULT
         </p>
       </div>

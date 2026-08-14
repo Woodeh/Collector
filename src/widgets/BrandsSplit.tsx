@@ -50,7 +50,7 @@ const BrandsSplit: FC<BrandsSplitProps> = ({ brandData, collectionStats, COLORS 
   const topBrands = brandData.slice(0, 5);
 
   return (
-    <div className="bg-[#1a1a1a] border border-[#333] p-8 rounded-[3rem] shadow-2xl min-h-[400px] flex flex-col text-left">
+    <div className="flex min-h-[360px] flex-col rounded-[2rem] border border-[#333] bg-[#1a1a1a] p-5 text-left shadow-2xl sm:min-h-[400px] sm:rounded-[3rem] sm:p-8">
       <div className="flex items-center justify-between mb-8 text-left">
         <h4 className="text-[10px] font-black text-gray-600 uppercase tracking-[0.3em] italic text-left">
           Brands Split

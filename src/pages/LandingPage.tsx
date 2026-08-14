@@ -86,7 +86,7 @@ const LandingPage: React.FC = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#121212] text-[#e4e4e4] font-sans selection:bg-blue-500/30 overflow-x-hidden text-left">
+    <div className="min-h-[100dvh] overflow-x-hidden bg-[#121212] text-left font-sans text-[#e4e4e4] selection:bg-blue-500/30">
       <LandingBackground backgroundY={backgroundY} floatingTextY={floatingTextY} />
 
       <HeroSection

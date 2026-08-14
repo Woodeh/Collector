@@ -82,7 +82,7 @@ const StatsAndCharts: FC<StatsAndChartsProps> = ({
   return (
     <div className="lg:col-span-4 space-y-8">
       {/* Financial Hub Block */}
-      <div className="bg-[#1a1a1a] border border-[#333] p-8 rounded-[3rem] space-y-6 shadow-2xl text-left">
+      <div className="space-y-6 rounded-[2rem] border border-[#333] bg-[#1a1a1a] p-5 text-left shadow-2xl sm:p-8 sm:rounded-[3rem]">
         <h4 className="text-[10px] font-black text-gray-600 uppercase tracking-[0.3em] italic">
           Financial Hub
         </h4>
@@ -93,9 +93,9 @@ const StatsAndCharts: FC<StatsAndChartsProps> = ({
               className="flex items-center gap-4 p-4 bg-[#121212] rounded-2xl border border-white/5 transition-all hover:border-white/10"
             >
               <div className={`p-3 ${stat.bg} rounded-xl ${stat.color}`}>{stat.icon}</div>
-              <div className="text-left">
+              <div className="min-w-0 text-left">
                 <p className="text-[8px] text-gray-500 uppercase font-black mb-1">{stat.label}</p>
-                <p className={`text-xl font-black ${stat.color} italic leading-none`}>
+                <p className={`truncate text-xl font-black ${stat.color} italic leading-none`}>
                   ${stat.val.toLocaleString()}
                 </p>
               </div>
@@ -105,11 +105,11 @@ const StatsAndCharts: FC<StatsAndChartsProps> = ({
       </div>
 
       {/* Top Franchises Block */}
-      <div className="bg-[#1a1a1a] border border-[#333] p-8 rounded-[3rem] shadow-2xl h-[400px] text-left">
+      <div className="h-[360px] rounded-[2rem] border border-[#333] bg-[#1a1a1a] p-5 text-left shadow-2xl sm:h-[400px] sm:rounded-[3rem] sm:p-8">
         <h4 className="text-[10px] font-black text-gray-600 uppercase tracking-[0.3em] italic mb-6">
           Top Franchises
         </h4>
-        <div className="h-[300px] w-full">
+        <div className="h-[270px] w-full sm:h-[300px]">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={animeData} layout="vertical" margin={{ left: -20, right: 20 }}>
               <XAxis type="number" hide />

@@ -21,21 +21,21 @@ const HomeWidgets: FC<HomeWidgetsProps> = ({ widgetStats }) => {
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      className="grid grid-cols-1 md:grid-cols-2 gap-8 pb-10"
+      className="grid grid-cols-1 gap-4 pb-10 sm:gap-6 md:grid-cols-2 md:gap-8"
     >
       <Link
         to="/preorders"
-        className="bg-[#1a1a1a] border border-[#333] p-8 rounded-[2.5rem] flex items-center justify-between group hover:border-orange-500/30 transition-all shadow-xl"
+        className="group flex min-w-0 items-center justify-between gap-3 rounded-[2rem] border border-[#333] bg-[#1a1a1a] p-5 shadow-xl transition-all hover:border-orange-500/30 sm:rounded-[2.5rem] sm:p-8"
       >
-        <div className="flex items-center gap-8">
-          <div className="p-5 bg-orange-500/10 rounded-2xl border border-orange-500/20 text-orange-500 group-hover:bg-orange-500 group-hover:text-white transition-all duration-500">
+        <div className="flex min-w-0 items-center gap-4 sm:gap-8">
+          <div className="shrink-0 rounded-2xl border border-orange-500/20 bg-orange-500/10 p-4 text-orange-500 transition-all duration-500 group-hover:bg-orange-500 group-hover:text-white sm:p-5">
             <Clock size={32} />
           </div>
-          <div className="space-y-1 text-left">
+          <div className="min-w-0 space-y-1 text-left">
             <span className="text-[9px] font-black uppercase tracking-widest text-orange-500 animate-pulse">
               {t('home.preorders')}
             </span>
-            <h3 className="text-2xl font-black text-white uppercase italic tracking-tighter leading-none">
+            <h3 className="truncate text-xl font-black text-white uppercase italic tracking-tighter leading-none sm:text-2xl">
               {t('nav.preorders')}
             </h3>
             <p className="text-gray-500 text-[10px] font-bold uppercase tracking-widest italic">
@@ -51,17 +51,17 @@ const HomeWidgets: FC<HomeWidgetsProps> = ({ widgetStats }) => {
 
       <Link
         to="/wishlist"
-        className="bg-[#1a1a1a] border border-[#333] p-8 rounded-[2.5rem] flex items-center justify-between hover:border-pink-500/30 transition-all group shadow-xl"
+        className="group flex min-w-0 items-center justify-between gap-3 rounded-[2rem] border border-[#333] bg-[#1a1a1a] p-5 shadow-xl transition-all hover:border-pink-500/30 sm:rounded-[2.5rem] sm:p-8"
       >
-        <div className="flex items-center gap-8">
-          <div className="p-5 bg-pink-500/10 rounded-2xl border border-pink-500/20 text-pink-500 group-hover:bg-pink-500 group-hover:text-white transition-all duration-500">
+        <div className="flex min-w-0 items-center gap-4 sm:gap-8">
+          <div className="shrink-0 rounded-2xl border border-pink-500/20 bg-pink-500/10 p-4 text-pink-500 transition-all duration-500 group-hover:bg-pink-500 group-hover:text-white sm:p-5">
             <Target size={32} />
           </div>
-          <div className="text-left">
+          <div className="min-w-0 text-left">
             <span className="text-[9px] font-black uppercase tracking-widest text-pink-500">
               {t('home.wishlist')}
             </span>
-            <h3 className="text-2xl font-black text-white uppercase italic tracking-tighter leading-none">
+            <h3 className="truncate text-xl font-black text-white uppercase italic tracking-tighter leading-none sm:text-2xl">
               {t('nav.wishlist')}
             </h3>
             <p className="text-gray-500 text-[10px] font-bold uppercase tracking-widest italic">
