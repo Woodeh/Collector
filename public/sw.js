@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'figure-collector-v1';
+const CACHE_VERSION = 'figure-collector-v2';
 const APP_SHELL = [
   '/',
   '/manifest.webmanifest',

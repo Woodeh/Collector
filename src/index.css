@@ -123,6 +123,125 @@ textarea {
   margin-inline: auto;
 }
 
+/* iOS Safari compatibility layer. The class is added before React mounts. */
+html.ios-safari,
+html.ios-safari body,
+html.ios-safari #root {
+  width: 100%;
+  min-height: -webkit-fill-available;
+  overflow-x: clip;
+  -webkit-text-size-adjust: 100%;
+}
+
+html.ios-safari body {
+  overscroll-behavior-y: none;
+}
+
+html.ios-safari .site-header {
+  position: -webkit-sticky;
+  position: sticky;
+  top: 0;
+  padding-top: env(safe-area-inset-top, 0px);
+  background: #1a1a1a;
+}
+
+html.ios-safari .site-nav {
+  padding-left: max(0.75rem, env(safe-area-inset-left, 0px));
+  padding-right: max(0.75rem, env(safe-area-inset-right, 0px));
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+}
+
+html.ios-safari .mobile-site-menu {
+  top: calc(61px + env(safe-area-inset-top, 0px));
+  padding-right: env(safe-area-inset-right, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  padding-left: env(safe-area-inset-left, 0px);
+  -webkit-overflow-scrolling: touch;
+  -webkit-backdrop-filter: blur(24px);
+  backdrop-filter: blur(24px);
+}
+
+html.ios-safari [class~="overflow-y-auto"],
+html.ios-safari [class~="overflow-x-auto"] {
+  -webkit-overflow-scrolling: touch;
+}
+
+html.ios-safari [class~="fixed"][class~="inset-0"][class~="items-center"] {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-top: max(0.75rem, env(safe-area-inset-top, 0px));
+  padding-right: max(0.75rem, env(safe-area-inset-right, 0px));
+  padding-bottom: max(0.75rem, env(safe-area-inset-bottom, 0px));
+  padding-left: max(0.75rem, env(safe-area-inset-left, 0px));
+}
+
+html.ios-safari [aria-live="polite"] {
+  top: calc(5rem + env(safe-area-inset-top, 0px));
+  right: max(0.75rem, env(safe-area-inset-right, 0px));
+  left: max(0.75rem, env(safe-area-inset-left, 0px));
+}
+
+html.ios-safari footer {
+  padding-right: max(0.75rem, env(safe-area-inset-right, 0px));
+  padding-bottom: calc(2.5rem + env(safe-area-inset-bottom, 0px));
+  padding-left: max(0.75rem, env(safe-area-inset-left, 0px));
+}
+
+html.ios-safari .app-page {
+  padding-right: max(0.75rem, env(safe-area-inset-right, 0px));
+  padding-bottom: calc(5rem + env(safe-area-inset-bottom, 0px));
+  padding-left: max(0.75rem, env(safe-area-inset-left, 0px));
+}
+
+html.ios-safari button,
+html.ios-safari select {
+  -webkit-appearance: none;
+}
+
+html.ios-safari input[type="date"] {
+  width: 100%;
+  min-width: 0;
+  min-height: var(--ui-control-height);
+}
+
+@media (max-width: 767px) {
+  html.ios-safari input,
+  html.ios-safari select,
+  html.ios-safari textarea {
+    font-size: 16px !important;
+  }
+}
+
+@media (min-width: 640px) {
+  html.ios-safari .site-nav {
+    padding-left: max(1.25rem, env(safe-area-inset-left, 0px));
+    padding-right: max(1.25rem, env(safe-area-inset-right, 0px));
+  }
+
+  html.ios-safari .mobile-site-menu {
+    top: calc(65px + env(safe-area-inset-top, 0px));
+  }
+
+  html.ios-safari [aria-live="polite"] {
+    right: max(1rem, env(safe-area-inset-right, 0px));
+    left: auto;
+  }
+
+  html.ios-safari footer {
+    padding-right: max(1.25rem, env(safe-area-inset-right, 0px));
+    padding-bottom: calc(3rem + env(safe-area-inset-bottom, 0px));
+    padding-left: max(1.25rem, env(safe-area-inset-left, 0px));
+  }
+}
+
+@media (orientation: landscape) {
+  html.ios-safari .app-page {
+    padding-right: max(1rem, env(safe-area-inset-right, 0px));
+    padding-left: max(1rem, env(safe-area-inset-left, 0px));
+  }
+}
+
 @media (min-width: 640px) {
   .app-page { padding: 1.75rem 1.25rem 5rem; }
 }

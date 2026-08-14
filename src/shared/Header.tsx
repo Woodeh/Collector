@@ -110,8 +110,8 @@ const Header: FC = () => {
   };
 
   return (
-    <header className="sticky top-0 z-[100] font-sans selection:bg-blue-500/30">
-      <nav className="bg-[#1a1a1a]/90 backdrop-blur-md border-b border-[#333] px-3 py-2.5 sm:px-5 sm:py-3 xl:px-8 flex items-center justify-between shadow-xl relative z-20">
+    <header className="site-header sticky top-0 z-[100] font-sans selection:bg-blue-500/30">
+      <nav className="site-nav bg-[#1a1a1a]/90 backdrop-blur-md border-b border-[#333] px-3 py-2.5 sm:px-5 sm:py-3 xl:px-8 flex items-center justify-between shadow-xl relative z-20">
         <input
           type="file"
           accept="image/*"
@@ -306,7 +306,7 @@ const Header: FC = () => {
 
       {/* MOBILE DROPDOWN MENU */}
       <div
-        className={`xl:hidden fixed inset-x-0 bottom-0 top-[61px] sm:top-[65px] bg-[#121212]/97 backdrop-blur-2xl transition-all duration-300 z-10 overflow-y-auto overscroll-contain ${
+        className={`mobile-site-menu xl:hidden fixed inset-x-0 bottom-0 top-[61px] sm:top-[65px] bg-[#121212]/97 backdrop-blur-2xl transition-all duration-300 z-10 overflow-y-auto overscroll-contain ${
           isMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none translate-y-4'
         }`}
       >
