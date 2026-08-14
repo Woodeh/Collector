@@ -171,7 +171,7 @@ const Community: React.FC = () => {
 
         {/* Grid Section */}
         {processedFigures.length > 0 ? (
-          <div className="grid grid-cols-1 min-[430px]:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 md:gap-6">
+          <div className="grid grid-cols-1 gap-3 min-[360px]:grid-cols-2 min-[360px]:gap-2 sm:gap-4 md:grid-cols-3 md:gap-6 lg:grid-cols-4 xl:grid-cols-5">
             {processedFigures.map((figure) => (
               <FigureCard key={figure.id} figure={figure} isCommunity={true} />
             ))}

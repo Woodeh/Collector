@@ -51,14 +51,14 @@ const FigureCard: FC<FigureCardProps> = ({
     <div className={`ui-card figure-card-interactive relative group border overflow-hidden transition-[transform,border-color,box-shadow] duration-300 flex flex-col h-full text-left font-sans ${isSelected ? 'border-blue-500 ring-2 ring-blue-500/30' : ''}`}>
       <span className="figure-card-accent" aria-hidden="true" />
       {selectionMode && (
-        <button type="button" onClick={onToggleSelection} aria-label={figure.name} aria-pressed={isSelected} className={`absolute left-4 top-4 z-[60] flex h-9 w-9 items-center justify-center rounded-xl border shadow-lg backdrop-blur-md ${isSelected ? 'border-blue-400 bg-blue-600 text-white' : 'border-white/20 bg-black/70 text-transparent'}`}>
-          <Check size={18} />
+        <button type="button" onClick={onToggleSelection} aria-label={figure.name} aria-pressed={isSelected} className={`absolute left-2 top-2 z-[60] flex h-8 w-8 items-center justify-center rounded-lg border shadow-lg backdrop-blur-md sm:left-4 sm:top-4 sm:h-9 sm:w-9 sm:rounded-xl ${isSelected ? 'border-blue-400 bg-blue-600 text-white' : 'border-white/20 bg-black/70 text-transparent'}`}>
+          <Check size={16} />
         </button>
       )}
       {/* Action Menu (Три точки) */}
       {!selectionMode && (onEdit || onDelete) && (
         <div
-          className="absolute top-4 right-4 z-50 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-all duration-300 transform translate-y-0 md:-translate-y-2 md:group-hover:translate-y-0"
+          className="absolute right-2 top-2 z-50 translate-y-0 opacity-100 transition-all duration-300 md:right-4 md:top-4 md:-translate-y-2 md:opacity-0 md:group-hover:translate-y-0 md:group-hover:opacity-100"
           ref={menuRef}
         >
           <button
@@ -66,18 +66,18 @@ const FigureCard: FC<FigureCardProps> = ({
             onClick={handleMenuToggle}
             aria-label={`${t('common.edit')} / ${t('common.delete')}`}
             aria-expanded={showMenu}
-            className={`p-2 rounded-xl backdrop-blur-md border transition-all shadow-lg cursor-pointer ${
+            className={`rounded-lg border p-1.5 shadow-lg backdrop-blur-md transition-all cursor-pointer sm:rounded-xl sm:p-2 ${
               showMenu
                 ? 'bg-blue-600 border-blue-400 text-white'
                 : 'bg-black/60 border-white/10 text-gray-400 hover:text-white'
             }`}
           >
-            <MoreVertical size={18} />
+            <MoreVertical size={16} />
           </button>
 
           {/* Выпадающий список */}
           {showMenu && (
-            <div className="absolute right-0 mt-2 w-32 bg-[#1a1a1a] border border-[#333] rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.5)] overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            <div className="absolute right-0 mt-1.5 w-28 overflow-hidden rounded-xl border border-[#333] bg-[#1a1a1a] shadow-[0_10px_40px_rgba(0,0,0,0.5)] animate-in fade-in zoom-in-95 duration-200 sm:mt-2 sm:w-32 sm:rounded-2xl">
               {onEdit && (
                 <button
                   type="button"
@@ -87,7 +87,7 @@ const FigureCard: FC<FigureCardProps> = ({
                     onEdit();
                     setShowMenu(false);
                   }}
-                  className="w-full flex items-center gap-3 px-4 py-3 text-[11px] font-black uppercase italic tracking-widest text-gray-400 hover:bg-blue-600/10 hover:text-blue-500 transition-all border-b border-[#333]/50 last:border-0 cursor-pointer"
+                  className="flex w-full items-center gap-2 border-b border-[#333]/50 px-3 py-2.5 text-[10px] font-black uppercase italic tracking-wider text-gray-400 transition-all last:border-0 hover:bg-blue-600/10 hover:text-blue-500 sm:gap-3 sm:px-4 sm:py-3 sm:text-[11px] sm:tracking-widest cursor-pointer"
                 >
                   <Pencil size={14} />
                   <span>{t('common.edit')}</span>
@@ -102,7 +102,7 @@ const FigureCard: FC<FigureCardProps> = ({
                     onDelete();
                     setShowMenu(false);
                   }}
-                  className="w-full flex items-center gap-3 px-4 py-3 text-[11px] font-black uppercase italic tracking-widest text-red-500/70 hover:bg-red-500/10 hover:text-red-500 transition-all cursor-pointer"
+                  className="flex w-full items-center gap-2 px-3 py-2.5 text-[10px] font-black uppercase italic tracking-wider text-red-500/70 transition-all hover:bg-red-500/10 hover:text-red-500 sm:gap-3 sm:px-4 sm:py-3 sm:text-[11px] sm:tracking-widest cursor-pointer"
                 >
                   <Trash2 size={14} />
                   <span>{t('common.delete')}</span>
@@ -133,12 +133,12 @@ const FigureCard: FC<FigureCardProps> = ({
 
           {/* AUTHOR BADGE: Показываем только в Community */}
           {isCommunity && (
-            <div className="absolute bottom-4 left-4 z-30">
-              <div className="flex items-center gap-2 bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/10 shadow-xl">
-                <div className="w-4 h-4 rounded-full bg-blue-600 flex items-center justify-center">
+            <div className="absolute bottom-2 left-2 right-2 z-30 sm:bottom-4 sm:left-4 sm:right-auto">
+              <div className="flex min-w-0 items-center gap-1.5 rounded-lg border border-white/10 bg-black/60 px-2 py-1 shadow-xl backdrop-blur-md sm:gap-2 sm:rounded-xl sm:px-3 sm:py-1.5">
+                <div className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-blue-600">
                   <User size={10} className="text-white" />
                 </div>
-                <span className="text-[9px] font-black uppercase text-white tracking-tight italic">
+                <span className="truncate text-[9px] font-black uppercase text-white tracking-tight italic">
                   {figure.authorName || t('common.anonymous')}
                 </span>
               </div>
@@ -147,37 +147,37 @@ const FigureCard: FC<FigureCardProps> = ({
         </div>
 
         {/* INFO SECTION */}
-        <div className="p-4 sm:p-5 flex-grow flex flex-col justify-between">
-          <div className="space-y-4">
+        <div className="flex flex-grow flex-col justify-between p-3 sm:p-5">
+          <div className="space-y-2.5 sm:space-y-4">
             {/* TOP INFO ROW */}
             <div className="flex items-center">
-              <span className="text-[10px] text-blue-500 font-black uppercase tracking-[0.25em] italic truncate max-w-[80%]">
+              <span className="max-w-full truncate text-[9px] font-black uppercase tracking-[0.12em] text-blue-500 italic sm:max-w-[80%] sm:text-[10px] sm:tracking-[0.25em]">
                 {figure.anime}
               </span>
             </div>
 
             {/* MAIN TITLE */}
-            <div className="relative pl-4 border-l-[3px] border-blue-600 py-1">
-              <h3 className="text-lg sm:text-xl font-black text-white leading-tight uppercase italic tracking-tighter group-hover:text-blue-400 transition-colors truncate">
+            <div className="relative border-l-2 border-blue-600 py-0.5 pl-2.5 sm:border-l-[3px] sm:py-1 sm:pl-4">
+              <h3 className="line-clamp-2 text-sm font-black uppercase italic leading-tight tracking-tighter text-white transition-colors group-hover:text-blue-400 sm:text-xl">
                 {figure.name}
               </h3>
-              <p className="text-gray-500 text-[10px] font-bold uppercase tracking-widest mt-1 italic">
+              <p className="mt-1 truncate text-[9px] font-bold uppercase tracking-wider text-gray-500 italic sm:text-[10px] sm:tracking-widest">
                 {figure.brand || 'Original'}
               </p>
             </div>
           </div>
 
           {!isCommunity && (
-            <div className="mt-5 sm:mt-8 pt-4 sm:pt-5 border-t border-white/5 flex justify-between items-center">
-              <div className="flex items-center gap-2 opacity-40">
+            <div className="mt-3 flex items-center justify-end border-t border-white/5 pt-3 sm:mt-8 sm:justify-between sm:pt-5">
+              <div className="hidden items-center gap-2 opacity-40 sm:flex">
                 <Tag size={14} className="text-blue-500" />
                 <span className="text-[10px] uppercase font-black tracking-widest text-white italic">
                   {t('common.price')}
                 </span>
               </div>
-              <div className="text-2xl sm:text-3xl font-black text-white italic tracking-tighter flex items-center gap-1">
+              <div className="flex min-w-0 items-center gap-0.5 text-lg font-black italic tracking-tighter text-white sm:gap-1 sm:text-3xl">
                 {Math.round(Number(figure.price) || 0).toLocaleString()}
-                <span className="text-blue-500 not-italic text-xl ml-1">$</span>
+                <span className="ml-0.5 text-sm not-italic text-blue-500 sm:ml-1 sm:text-xl">$</span>
               </div>
             </div>
           )}
